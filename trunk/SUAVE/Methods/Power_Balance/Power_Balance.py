@@ -9,6 +9,7 @@
 # ----------------------------------------------------------------------
 import numpy as np
 
+import SUAVE
 from SUAVE.Core import Data, Units
 
 # ----------------------------------------------------------------------
@@ -16,7 +17,7 @@ from SUAVE.Core import Data, Units
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Power_Balance
-def Power_Balance(vehicle, conditions):
+def Power_Balance(vehicle, state_sizing):
     """
     Assumptions:
         None
@@ -27,8 +28,9 @@ def Power_Balance(vehicle, conditions):
         Journal of Propulsion and Power, Vol. 33, No. 5, 2017, pp. 1118-1129,
         doi:10.2514/1.B36321.
         
-    Inputs:
-      vehicle object TODO - List all inputs
+    Inputs: TODO - Expand to show all variables
+      vehicle
+      state
  
     Properties Used:
         N/A
@@ -37,17 +39,24 @@ def Power_Balance(vehicle, conditions):
     nr_engines = vehicle.nr_engines
     nr_mech_fans = vehicle.nr_mech_fans
     nr_elec_fans = vehicle.nr_elec_fans
-    drag_coefficient = conditions.aerodynamics.drag_coefficient
-    print(drag_coefficient)
-    import pdb; pdb.set_trace()  # breakpoint 41ebf5a7 //
+    state = state_sizing
     
-
-    # fL = vehicle.fL
-    fL = 0.0  # FIXME - Delete
+    fL = vehicle.fL
     fBLIm = vehicle.fBLIm
     fBLIe = vehicle.fBLIe
 
-    Vinf = 150.0 * Units.knot  # FIXME - Should be pulled from flight state
+    # Calculate aerodynamics
+    aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()
+    aerodynamics.geometry = vehicle
+    aerodynamics.initialize()
+
+    results_aero = aerodynamics.evaluate(state)
+
+    # Extract drags from aero results
+    CD_tot = results_aero.drag.total  # TODO - Check that this is actual CD_tot
+    CD_par = results_aero.drag.parasite.total
+
+    Vinf = state.conditions.freestream.cruise_speed
 
     delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
     delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
@@ -56,9 +65,10 @@ def Power_Balance(vehicle, conditions):
 
     fsurf = 0.9
 
-    #TODO - Pull from aero analysis
-    Dp = 2655.0 # Total non-BLI drag from LEARN.
-    Dpp_DP = 0.5  # Fraction of non-BLI parasite drag.
+    # Calculate total drag
+    qinf = 0.5 * state.conditions.freestream.density * Vinf**2.0
+    Dp = CD_tot * qinf * vehicle.reference_area
+    Dpp_DP = CD_par / CD_tot
 
     # Set up system of equations to solve power balance
 
@@ -93,14 +103,11 @@ def Power_Balance(vehicle, conditions):
         mdote[j] = mdote_tot / nr_elec_fans
         PKe[j] = PKe_tot / nr_elec_fans
 
-    # Calculate core mass flow # TODO
-
     results = Data()
     results.mdotm = mdotm
     results.mdote = mdote
     results.PKm = PKm
     results.PKe = PKe
     results.PK_tot = PKm_tot + PKe_tot
-    results.mdot_core = mdot_core
 
     return results
