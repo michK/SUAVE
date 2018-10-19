@@ -21,7 +21,7 @@ import numpy as np
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(mdotm, mdote, PKm, PKe, fL, fS):
+def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1.3):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -36,8 +36,9 @@ def unified_propsys(mdotm, mdote, PKm, PKe, fL, fS):
     Inputs:
             mdotm - array of mechanical fan mass flows [kg/s]
             mdote - array of electrical fan mass flows [kg/s]
-            PKm - array of mechanical propulsive power streams [W]
-            PKe - array of electrical propulsive power streams [W]
+            PKtot - Total installed PK [W]
+            fL    - Load electrification factor [-]
+            fS    - Source electrification factor [-]
 
     Outputs:
             weight - weight of the full propulsion system [kg]
@@ -61,6 +62,7 @@ def unified_propsys(mdotm, mdote, PKm, PKe, fL, fS):
     eta_fan = 0.9  # Fan
     eta_mot = 0.95  # Motor
     eta_pe = 0.98  # Power electronics
+    eta_bat = 0.85  # TODO - This should come from Ragone relation
 
     # Fan and nacelle weights
     m_fanm = (Kfan * mdotm**1.2).sum()
@@ -68,56 +70,101 @@ def unified_propsys(mdotm, mdote, PKm, PKe, fL, fS):
     m_fane = (Kfan * mdote**1.2).sum()
     m_nace = (cmnace * Knace * mdote).sum()
 
-    # Fan powers
-    p_mfan = PKm / eta_fan
-    p_efan = PKe / eta_fan
-
-    # Propulsive motor weights
-    p_mot = p_efan / eta_mot
-    m_prop_mot = (p_mot / pm_mot).sum()
-
-    # Propulsive motor power electronics weights
-    p_pe_prop_mot = p_mot.sum() / eta_pe
-    m_pe_prop_mot = p_pe_prop_mot / pm_pe
-
-    # NOTE - Everything correct up to here
-
     # Determine link properties - generator or motor
     if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):
         arch = 'SeriesPartialHybrid'  # Link is generator
     else: # parallel partial, fL,fS specified
         arch = 'ParallelPartialHybrid'  # Link is motor
 
+    # System of equations for link as generator
     if arch == 'SeriesPartialHybrid':
-        p_link = p_pe_prop_mot - p_bat
-        p_pe_link = p_link / eta_pe
-        p_gen_link = p_pe_link / eta_mot  # TODO - split this up into array of individual generators
+        A = np.array((
+                     [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
+                     [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
+                     [0,          0,          -1/eta_mot, 0, 1,         0, 0,       0, 0, 0,          0],
+                     [0,          0,          0,          0, -1/eta_pe, 1, 0,       0, 0, 0,          0],
+                     [0,          -1/eta_fan, 0,          1, 0,         0, 0,       0, 0, 0,          0],
+                     [0,          0,          0,          0, 0,         0, 0,       0, 0, 1,          -1],
+                     [0,          0,          0,          0, 0,         0, 0,       0, 1, -1/eta_mot, 0],
+                     [0,          0,          0,          0, 0,         1, -1,      0, 0, 0,          -1],
+                     [0,          0,          0,          1, 0,         0, 0,      -1, 1, 0,          0],
+                     [0,          0,          0,          0, 0,         0, (fS-1), fS, 0, 0, 0],
+                     [(fL-1),     fL,         0,          0, 0,         0, 0,       0, 0, 0, 0]
+                    ))
 
-        p_core = p_mot_link_tot + 
+        b = np.array((
+                     [PKtot],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                    ))
 
+        # Solve system
+        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = np.linalg.solve(A, b)
 
-    # Turbine core weights
-    p_core = p_mfan
-    p_core_tot = p_core.sum()
-    mdot_core = p_core / c_core
-    m_core = (Kcore * mdot_core**1.2).sum()
+        mdot_core = Pturb / c_core
 
-    # Battery sizing - Size based on power requirement for now. NOTE - Figure out how to do this properly
-    p_bat = fS / (1 - fS) * p_core_tot
-    m_bat = p_bat / p_sbat
+        m_core        = Kcore * mdot_core**1.2
+        m_prop_mot    = Pmot / pm_mot
+        m_pe_prop_mot = Pinv / pm_pe
+        m_bat         = Pbat / (p_sbat * eta_bat)
+        m_gen         = Pgen / pm_mot
+        m_pe_link     = Pconv / pm_pe
 
+        mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
+                m_bat + m_gen + m_pe_link
 
-    import pdb; pdb.set_trace()  # breakpoint 6fef5f72 //
+    elif arch == 'ParallelPartialHybrid':
+        A = np.array((
+                     [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
+                     [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
+                     [0,          0,          -1/eta_mot, 0, 1,         0, 0,       0, 0, 0,          0],
+                     [0,          0,          0,          0, -1/eta_pe, 1, 0,       0, 0, 0,          0],
+                     [0,          -1/eta_fan, 0,          1, 0,         0, 0,       0, 0, 0,          0],
+                     [0,          0,          0,          0, 0,         0, 0,       0, 0, 1,          -1/eta_pe],
+                     [0,          0,          0,          0, 0,         0, 0,       0, 1, -eta_mot,   0],
+                     [0,          0,          0,          0, 0,         1, -1,      0, 0, 0,          1],
+                     [0,          0,          0,          1, 0,        0, 0,       -1,-1, 0,          0],
+                     [0,          0,          0,          0,  0,        0, (fS-1), fS, 0, 0, 0],
+                     [(fL-1),     fL,         0,          0,  0,        0, 0,       0, 0, 0, 0]
+                    ))
 
+        b = np.array((
+                     [PKtot],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                     [0],
+                    ))
 
-    mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
-            m_bat + m_mot_link + m_pe_link
+        # Solve system
+        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = np.linalg.solve(A, b)
 
-    # mprop = nr_eng * (mcore + mgen + mrect + mmfan + mmnace) +
-    # nr_elec_fans * (minv + mmot + mefan + menace) + mTMS
-    import pdb; pdb.set_trace()  # breakpoint ea000030 //
+        mdot_core = Pturb / c_core
 
+        m_core = Kcore * mdot_core**1.2
+        m_prop_mot    = Pmot / pm_mot
+        m_pe_prop_mot = Pinv / pm_pe
+        m_bat         = Pbat / (p_sbat * eta_bat)
+        m_mot_link    = Pmot_link / pm_mot
+        m_pe_link     = Pconv / pm_pe
 
-    weight_propsys = mprop * 9.81
+        mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
+                m_bat + m_mot_link + m_pe_link
+
+    weight_propsys = mprop * 9.81 * weight_factor
 
     return weight_propsys
