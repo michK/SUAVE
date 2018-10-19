@@ -5,6 +5,7 @@
 # Modified: Feb 2016, M. Vegh
 #           Jul 2017, M. Clarke
 #           Jun 2018, T. MacDonald
+#           Oct 2018, M. Kruger
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -26,7 +27,7 @@ import warnings
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Weights-Correlations-Tube_Wing
-def empty(vehicle,settings=None):
+def empty(vehicle, results_power_balance, settings=None):
     """ This is for a standard Tube and Wing aircraft configuration.        
 
     Assumptions:
@@ -36,6 +37,10 @@ def empty(vehicle,settings=None):
         N/A
         
     Inputs:
+     power balance
+          mdotm - array of mechanically powered fans mass flows                  [kg/s]   
+          mdote - array of electrically powered fans mass flows                  [kg/s]
+          PKtot - total installed flow power                                     [W]
       engine - a data dictionary with the fields:                    
           thrust_sls - sea level static thrust of a single engine                [Newtons]
 
@@ -111,7 +116,12 @@ def empty(vehicle,settings=None):
     wt_cargo   = vehicle.mass_properties.cargo
     num_seats  = vehicle.fuselages['fuselage'].number_coach_seats
     ctrl_type  = vehicle.systems.control
-    ac_type    = vehicle.systems.accessories    
+    ac_type    = vehicle.systems.accessories
+    mdotm     = results_power_balance.mdotm
+    mdote     = results_power_balance.mdote
+    PKtot     = results_power_balance.PKtot
+    fL      = vehicle.fL
+    fS      = vehicle.fS
     
     if settings == None:
         wt_factors = Data()
@@ -133,8 +143,12 @@ def empty(vehicle,settings=None):
         thrust_sls                       = propulsors.sealevel_static_thrust
         wt_engine_jet                    = Propulsion.engine_jet(thrust_sls)
         wt_propulsion                    = Propulsion.integrated_propulsion(wt_engine_jet,num_eng)
-        propulsors.mass_properties.mass  = wt_propulsion 
+        propulsors.mass_properties.mass  = wt_propulsion
         
+    elif propulsor_name=='unified_propsys':
+        wt_propulsion                    = Propulsion.unified_propsys(mdotm, mdote, PKtot, fL, fS)
+        propulsors.mass_properties.mass  = wt_propulsion
+
     else: #propulsor used is not a turbo_fan; assume mass_properties defined outside model
         wt_propulsion                   = propulsors.mass_properties.mass
 
