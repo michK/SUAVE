@@ -39,6 +39,7 @@ def Power_Balance(vehicle, state_sizing):
     nr_engines = vehicle.nr_engines
     nr_mech_fans = vehicle.nr_mech_fans
     nr_elec_fans = vehicle.nr_elec_fans
+    PKtot = vehicle.PKtot
     state = state_sizing
     
     fL = vehicle.fL
@@ -104,6 +105,7 @@ def Power_Balance(vehicle, state_sizing):
         PKe[j] = PKe_tot / nr_elec_fans
 
     results = Data()
+    results.PKtot = PKtot
     results.mdotm = mdotm
     results.mdote = mdote
     results.PKm = PKm

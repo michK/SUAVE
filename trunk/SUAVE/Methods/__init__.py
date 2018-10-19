@@ -5,6 +5,7 @@ import Utilities
 import Noise
 import Weights
 import Aerodynamics
+import Power_Balance
 import Performance
 import Missions
 import Power
