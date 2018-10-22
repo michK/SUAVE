@@ -10,7 +10,7 @@
 import numpy as np
 
 import SUAVE
-from SUAVE.Core import Data, Units
+from SUAVE.Core import Data
 
 # ----------------------------------------------------------------------
 #  Power Balance
@@ -36,11 +36,11 @@ def Power_Balance(vehicle, state_sizing):
         N/A
     """
     # Unpack inputs
-    nr_engines = vehicle.nr_engines
     nr_mech_fans = vehicle.nr_mech_fans
     nr_elec_fans = vehicle.nr_elec_fans
     PKtot = vehicle.PKtot
     state = state_sizing
+    PK_tot = vehicle.PKtot
     
     fL = vehicle.fL
     fBLIm = vehicle.fBLIm
@@ -71,24 +71,14 @@ def Power_Balance(vehicle, state_sizing):
     Dp = CD_tot * qinf * vehicle.reference_area
     Dpp_DP = CD_par / CD_tot
 
-    # Set up system of equations to solve power balance
+    # Calculate PKm and PKe
+    PKm_tot = (1.0 - fL) * PK_tot
+    PKe_tot = fL * PK_tot    
 
-    A = np.array((
-                 [fL, fL - 1.0, 0                             , 0                            ],
-                 [0 , 0       , Vjetm - Vinf                  , Vjete - Vinf                 ],
-                 [1 , 0       , -0.5*(Vjetm**2.0 - Vinf**2.0) , 0                            ],
-                 [0 , 1       , 0                             , -0.5*(Vjete**2.0 - Vinf**2.0)]
-                ))
+    # Calculate required mass flows
 
-    b = np.array((
-                 [0],
-                 [Dp * (1.0 - fBLIm * Dpp_DP - fBLIe * Dpp_DP)],
-                 [fBLIm * fsurf * Dpp_DP * Dp],
-                 [fBLIe * fsurf * Dpp_DP * Dp]
-                ))
-
-    # Solve system
-    [PKm_tot, PKe_tot, mdotm_tot, mdote_tot] = np.linalg.solve(A, b)
+    mdotm_tot = 2.0 * (PKm_tot - fBLIm * fsurf * Dp * Vinf) / (Vjetm**2.0 - Vinf**2.0)
+    mdote_tot = 2.0 * (PKe_tot - fBLIe * fsurf * Dp * Vinf) / (Vjete**2.0 - Vinf**2.0)
 
     # Calculate individual propulsor stream mass flows and propulsive powers
     mdotm = np.zeros(nr_mech_fans)
@@ -110,6 +100,7 @@ def Power_Balance(vehicle, state_sizing):
     results.mdote = mdote
     results.PKm = PKm
     results.PKe = PKe
+
     results.PK_tot = PKm_tot + PKe_tot
 
     return results
