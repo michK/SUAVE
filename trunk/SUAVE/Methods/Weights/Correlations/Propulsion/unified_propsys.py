@@ -10,18 +10,19 @@
 
 # suave imports
 from SUAVE.Core import Units
+from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
 # package imports
 import numpy as np
 
 # ----------------------------------------------------------------------
-#   Integrated Propulsion
+#   Unified Propulsion System
 # ----------------------------------------------------------------------
 
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1.3):
+def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -70,44 +71,10 @@ def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1.3):
     m_fane = (Kfan * mdote**1.2).sum()
     m_nace = (cmnace * Knace * mdote).sum()
 
-    # Determine link properties - generator or motor
-    if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):
-        arch = 'SeriesPartialHybrid'  # Link is generator
-    else: # parallel partial, fL,fS specified
-        arch = 'ParallelPartialHybrid'  # Link is motor
-
-    # System of equations for link as generator
-    if arch == 'SeriesPartialHybrid':
-        A = np.array((
-                     [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          -1/eta_mot, 0, 1,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, -1/eta_pe, 1, 0,       0, 0, 0,          0],
-                     [0,          -1/eta_fan, 0,          1, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 0, 1,          -1],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 1, -1/eta_mot, 0],
-                     [0,          0,          0,          0, 0,         1, -1,      0, 0, 0,          -1],
-                     [0,          0,          0,          1, 0,         0, 0,      -1, 1, 0,          0],
-                     [0,          0,          0,          0, 0,         0, (fS-1), fS, 0, 0, 0],
-                     [(fL-1),     fL,         0,          0, 0,         0, 0,       0, 0, 0, 0]
-                    ))
-
-        b = np.array((
-                     [PKtot],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                    ))
-
-        # Solve system
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = np.linalg.solve(A, b)
+    # Determine link properties - generator or motor # NOTE - This is inefficient because it checks conditional here and in function
+    if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator
+        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = \
+        calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
         mdot_core = Pturb / c_core
 
@@ -121,37 +88,9 @@ def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1.3):
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_bat + m_gen + m_pe_link
 
-    elif arch == 'ParallelPartialHybrid':
-        A = np.array((
-                     [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          -1/eta_mot, 0, 1,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, -1/eta_pe, 1, 0,       0, 0, 0,          0],
-                     [0,          -1/eta_fan, 0,          1, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 0, 1,          -1/eta_pe],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 1, -eta_mot,   0],
-                     [0,          0,          0,          0, 0,         1, -1,      0, 0, 0,          1],
-                     [0,          0,          0,          1, 0,        0, 0,       -1,-1, 0,          0],
-                     [0,          0,          0,          0,  0,        0, (fS-1), fS, 0, 0, 0],
-                     [(fL-1),     fL,         0,          0,  0,        0, 0,       0, 0, 0, 0]
-                    ))
-
-        b = np.array((
-                     [PKtot],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                    ))
-
-        # Solve system
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = np.linalg.solve(A, b)
+    else:  # Parallel - Link is motor
+        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = \
+        calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
         mdot_core = Pturb / c_core
 
@@ -165,6 +104,6 @@ def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1.3):
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_bat + m_mot_link + m_pe_link
 
-    weight_propsys = mprop * 9.81 * weight_factor
+    mass_propsys = mprop * weight_factor
 
-    return weight_propsys
+    return mass_propsys

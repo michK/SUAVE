@@ -117,11 +117,6 @@ def empty(vehicle, results_power_balance, settings=None):
     num_seats  = vehicle.fuselages['fuselage'].number_coach_seats
     ctrl_type  = vehicle.systems.control
     ac_type    = vehicle.systems.accessories
-    mdotm     = results_power_balance.mdotm
-    mdote     = results_power_balance.mdote
-    PKtot     = results_power_balance.PKtot
-    fL      = vehicle.fL
-    fS      = vehicle.fS
     
     if settings == None:
         wt_factors = Data()
@@ -144,8 +139,14 @@ def empty(vehicle, results_power_balance, settings=None):
         wt_engine_jet                    = Propulsion.engine_jet(thrust_sls)
         wt_propulsion                    = Propulsion.integrated_propulsion(wt_engine_jet,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion
-        
+
     elif propulsor_name=='unified_propsys':
+        # Unpack inputs
+        mdotm = results_power_balance.mdotm
+        mdote = results_power_balance.mdote
+        PKtot = results_power_balance.PKtot
+        fL    = vehicle.fL
+        fS    = vehicle.fS
         wt_propulsion                    = Propulsion.unified_propsys(mdotm, mdote, PKtot, fL, fS)
         propulsors.mass_properties.mass  = wt_propulsion
 
@@ -222,7 +223,7 @@ def empty(vehicle, results_power_balance, settings=None):
 
     # Calculate the equipment empty weight of the aircraft
     wt_empty           = (wt_wing + wt_fuselage + wt_landing_gear + wt_propulsion + output_2.wt_systems + \
-                          wt_tail_horizontal + wt_vtail_tot) 
+                          wt_tail_horizontal + wt_vtail_tot)
     vehicle.fuselages['fuselage'].mass_properties.mass = wt_fuselage
 
 

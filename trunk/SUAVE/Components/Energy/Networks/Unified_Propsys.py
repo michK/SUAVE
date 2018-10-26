@@ -10,12 +10,14 @@
 
 # suave imports
 import SUAVE
+from SUAVE.Core import Units
 
 # package imports
 import numpy as np
 from SUAVE.Core import Data
 from SUAVE.Methods.Power.Battery.Variable_Mass import find_mass_gain_rate
 from SUAVE.Components.Propulsors.Propulsor import Propulsor
+from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
 # ----------------------------------------------------------------------
 #  Network
@@ -83,6 +85,9 @@ class Unified_Propsys(Propulsor):
             Properties Used:
             Defaulted values
         """
+        # Constants
+        hfuel = 43.0 * Units['MJ/kg']
+        eta_th = 0.5
 
         # Unpack inputs
         # nr_engines = vehicle.nr_engines
@@ -92,6 +97,7 @@ class Unified_Propsys(Propulsor):
         # state = state_sizing
 
         fL = self.fL
+        fS = self.fS
         fBLIm = self.fBLIm
         fBLIe = self.fBLIe
 
@@ -131,6 +137,19 @@ class Unified_Propsys(Propulsor):
         # Solve system
         [PKm_tot, PKe_tot, mdotm_tot, mdote_tot] = np.linalg.solve(A, b)
 
+        # Find core power
+        # Efficiencies
+        eta_pe  = 0.98
+        eta_mot = 0.95
+        eta_fan = 0.9
+
+        PK_tot = PKm_tot + PKe_tot
+        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = \
+        calculate_powers(PK_tot[0], fS, fL, eta_pe, eta_mot, eta_fan)
+
+        # Calculate vehicle mass rate of change
+        mdot_fuel = Pturb / (hfuel * eta_th)
+
         # Calculate individual propulsor stream mass flows and propulsive powers
         # mdotm = np.zeros(nr_mech_fans)
         # mdote = np.zeros(nr_elec_fans)
@@ -147,7 +166,9 @@ class Unified_Propsys(Propulsor):
 
         results = Data()
         results.PK_tot = PKm_tot + PKe_tot
+        results.power_required = results.PK_tot
         results.mdot_tot = mdotm_tot + mdote_tot
+        results.vehicle_mass_rate = np.ones(10) * mdot_fuel
         # results.mdote = mdote
         # results.PKm = PKm
         # results.PKe = PKe
