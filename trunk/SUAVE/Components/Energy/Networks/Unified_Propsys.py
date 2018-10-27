@@ -10,14 +10,13 @@
 
 # suave imports
 import SUAVE
-from SUAVE.Core import Units
-
-# package imports
-import numpy as np
-from SUAVE.Core import Data
+from SUAVE.Core import Units, Data
 from SUAVE.Methods.Power.Battery.Variable_Mass import find_mass_gain_rate
 from SUAVE.Components.Propulsors.Propulsor import Propulsor
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
+
+# package imports
+import numpy as np
 
 # ----------------------------------------------------------------------
 #  Network
@@ -87,9 +86,7 @@ class Unified_Propsys(Propulsor):
         """
 
         #Unpack
-        conditions = state.conditions
-        print(conditions)
-        import pdb; pdb.set_trace()  # breakpoint 3eba5123 //
+        conditions = state.conditions       
 
         # Constants
         hfuel = 43.0 * Units['MJ/kg']
@@ -113,8 +110,7 @@ class Unified_Propsys(Propulsor):
         eta_fan = 0.9
 
         CD_tot = conditions.aerodynamics.drag_breakdown.total
-        print(CD_tot)
-        import pdb; pdb.set_trace()  # breakpoint 090d6777 //
+
         CD_par = conditions.aerodynamics.drag_breakdown.parasite.total
 
         Vinf = conditions.freestream.velocity
@@ -178,28 +174,11 @@ class Unified_Propsys(Propulsor):
             # Calculate vehicle mass rate of change
             mdot_fuel[i] = Pturb_i / (hfuel * eta_th)
 
-            # TODO - Split up into individual propulsors
-            # Calculate individual propulsor stream mass flows and propulsive powers
-            # mdotm = np.zeros(nr_mech_fans)
-            # mdote = np.zeros(nr_elec_fans)
-            # PKm = np.zeros(nr_mech_fans)
-            # PKe = np.zeros(nr_elec_fans)
-
-            # for i in range(nr_mech_fans):
-            #     mdotm[i] = mdotm_tot / nr_mech_fans
-            #     PKm[i] = PKm_tot / nr_mech_fans
-
-            # for j in range(nr_elec_fans):
-            #     mdote[j] = mdote_tot / nr_elec_fans
-            #     PKe[j] = PKe_tot / nr_elec_fans
-
         results = Data()
         results.PK_tot = (PKm_tot + PKe_tot).reshape(nr_elements, 1)
         results.power_required = results.PK_tot
-        results.mdot_tot = (mdotm_tot + mdote_tot).reshape(nr_elements, 1)
+        results.mdot_tot = mdot_fuel.reshape(nr_elements, 1)
         results.vehicle_mass_rate = results.mdot_tot
-        print(results.vehicle_mass_rate)
-        import pdb; pdb.set_trace()  # breakpoint c43e7676 //
 
         return results
 
