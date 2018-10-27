@@ -85,6 +85,12 @@ class Unified_Propsys(Propulsor):
             Properties Used:
             Defaulted values
         """
+
+        #Unpack
+        conditions = state.conditions
+        print(conditions)
+        import pdb; pdb.set_trace()  # breakpoint 3eba5123 //
+
         # Constants
         hfuel = 43.0 * Units['MJ/kg']
         eta_th = 0.5
@@ -101,10 +107,17 @@ class Unified_Propsys(Propulsor):
         fBLIm = self.fBLIm
         fBLIe = self.fBLIe
 
-        CD_tot = state.conditions.aerodynamics.drag_breakdown.total.mean()
-        CD_par = state.conditions.aerodynamics.drag_breakdown.parasite.total.mean()
+        # Efficiencies
+        eta_pe  = 0.98
+        eta_mot = 0.95
+        eta_fan = 0.9
 
-        Vinf = state.conditions.freestream.velocity.mean()
+        CD_tot = conditions.aerodynamics.drag_breakdown.total
+        print(CD_tot)
+        import pdb; pdb.set_trace()  # breakpoint 090d6777 //
+        CD_par = conditions.aerodynamics.drag_breakdown.parasite.total
+
+        Vinf = conditions.freestream.velocity
 
         delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
         delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
@@ -114,65 +127,79 @@ class Unified_Propsys(Propulsor):
         fsurf = 0.9
 
         # Calculate total drag
-        qinf = 0.5 * state.conditions.freestream.density.mean() * Vinf**2.0
+        qinf = 0.5 * conditions.freestream.density * Vinf**2.0
         Dp = CD_tot * qinf * self.reference_area
         Dpp_DP = CD_par / CD_tot
 
         # Set up system of equations to solve power balance
+        nr_elements = np.shape(CD_tot)[0]
 
-        A = np.array((
-                     [fL, fL - 1.0, 0                             , 0                            ],
-                     [0 , 0       , Vjetm - Vinf                  , Vjete - Vinf                 ],
-                     [1 , 0       , -0.5*(Vjetm**2.0 - Vinf**2.0) , 0                            ],
-                     [0 , 1       , 0                             , -0.5*(Vjete**2.0 - Vinf**2.0)]
-                    ))
+        # Initialize solution arrays
+        PKm_tot = np.zeros(nr_elements)
+        PKe_tot = np.zeros(nr_elements)
+        mdotm_tot = np.zeros(nr_elements)
+        mdote_tot = np.zeros(nr_elements)
+        PKe = np.zeros(nr_elements)
+        PKm = np.zeros(nr_elements)
+        mdot_fuel = np.zeros(nr_elements)
 
-        b = np.array((
-                     [0],
-                     [Dp * (1.0 - fBLIm * Dpp_DP - fBLIe * Dpp_DP)],
-                     [fBLIm * fsurf * Dpp_DP * Dp],
-                     [fBLIe * fsurf * Dpp_DP * Dp]
-                    ))
+        for i in range(nr_elements):
 
-        # Solve system
-        [PKm_tot, PKe_tot, mdotm_tot, mdote_tot] = np.linalg.solve(A, b)
+            A = np.array((
+                         [fL, fL - 1.0, 0                             , 0                            ],
+                         [0 , 0       , Vjetm[i] - Vinf[i]                  , Vjete[i] - Vinf[i]                 ],
+                         [1 , 0       , -0.5*(Vjetm[i]**2.0 - Vinf[i]**2.0) , 0                            ],
+                         [0 , 1       , 0                             , -0.5*(Vjete[i]**2.0 - Vinf[i]**2.0)]
+                        ))
 
-        # Find core power
-        # Efficiencies
-        eta_pe  = 0.98
-        eta_mot = 0.95
-        eta_fan = 0.9
+            b = np.array((
+                         [0],
+                         [Dp[i] * (1.0 - fBLIm * Dpp_DP[i] - fBLIe * Dpp_DP[i])],
+                         [fBLIm * fsurf * Dpp_DP[i] * Dp[i]],
+                         [fBLIe * fsurf * Dpp_DP[i] * Dp[i]]
+                        ))
 
-        PK_tot = PKm_tot + PKe_tot
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = \
-        calculate_powers(PK_tot[0], fS, fL, eta_pe, eta_mot, eta_fan)
+            # Solve system
+            [PKm, PKe, mdotm, mdote] = np.linalg.solve(A, b)
 
-        # Calculate vehicle mass rate of change
-        mdot_fuel = Pturb / (hfuel * eta_th)
+            PKm_tot[i] = PKm
+            PKe_tot[i] = PKe
+            mdotm_tot[i] = mdotm
+            mdote_tot[i] = mdote
 
-        # Calculate individual propulsor stream mass flows and propulsive powers
-        # mdotm = np.zeros(nr_mech_fans)
-        # mdote = np.zeros(nr_elec_fans)
-        # PKm = np.zeros(nr_mech_fans)
-        # PKe = np.zeros(nr_elec_fans)
+            PK_tot = PKm + PKe
 
-        # for i in range(nr_mech_fans):
-        #     mdotm[i] = mdotm_tot / nr_mech_fans
-        #     PKm[i] = PKm_tot / nr_mech_fans
+            [PKe_i, PKm_i, PfanE_i, PfanM_i, Pmot_i, Pinv_i, Pbat_i, Pturb_i, Pmot_link_i, Pconv_i, Plink_i] = \
+            calculate_powers(PK_tot[0], fS, fL, eta_pe, eta_mot, eta_fan)
 
-        # for j in range(nr_elec_fans):
-        #     mdote[j] = mdote_tot / nr_elec_fans
-        #     PKe[j] = PKe_tot / nr_elec_fans
+            PKm = PKm_i
+            PKe = PKe_i           
+
+            # Calculate vehicle mass rate of change
+            mdot_fuel[i] = Pturb_i / (hfuel * eta_th)
+
+            # TODO - Split up into individual propulsors
+            # Calculate individual propulsor stream mass flows and propulsive powers
+            # mdotm = np.zeros(nr_mech_fans)
+            # mdote = np.zeros(nr_elec_fans)
+            # PKm = np.zeros(nr_mech_fans)
+            # PKe = np.zeros(nr_elec_fans)
+
+            # for i in range(nr_mech_fans):
+            #     mdotm[i] = mdotm_tot / nr_mech_fans
+            #     PKm[i] = PKm_tot / nr_mech_fans
+
+            # for j in range(nr_elec_fans):
+            #     mdote[j] = mdote_tot / nr_elec_fans
+            #     PKe[j] = PKe_tot / nr_elec_fans
 
         results = Data()
-        results.PK_tot = PKm_tot + PKe_tot
+        results.PK_tot = (PKm_tot + PKe_tot).reshape(nr_elements, 1)
         results.power_required = results.PK_tot
-        results.mdot_tot = mdotm_tot + mdote_tot
-        results.vehicle_mass_rate = np.ones(10) * mdot_fuel
-        # results.mdote = mdote
-        # results.PKm = PKm
-        # results.PKe = PKe
-        # results.PK_tot = PKm_tot + PKe_tot
+        results.mdot_tot = (mdotm_tot + mdote_tot).reshape(nr_elements, 1)
+        results.vehicle_mass_rate = results.mdot_tot
+        print(results.vehicle_mass_rate)
+        import pdb; pdb.set_trace()  # breakpoint c43e7676 //
 
         return results
 
