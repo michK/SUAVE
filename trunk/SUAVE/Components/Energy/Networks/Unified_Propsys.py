@@ -61,9 +61,12 @@ class Unified_Propsys(Propulsor):
         self.motor_efficiency = .95
         self.tag              = 'Network'
 
-        #areas needed for drag; not in there yet
+        # areas needed for drag; not in there yet
         self.areas             = Data()
         self.areas.wetted      = 0.0
+
+        # max power tracker
+        self.max_power = 0.0
 
     # linking the different network components
     def evaluate_power(self, state):
@@ -179,6 +182,10 @@ class Unified_Propsys(Propulsor):
         results.power_required = results.PK_tot
         results.mdot_tot = mdot_fuel.reshape(nr_elements, 1)
         results.vehicle_mass_rate = results.mdot_tot
+
+        #  Update max power
+        if PK_tot > self.max_power:
+            self.max_power = PK_tot
 
         return results
 
