@@ -187,6 +187,10 @@ class Unified_Propsys(Propulsor):
         if PK_tot > self.max_power:
             self.max_power = PK_tot
 
+        # store data
+        results_conditions = Data
+        conditions.propulsion = results_conditions(PK_tot = results.PK_tot)
+
         return results
 
     __call__ = evaluate_power
