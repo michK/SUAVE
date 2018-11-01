@@ -37,11 +37,11 @@ def unpack_unknowns(segment,state):
     """        
     
     # unpack unknowns
-    throttle = state.unknowns.throttle
+    # throttle = state.unknowns.throttle
     theta    = state.unknowns.body_angle
     
     # apply unknowns
-    state.conditions.propulsion.throttle[:,0]            = throttle[:,0]
+    # state.conditions.propulsion.throttle[:,0]            = throttle[:,0]
     state.conditions.frames.body.inertial_rotations[:,1] = theta[:,0]   
     
 # ----------------------------------------------------------------------
