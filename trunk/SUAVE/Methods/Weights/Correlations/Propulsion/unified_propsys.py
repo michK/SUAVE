@@ -22,7 +22,7 @@ import numpy as np
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1):
+def unified_propsys(mdotm, mdote, PKtot, Ebat, fL, fS, weight_factor=1):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -81,9 +81,16 @@ def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1):
         m_core        = Kcore * mdot_core**1.2
         m_prop_mot    = Pmot / pm_mot
         m_pe_prop_mot = Pinv / pm_pe
-        m_bat         = Pbat / (p_sbat * eta_bat)
         m_gen         = Pgen / pm_mot
         m_pe_link     = Pconv / pm_pe
+
+        # Size battery based on power or energy
+        # Power
+        m_bat_p = Pbat / (p_sbat * eta_bat)
+        # Energy
+        m_bat_e = Ebat / e_sbat
+
+        m_bat = np.max([m_bat_p, m_bat_e]) # TODO - No traceability here, change to track variable
 
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_bat + m_gen + m_pe_link
@@ -97,9 +104,16 @@ def unified_propsys(mdotm, mdote, PKtot, fL, fS, weight_factor=1):
         m_core = Kcore * mdot_core**1.2
         m_prop_mot    = Pmot / pm_mot
         m_pe_prop_mot = Pinv / pm_pe
-        m_bat         = Pbat / (p_sbat * eta_bat)
         m_mot_link    = Pmot_link / pm_mot
         m_pe_link     = Pconv / pm_pe
+
+        # Size battery based on power or energy
+        # Power
+        m_bat_p = Pbat / (p_sbat * eta_bat)
+        # Energy
+        m_bat_e = Ebat / e_sbat
+
+        m_bat = np.max([m_bat_p, m_bat_e]) # TODO - No traceability here, change to track variable
 
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_bat + m_mot_link + m_pe_link

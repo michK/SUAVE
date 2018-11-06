@@ -68,7 +68,8 @@ class Unified_Propsys(Propulsor):
         # max power tracker
         self.max_power = 0.0
 
-    # linking the different network components
+
+
     def evaluate_power(self, state):
         """ Calculate power given the current state of the vehicle
 
@@ -141,6 +142,7 @@ class Unified_Propsys(Propulsor):
         PKe = np.zeros(nr_elements)
         PKm = np.zeros(nr_elements)
         mdot_fuel = np.zeros(nr_elements)
+        Pbat = np.zeros(nr_elements)
 
         for i in range(nr_elements):
 
@@ -177,11 +179,15 @@ class Unified_Propsys(Propulsor):
             # Calculate vehicle mass rate of change
             mdot_fuel[i] = Pturb_i / (hfuel * eta_th)
 
+            Pbat[i] = Pbat_i
+
         results = Data()
         results.PK_tot = (PKm_tot + PKe_tot).reshape(nr_elements, 1)
         results.power_required = results.PK_tot
         results.mdot_tot = mdot_fuel.reshape(nr_elements, 1)
         results.vehicle_mass_rate = results.mdot_tot
+        results.Pbat = Pbat.reshape(nr_elements, 1)
+        # print(results.Pbat)
 
         #  Update max power
         if PK_tot > self.max_power:
@@ -189,7 +195,10 @@ class Unified_Propsys(Propulsor):
 
         # store data
         results_conditions = Data
-        conditions.propulsion = results_conditions(PK_tot = results.PK_tot)
+        conditions.propulsion = results_conditions(
+                                                   PK_tot = results.PK_tot,
+                                                   Pbat = results.Pbat,
+                                                   )
 
         return results
 
