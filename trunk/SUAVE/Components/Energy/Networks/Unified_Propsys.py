@@ -106,7 +106,6 @@ class Unified_Propsys(Propulsor):
         fBLIm = self.fBLIm
         fBLIe = self.fBLIe
 
-
         # Efficiencies
         eta_pe  = 0.98
         eta_mot = 0.95
@@ -173,12 +172,17 @@ class Unified_Propsys(Propulsor):
             calculate_powers(PK_tot[0], fS, fL, eta_pe, eta_mot, eta_fan)
 
             PKm = PKm_i
-            PKe = PKe_i           
+            PKe = PKe_i
+
+            # Ragone relation for battery efficiency
+            psi = Pbat_i / self.Pbat_max
+            eta_bat = 0.5 + (1.0 - psi) / 2.0
+
+            # Adjust battery power to account for efficiency drop
+            Pbat[i] = Pbat_i / eta_bat
 
             # Calculate vehicle mass rate of change
             mdot_fuel[i] = Pturb_i / (hfuel * eta_th)
-
-            Pbat[i] = Pbat_i
 
         results = Data()
         results.PK_tot = (PKm_tot + PKe_tot).reshape(nr_elements, 1)
