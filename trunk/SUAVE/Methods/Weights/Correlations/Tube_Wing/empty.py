@@ -148,7 +148,8 @@ def empty(vehicle, results_power_balance, settings=None):
         fL    = vehicle.fL
         fS    = vehicle.fS
         Ebat  = vehicle.Ebat
-        wt_propulsion                    = Propulsion.unified_propsys(mdotm, mdote, PKtot, Ebat, fL, fS)
+        Pbat_max = vehicle.Pbat_max
+        wt_propulsion                    = Propulsion.unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS)
         propulsors.mass_properties.mass  = wt_propulsion
 
     else: #propulsor used is not a turbo_fan; assume mass_properties defined outside model

@@ -22,7 +22,7 @@ import numpy as np
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(mdotm, mdote, PKtot, Ebat, fL, fS, weight_factor=1):
+def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -63,7 +63,7 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, fL, fS, weight_factor=1):
     eta_fan = 0.9  # Fan
     eta_mot = 0.95  # Motor
     eta_pe = 0.98  # Power electronics
-    eta_bat = 0.85  # TODO - This should come from Ragone relation
+    # eta_bat = 0.85  # TODO - This should come from Ragone relation
 
     # Fan and nacelle weights
     m_fanm = (Kfan * mdotm**1.2).sum()
@@ -75,6 +75,10 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, fL, fS, weight_factor=1):
     if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator
         [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = \
         calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+
+        # Ragone relation for battery efficiency
+        psi = Pbat / Pbat_max
+        eta_bat = 0.5 + (1.0 - psi) / 2.0
 
         mdot_core = Pturb / c_core
 
@@ -98,6 +102,10 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, fL, fS, weight_factor=1):
     else:  # Parallel - Link is motor
         [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = \
         calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+
+        # Ragone relation for battery efficiency
+        psi = Pbat / Pbat_max
+        eta_bat = 0.5 + (1.0 - psi) / 2.0
 
         mdot_core = Pturb / c_core
 

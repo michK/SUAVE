@@ -9,9 +9,7 @@
 # ----------------------------------------------------------------------
 
 # suave imports
-import SUAVE
 from SUAVE.Core import Units, Data
-from SUAVE.Methods.Power.Battery.Variable_Mass import find_mass_gain_rate
 from SUAVE.Components.Propulsors.Propulsor import Propulsor
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
@@ -67,7 +65,7 @@ class Unified_Propsys(Propulsor):
 
         # max power tracker
         self.max_power = 0.0
-
+        self.max_bat_power = 0.01
 
 
     def evaluate_power(self, state):
@@ -107,6 +105,7 @@ class Unified_Propsys(Propulsor):
         fS = self.fS
         fBLIm = self.fBLIm
         fBLIe = self.fBLIe
+
 
         # Efficiencies
         eta_pe  = 0.98
@@ -184,12 +183,16 @@ class Unified_Propsys(Propulsor):
         results = Data()
         results.PK_tot = (PKm_tot + PKe_tot).reshape(nr_elements, 1)
         results.power_required = results.PK_tot
+        results.Pbat_max = self.max_bat_power
         results.mdot_tot = mdot_fuel.reshape(nr_elements, 1)
         results.vehicle_mass_rate = results.mdot_tot
         results.Pbat = Pbat.reshape(nr_elements, 1)
-        # print(results.Pbat)
 
-        #  Update max power
+        # Keep track of max total and battery power
+
+        if np.amax(Pbat) > self.max_bat_power:
+            self.max_bat_power = np.amax(Pbat)
+
         if PK_tot > self.max_power:
             self.max_power = PK_tot
 
@@ -198,6 +201,7 @@ class Unified_Propsys(Propulsor):
         conditions.propulsion = results_conditions(
                                                    PK_tot = results.PK_tot,
                                                    Pbat = results.Pbat,
+                                                   Pbat_max = results.Pbat_max
                                                    )
 
         return results
