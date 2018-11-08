@@ -19,13 +19,7 @@ import numpy as np
 
 def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
     # Determine link properties - generator or motor
-    if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):
-        arch = 'SeriesPartialHybrid'  # Link is generator
-    else: # parallel partial, fL,fS specified
-        arch = 'ParallelPartialHybrid'  # Link is motor
-
-    # System of equations for link as generator
-    if arch == 'SeriesPartialHybrid':
+    if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator        
         A = np.array((
                      [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
                      [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
@@ -59,7 +53,7 @@ def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
 
         return PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink
 
-    else:
+    else: # Parallel - Link is motor
         A = np.array((
                      [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
                      [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
