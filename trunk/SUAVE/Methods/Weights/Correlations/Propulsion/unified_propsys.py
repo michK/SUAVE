@@ -72,74 +72,39 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
     m_fane = (Kfan * mdote**1.2).sum()
     m_nace = (cmnace * Knace * mdote).sum()
 
-    # Determine link properties - generator or motor # NOTE - This is inefficient because it checks conditional here and in function
-    if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = \
-        calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+    # Calculate powers
+    [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgenmot, Pconv, Plink] = \
+    calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
-        mdot_core = Pturb / c_core
+    mdot_core = Pturb / c_core
 
-        m_core        = Kcore * mdot_core**1.2
-        m_prop_mot    = Pmot / pm_mot
-        m_pe_prop_mot = Pinv / pm_pe
-        m_gen         = Pgen / pm_mot
-        m_pe_link     = Pconv / pm_pe
+    m_core        = Kcore * mdot_core**1.2
+    m_prop_mot    = Pmot / pm_mot
+    m_pe_prop_mot = Pinv / pm_pe
+    m_gen         = Pgenmot / pm_mot
+    m_pe_link     = Pconv / pm_pe
 
-        # Size battery based on power or energy
-        # Power
-        m_bat_p = Pbat / (p_sbat * eta_bat)
-        # Energy
-        m_bat_e = Ebat / e_sbat
+    # Size battery based on power or energy
+    # Power
+    m_bat_p = Pbat / (p_sbat * eta_bat)
+    # Energy
+    m_bat_e = Ebat / e_sbat
 
-        m_bat = np.max([m_bat_p, m_bat_e]) # TODO - No traceability here, change to track variable
+    m_bat = np.max([m_bat_p, m_bat_e]) # TODO - No traceability here, change to track variable
 
-        mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
-                m_bat + m_gen + m_pe_link
+    mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
+            m_bat + m_gen + m_pe_link
 
-        # Thermal management system
-        q_bat  = (1.0 - eta_bat) * Pbat
-        q_gen  = (1.0 - eta_mot) * Pgen
-        q_conv = (1.0 - eta_pe) * Pconv
-        q_inv  = (1.0 - eta_pe) * Pinv
-        q_mot  = (1.0 - eta_mot) * Pmot
-        
-        q_tot  = q_bat + q_gen + q_conv + q_inv + q_mot
+    # Thermal management system
+    q_bat  = (1.0 - eta_bat) * Pbat
+    q_gen  = (1.0 - eta_mot) * Pgenmot
+    q_conv = (1.0 - eta_pe) * Pconv
+    q_inv  = (1.0 - eta_pe) * Pinv
+    q_mot  = (1.0 - eta_mot) * Pmot
+    
+    q_tot  = q_bat + q_gen + q_conv + q_inv + q_mot
 
-        mass_tms = q_tot / pm_tms
-
-    else:  # Parallel - Link is motor
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = \
-        calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
-
-        mdot_core = Pturb / c_core
-
-        m_core = Kcore * mdot_core**1.2
-        m_prop_mot    = Pmot / pm_mot
-        m_pe_prop_mot = Pinv / pm_pe
-        m_mot_link    = Pmot_link / pm_mot
-        m_pe_link     = Pconv / pm_pe
-
-        # Size battery based on power or energy
-        # Power
-        m_bat_p = Pbat / (p_sbat * eta_bat)
-        # Energy
-        m_bat_e = Ebat / e_sbat
-
-        m_bat = np.max([m_bat_p, m_bat_e]) # TODO - No traceability here, change to track variable
-
-        mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
-                m_bat + m_mot_link + m_pe_link
-
-        # Thermal management system
-        q_bat  = (1.0 - eta_bat) * Pbat
-        q_conv = (1.0 - eta_pe)  * Pconv
-        q_mot_link  = (1.0 - eta_mot) * Pmot_link
-        q_inv  = (1.0 - eta_pe)  * Pinv
-        q_mot  = (1.0 - eta_mot) * Pmot
-        
-        q_tot  = q_bat + q_conv + q_mot_link + q_inv + q_mot
-
-        mass_tms = q_tot / pm_tms
+    mass_tms = q_tot / pm_tms
 
     mass_propsys = (mprop + mass_tms) * weight_factor
 
