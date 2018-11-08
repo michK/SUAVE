@@ -55,6 +55,7 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
     c_core = 400.0 * Units['kJ/kg']
     pm_mot = 8.0 * Units['hp/lb']
     pm_pe = 10.0 * Units['hp/lb']
+    pm_tms = 8.0 * Units['hp/lb']
     e_sbat = 500.0 * Units['Wh/kg']  # battery specific energy
     p_sbat = 2985.0 * Units['W/kg']  # battery specific power
 
@@ -62,7 +63,7 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
     # Assumed efficiencies
     eta_fan = 0.9  # Fan
     eta_mot = 0.95  # Motor
-    eta_pe = 0.98  # Power electronics
+    eta_pe  = 0.98  # Power electronics
     eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5
 
     # Fan and nacelle weights
@@ -95,6 +96,17 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_bat + m_gen + m_pe_link
 
+        # Thermal management system
+        q_bat  = (1.0 - eta_bat) * Pbat
+        q_gen  = (1.0 - eta_mot) * Pgen
+        q_conv = (1.0 - eta_pe) * Pconv
+        q_inv  = (1.0 - eta_pe) * Pinv
+        q_mot  = (1.0 - eta_mot) * Pmot
+        
+        q_tot  = q_bat + q_gen + q_conv + q_inv + q_mot
+
+        mass_tms = q_tot / pm_tms
+
     else:  # Parallel - Link is motor
         [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = \
         calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
@@ -118,6 +130,17 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_bat + m_mot_link + m_pe_link
 
-    mass_propsys = mprop * weight_factor
+        # Thermal management system
+        q_bat  = (1.0 - eta_bat) * Pbat
+        q_conv = (1.0 - eta_pe)  * Pconv
+        q_mot_link  = (1.0 - eta_mot) * Pmot_link
+        q_inv  = (1.0 - eta_pe)  * Pinv
+        q_mot  = (1.0 - eta_mot) * Pmot
+        
+        q_tot  = q_bat + q_conv + q_mot_link + q_inv + q_mot
+
+        mass_tms = q_tot / pm_tms
+
+    mass_propsys = (mprop + mass_tms) * weight_factor
 
     return mass_propsys
