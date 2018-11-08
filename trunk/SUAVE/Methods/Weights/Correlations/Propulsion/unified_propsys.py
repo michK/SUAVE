@@ -90,7 +90,7 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
     # Energy
     m_bat_e = Ebat / e_sbat
 
-    m_bat = np.max([m_bat_p, m_bat_e]) # TODO - No traceability here, change to track variable
+    m_bat = np.max([m_bat_p, m_bat_e])
 
     mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
             m_bat + m_gen + m_pe_link
