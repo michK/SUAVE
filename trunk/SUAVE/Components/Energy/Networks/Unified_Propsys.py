@@ -57,6 +57,7 @@ class Unified_Propsys(Propulsor):
         self.propulsor        = None
         self.battery          = None
         self.motor_efficiency = .95
+        self.throttle         =  1.0
         self.tag              = 'Network'
 
         # areas needed for drag; not in there yet
@@ -64,7 +65,7 @@ class Unified_Propsys(Propulsor):
         self.areas.wetted      = 0.0
 
         # max power tracker
-        self.max_power = 0.0
+        self.max_power = 0.01
         self.max_bat_power = 0.01
 
 
@@ -88,7 +89,7 @@ class Unified_Propsys(Propulsor):
         """
 
         #Unpack
-        conditions = state.conditions       
+        conditions = state.conditions
 
         # Constants
         hfuel = 43.0 * Units['MJ/kg']
@@ -191,6 +192,7 @@ class Unified_Propsys(Propulsor):
         results.mdot_tot = mdot_fuel.reshape(nr_elements, 1)
         results.vehicle_mass_rate = results.mdot_tot
         results.Pbat = Pbat.reshape(nr_elements, 1)
+        results.throttle = results.PK_tot / self.max_power
 
         # Keep track of max total and battery power
 
@@ -205,7 +207,8 @@ class Unified_Propsys(Propulsor):
         conditions.propulsion = results_conditions(
                                                    PK_tot = results.PK_tot,
                                                    Pbat = results.Pbat,
-                                                   Pbat_max = results.Pbat_max
+                                                   Pbat_max = results.Pbat_max,
+                                                   throttle = results.throttle
                                                    )
 
         return results
