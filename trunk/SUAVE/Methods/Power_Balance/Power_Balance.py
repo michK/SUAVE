@@ -56,7 +56,6 @@ def Power_Balance(vehicle, state_sizing):
 
     # Extract drags from aero results
     CD_tot = results_aero.drag.total  # TODO - Check that this is actual CD_tot
-    CD_par = results_aero.drag.parasite.total
 
     Vinf = state.conditions.freestream.cruise_speed
 
