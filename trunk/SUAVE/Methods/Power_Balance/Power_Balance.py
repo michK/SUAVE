@@ -19,6 +19,7 @@ from SUAVE.Core import Data
 ## @ingroup Methods-Power_Balance
 def Power_Balance(vehicle, state_sizing):
     """
+    Method runs once per outer iteration loop to size propulsion system
     Assumptions:
         None
 
