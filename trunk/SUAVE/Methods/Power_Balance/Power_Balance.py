@@ -70,7 +70,6 @@ def Power_Balance(vehicle, state_sizing):
     # Calculate total drag
     qinf = 0.5 * state.conditions.freestream.density * Vinf**2.0
     Dp = CD_tot * qinf * vehicle.reference_area
-    Dpp_DP = CD_par / CD_tot
 
     # Calculate PKm and PKe
     PKm_tot = (1.0 - fL) * PK_tot
