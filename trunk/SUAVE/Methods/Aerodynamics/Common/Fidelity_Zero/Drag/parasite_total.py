@@ -99,8 +99,8 @@ def parasite_total(state,settings,geometry):
         parasite_drag = 0. # not currently available for supersonics
 
     total_parasite_drag += parasite_drag
-       
+
     # dump to conditions
-    state.conditions.aerodynamics.drag_breakdown.parasite.total = total_parasite_drag   
+    state.conditions.aerodynamics.drag_breakdown.parasite.total = total_parasite_drag
 
     return total_parasite_drag
