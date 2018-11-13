@@ -60,6 +60,10 @@ class Unified_Propsys(Propulsor):
         self.throttle         =  1.0
         self.tag              = 'Network'
 
+        # Propulsor areas
+        self.mech_fan_dia =  1.0 * Units.m
+        self.elec_fan_dia =  1.0 * Units.m
+
         # areas needed for drag; not in there yet
         self.areas             = Data()
         self.areas.wetted      = 0.0
