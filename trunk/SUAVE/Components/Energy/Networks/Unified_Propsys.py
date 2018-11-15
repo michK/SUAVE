@@ -100,7 +100,7 @@ class Unified_Propsys(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        # number_of_engines = vehicle.number_of_engines
+        # nr_engines = vehicle.nr_engines
         # nr_mech_fans = vehicle.nr_mech_fans
         # nr_elec_fans = vehicle.nr_elec_fans
         # PKtot = vehicle.PKtot
@@ -122,8 +122,10 @@ class Unified_Propsys(Propulsor):
 
         Vinf = conditions.freestream.velocity
 
-        Vjetm = 200.0 * Units.kt #  TODO - Calculate
-        Vjete = 200.0 * Units.kt #  TODO - Calculate
+        delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
+        delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
+        Vjetm = delta_vjet_mech * Vinf
+        Vjete = delta_vjet_elec * Vinf
 
         fsurf = 0.9
 
