@@ -37,8 +37,8 @@ def Power_Balance(vehicle, state_sizing):
         N/A
     """
     # Unpack inputs
-    nr_mech_fans = vehicle.nr_mech_fans
-    nr_elec_fans = vehicle.nr_elec_fans
+    nr_fans_mech = vehicle.nr_fans_mech
+    nr_fans_elec = vehicle.nr_fans_elec
     PKtot = vehicle.PKtot
     state = state_sizing
     PK_tot = vehicle.PKtot
@@ -48,7 +48,7 @@ def Power_Balance(vehicle, state_sizing):
     fBLIe = vehicle.fBLIe
 
     # Calculate aerodynamics
-    aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()
+    aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero_Unified()
     aerodynamics.geometry = vehicle
     aerodynamics.initialize()
 
@@ -80,18 +80,18 @@ def Power_Balance(vehicle, state_sizing):
     mdote_tot = 2.0 * (PKe_tot - fBLIe * fsurf * Dp * Vinf) / (Vjete**2.0 - Vinf**2.0)
 
     # Calculate individual propulsor stream mass flows and propulsive powers
-    mdotm = np.zeros(nr_mech_fans)
-    mdote = np.zeros(nr_elec_fans)
-    PKm = np.zeros(nr_mech_fans)
-    PKe = np.zeros(nr_elec_fans)
+    mdotm = np.zeros(nr_fans_mech)
+    mdote = np.zeros(nr_fans_elec)
+    PKm = np.zeros(nr_fans_mech)
+    PKe = np.zeros(nr_fans_elec)
 
-    for i in range(nr_mech_fans):
-        mdotm[i] = mdotm_tot / nr_mech_fans
-        PKm[i] = PKm_tot / nr_mech_fans
+    for i in range(nr_fans_mech):
+        mdotm[i] = mdotm_tot / nr_fans_mech
+        PKm[i] = PKm_tot / nr_fans_mech
 
-    for j in range(nr_elec_fans):
-        mdote[j] = mdote_tot / nr_elec_fans
-        PKe[j] = PKe_tot / nr_elec_fans
+    for j in range(nr_fans_elec):
+        mdote[j] = mdote_tot / nr_fans_elec
+        PKe[j] = PKe_tot / nr_fans_elec
 
     results = Data()
     results.PKtot = PKtot

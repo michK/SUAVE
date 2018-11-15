@@ -100,7 +100,7 @@ class Unified_Propsys(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        # nr_engines = vehicle.nr_engines
+        # number_of_engines = vehicle.number_of_engines
         # nr_mech_fans = vehicle.nr_mech_fans
         # nr_elec_fans = vehicle.nr_elec_fans
         # PKtot = vehicle.PKtot
