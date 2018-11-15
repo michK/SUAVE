@@ -122,10 +122,8 @@ class Unified_Propsys(Propulsor):
 
         Vinf = conditions.freestream.velocity
 
-        delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
-        delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
-        Vjetm = delta_vjet_mech * Vinf
-        Vjete = delta_vjet_elec * Vinf
+        Vjetm = 200.0 * Units.kt #  TODO - Calculate
+        Vjete = 200.0 * Units.kt #  TODO - Calculate
 
         fsurf = 0.9
 

@@ -10,7 +10,7 @@
 import numpy as np
 
 import SUAVE
-from SUAVE.Core import Data
+from SUAVE.Core import Data, Units
 
 # ----------------------------------------------------------------------
 #  Power Balance
@@ -59,10 +59,8 @@ def Power_Balance(vehicle, state_sizing):
 
     Vinf = state.conditions.freestream.cruise_speed
 
-    delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
-    delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
-    Vjetm = delta_vjet_mech * Vinf
-    Vjete = delta_vjet_elec * Vinf
+    Vjetm = 200.0 * Units.kt #  TODO - Calculate
+    Vjete = 200.0 * Units.kt #  TODO - Calculate
 
     fsurf = 0.9
 
