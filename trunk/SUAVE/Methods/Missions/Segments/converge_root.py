@@ -53,7 +53,7 @@ def converge_root(segment,state):
                                          unknowns,
                                          args = [segment,state],
                                          # xtol = state.numerics.tolerance_solution,
-                                         xtol = 1,  # FIXME - This might need to be revisited
+                                         xtol = 0.1,  # FIXME - This might need to be revisited
                                          full_output=1)
 
     if ier!=1:
