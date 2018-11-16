@@ -15,6 +15,7 @@ from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
 # package imports
 import numpy as np
+from scipy.optimize import fsolve
 
 # ----------------------------------------------------------------------
 #  Network
@@ -61,8 +62,11 @@ class Unified_Propsys(Propulsor):
         self.tag              = 'Network'
 
         # Propulsor areas
-        self.mech_fan_dia =  1.0 * Units.m
-        self.elec_fan_dia =  1.0 * Units.m
+        self.mech_fan_dia = 1.0 * Units.m
+        self.elec_fan_dia = 1.0 * Units.m
+
+        self.area_noz_fan = 0.6  # FIXME - Find reasonable values
+        self.area_jet_noz = 0.95  # FIXME - Find reasonable values
 
         # areas needed for drag; not in there yet
         self.areas             = Data()
@@ -100,16 +104,22 @@ class Unified_Propsys(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        # nr_engines = vehicle.nr_engines
-        # nr_mech_fans = vehicle.nr_mech_fans
-        # nr_elec_fans = vehicle.nr_elec_fans
-        # PKtot = vehicle.PKtot
-        # state = state_sizing
-
+        nr_mech_fans = self.number_of_engines_mech
+        nr_elec_fans = self.number_of_engines_elec
         fL = self.fL
         fS = self.fS
         fBLIm = self.fBLIm
         fBLIe = self.fBLIe
+        dia_fan_mech = self.fan_diameter_mech
+        dia_fan_elec = self.fan_diameter_elec
+
+        # Calculate fan areas
+        area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
+        area_fan_elec = np.pi / 4.0 * dia_fan_elec**2.0
+
+        # Calculate jet area
+        area_jet_mech = area_fan_mech * self.area_noz_fan * self.area_jet_noz
+        area_jet_elec = area_fan_elec * self.area_noz_fan * self.area_jet_noz
 
         # Efficiencies
         eta_pe  = 0.98
@@ -121,11 +131,6 @@ class Unified_Propsys(Propulsor):
         CD_par = conditions.aerodynamics.drag_breakdown.parasite.total
 
         Vinf = conditions.freestream.velocity
-
-        delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
-        delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
-        Vjetm = delta_vjet_mech * Vinf
-        Vjete = delta_vjet_elec * Vinf
 
         fsurf = 0.9
 
@@ -149,22 +154,37 @@ class Unified_Propsys(Propulsor):
 
         for i in range(nr_elements):
 
-            A = np.array((
-                         [fL, fL - 1.0, 0                             , 0                            ],
-                         [0 , 0       , Vjetm[i] - Vinf[i]                  , Vjete[i] - Vinf[i]                 ],
-                         [1 , 0       , -0.5*(Vjetm[i]**2.0 - Vinf[i]**2.0) , 0                            ],
-                         [0 , 1       , 0                             , -0.5*(Vjete[i]**2.0 - Vinf[i]**2.0)]
-                        ))
+            def power_balance(params):
+                """Function to calculate resisuals of power balance equations"""
+                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
+                # print(PKm, PKe, mdotm, mdote)
 
-            b = np.array((
-                         [0],
-                         [Dp[i] * (1.0 - fBLIm * Dpp_DP[i] - fBLIe * Dpp_DP[i])],
-                         [fBLIm * fsurf * Dpp_DP[i] * Dp[i]],
-                         [fBLIe * fsurf * Dpp_DP[i] * Dp[i]]
-                        ))
+                res1 = fL - PKe / (PKe + PKm)
 
-            # Solve system
-            [PKm, PKe, mdotm, mdote] = np.linalg.solve(A, b)
+                res2 = mdotm * (Vjetm - Vinf[i]) + mdote * (Vjete - Vinf[i]) - \
+                    Dp[i] * (1.0 - fBLIm * Dpp_DP[i] - fBLIe * Dpp_DP[i])
+
+                res3 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dp[i] * Vinf[i]
+
+                res4 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dp[i] * Vinf[i]
+
+                res5 = mdotm - nr_mech_fans * conditions.freestream.density[i] * area_jet_mech * Vjetm
+
+                res6 = mdote - nr_elec_fans * conditions.freestream.density[i] * area_jet_elec * Vjete
+
+                residuals = [
+                             abs(res1),
+                             abs(res2),
+                             abs(res3),
+                             abs(res4),
+                             abs(res5),
+                             abs(res6),
+                            ]
+
+                return residuals
+
+            args_init = [300000.0, 300000.0, 100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
+            [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = fsolve(power_balance, args_init)
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
@@ -174,7 +194,7 @@ class Unified_Propsys(Propulsor):
             PK_tot = PKm + PKe
 
             [PKe_i, PKm_i, PfanE_i, PfanM_i, Pmot_i, Pinv_i, Pbat_i, Pturb_i, Pmot_link_i, Pconv_i, Plink_i] = \
-            calculate_powers(PK_tot[0], fS, fL, eta_pe, eta_mot, eta_fan)
+            calculate_powers(PK_tot, fS, fL, eta_pe, eta_mot, eta_fan)
 
             PKm = PKm_i
             PKe = PKe_i
