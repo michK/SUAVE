@@ -107,7 +107,7 @@ class Fidelity_Zero_Unified(Markup):
         compute.drag.parasite.fuselages            = Process_Geometry('fuselages')
         compute.drag.parasite.fuselages.fuselage   = Common.Drag.parasite_drag_fuselage
         compute.drag.parasite.propulsors           = Process_Geometry('propulsors')
-        compute.drag.parasite.propulsors.propulsor = Common.Drag.parasite_drag_unified_propulsors
+        compute.drag.parasite.propulsors.propulsor = Common.Drag.parasite_drag_propulsors_unified
         compute.drag.parasite.pylons               = Common.Drag.parasite_drag_pylon_unified
         compute.drag.parasite.total                = Common.Drag.parasite_total
         compute.drag.induced                       = Common.Drag.induced_drag_aircraft
