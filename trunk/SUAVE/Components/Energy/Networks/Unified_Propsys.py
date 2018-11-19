@@ -157,7 +157,6 @@ class Unified_Propsys(Propulsor):
             def power_balance(params):
                 """Function to calculate resisuals of power balance equations"""
                 PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
-                # print(PKm, PKe, mdotm, mdote)
 
                 res1 = fL - PKe / (PKe + PKm)
 
