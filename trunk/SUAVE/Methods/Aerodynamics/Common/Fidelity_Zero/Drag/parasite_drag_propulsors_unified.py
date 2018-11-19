@@ -41,7 +41,7 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
       mach_number                                [Unitless]
       temperature                                [K]
       reynolds_number                            [Unitless]
-    geometry.     
+    geometry.
       nacelle_diameter_mech                      [m^2]
       nacelle_diameter_elec                      [m^2]
       areas.wetted_mech                          [m^2]
@@ -57,10 +57,10 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     """
     # unpack inputs
     conditions    = state.conditions
-   
+
     propsys = geometry
 
-    # mechanical propulsors;   
+    # mechanical propulsors;
     Sref_mech      = propsys.nacelle_diameter_mech**2. / 4. * np.pi
     Swet_mech      = propsys.areas_wetted_mech
     l_prop_mech = propsys.engine_length_mech
@@ -75,35 +75,35 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     # conditions
     freestream = conditions.freestream
     Mc  = freestream.mach_number
-    Tc  = freestream.temperature   
+    Tc  = freestream.temperature
     re  = freestream.reynolds_number
 
     # mechanical propulsors
     # reynolds number
     Re_prop_mech = re*l_prop_mech
-   
+
     # skin friction coefficient
     cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_prop_mech,Mc,Tc)
-   
+
     ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
-    k_prop = 1 + 0.35 / (float(l_prop_mech)/float(d_prop_mech))     
-  
-    # find the final result   
+    k_prop = 1 + 0.35 / (float(l_prop_mech)/float(d_prop_mech))
+
+    # find the final result
     propulsor_parasite_drag_mech = k_prop * cf_prop * Swet_mech / Sref_mech
 
     # electrical propulsors
     # reynolds number
     Re_prop_elec = re*l_prop_elec
-   
+
     # skin friction coefficient
     cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_prop_elec,Mc,Tc)
-   
+
     ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
-    k_prop = 1 + 0.35 / (float(l_prop_elec)/float(d_prop_elec))     
-   
-    # find the final result   
-    propulsor_parasite_drag_elec = k_prop * cf_prop * Swet_elec / Sref_elec  
-   
+    k_prop = 1 + 0.35 / (float(l_prop_elec)/float(d_prop_elec))
+
+    # find the final result
+    propulsor_parasite_drag_elec = k_prop * cf_prop * Swet_elec / Sref_elec
+
     # dump data to conditions
     propulsor_result = Data(
         wetted_area_mech          = Swet_mech    ,
@@ -118,5 +118,5 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
         form_factor               = k_prop  ,
     )
     conditions.aerodynamics.drag_breakdown.parasite[propsys.tag] = propulsor_result
-   
+
     return propulsor_parasite_drag_mech, propulsor_parasite_drag_elec
