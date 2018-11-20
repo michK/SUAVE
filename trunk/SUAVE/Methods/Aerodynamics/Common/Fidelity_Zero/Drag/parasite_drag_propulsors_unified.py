@@ -61,16 +61,20 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     propsys = geometry
 
     # mechanical propulsors;
-    Sref_mech      = propsys.nacelle_diameter_mech**2. / 4. * np.pi
+    Sref_mech      = np.pi / 4.0 * propsys.nacelle_diameter_mech**2.0
     Swet_mech      = propsys.areas_wetted_mech
-    l_prop_mech = propsys.engine_length_mech
-    d_prop_mech = propsys.nacelle_diameter_mech
+    l_nacelle_mech = propsys.nacelle_length_mech
+    d_nacelle_mech = propsys.nacelle_diameter_mech
+    nr_fans_mech = propsys.number_of_engines_mech
+    f_embed_mech = 1.0
 
     # electrical propulsors
-    Sref_elec      = propsys.nacelle_diameter_elec**2. / 4. * np.pi
+    Sref_elec      = np.pi / 4.0 * propsys.nacelle_diameter_elec**2.0
     Swet_elec      = propsys.areas_wetted_elec
-    l_prop_elec = propsys.engine_length_elec
-    d_prop_elec = propsys.nacelle_diameter_elec
+    l_nacelle_elec = propsys.nacelle_length_elec
+    d_nacelle_elec = propsys.nacelle_diameter_elec
+    nr_fans_elec = propsys.number_of_engines_elec
+    f_embed_elec = 0.5
 
     # conditions
     freestream = conditions.freestream
@@ -80,38 +84,45 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
 
     # mechanical propulsors
     # reynolds number
-    Re_prop_mech = re*l_prop_mech
+    Re_nacelle_mech = re*l_nacelle_mech
 
     # skin friction coefficient
-    cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_prop_mech,Mc,Tc)
+    cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_nacelle_mech, Mc, Tc)
 
     ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
-    k_prop = 1 + 0.35 / (float(l_prop_mech)/float(d_prop_mech))
+    k_prop = 1 + 0.35 / (float(l_nacelle_mech) / float(d_nacelle_mech))
 
     # find the final result
-    propulsor_parasite_drag_mech = k_prop * cf_prop * Swet_mech / Sref_mech
+    parasite_drag_coefficient_mech = f_embed_mech * k_prop * cf_prop * Swet_mech / Sref_mech
 
     # electrical propulsors
     # reynolds number
-    Re_prop_elec = re*l_prop_elec
+    Re_nacelle_elec = re*l_nacelle_elec
 
     # skin friction coefficient
-    cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_prop_elec,Mc,Tc)
+    cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_nacelle_elec, Mc, Tc)
 
     ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
-    k_prop = 1 + 0.35 / (float(l_prop_elec)/float(d_prop_elec))
+    k_prop = 1 + 0.35 / (float(l_nacelle_elec) / float(d_nacelle_elec))
 
     # find the final result
-    propulsor_parasite_drag_elec = k_prop * cf_prop * Swet_elec / Sref_elec
+    parasite_drag_coefficient_elec = f_embed_elec * k_prop * cf_prop * Swet_elec / Sref_elec
+
+    # consolidate mech and elec propulsors  # NOTE - not consistent reference areas
+    parasite_drag_coefficient = parasite_drag_coefficient_mech + parasite_drag_coefficient_elec
+    wetted_area =  (nr_fans_mech * Swet_mech) + (nr_fans_elec * Swet_elec)
+    print(wetted_area)
 
     # dump data to conditions
     propulsor_result = Data(
+        wetted_area          = wetted_area    ,
         wetted_area_mech          = Swet_mech    ,
         wetted_area_elec          = Swet_elec    ,
         reference_area_mech       = Sref_mech    ,
-        reference_area_wlwx       = Sref_elec    ,
-        parasite_drag_coefficient_mech = propulsor_parasite_drag_mech ,
-        parasite_drag_coefficient_elec = propulsor_parasite_drag_elec ,
+        reference_area_elec       = Sref_elec    ,
+        parasite_drag_coefficient = parasite_drag_coefficient,
+        parasite_drag_coefficient_mech = parasite_drag_coefficient_mech,
+        parasite_drag_coefficient_elec = parasite_drag_coefficient_elec,
         skin_friction_coefficient = cf_prop ,
         compressibility_factor    = k_comp  ,
         reynolds_factor           = k_reyn  ,
@@ -119,4 +130,4 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     )
     conditions.aerodynamics.drag_breakdown.parasite[propsys.tag] = propulsor_result
 
-    return propulsor_parasite_drag_mech, propulsor_parasite_drag_elec
+    return parasite_drag_coefficient_mech, parasite_drag_coefficient_elec

@@ -77,17 +77,18 @@ def parasite_total(state,settings,geometry):
             total_parasite_drag += parasite_drag * ref_area/vehicle_reference_area * propulsor.number_of_engines
     elif propulsors.values()[0]['arch_tag'] == 'unified': # unified model
         for propulsor in propulsors.values():
-            ref_area_mech = np.pi / 4.0 * propulsor.nacelle_diameter_mech**2
-            ref_area_elec = np.pi / 4.0 * propulsor.nacelle_diameter_elec**2
+            ref_area_mech = np.pi / 4.0 * propulsor.nacelle_diameter_mech**2.0
+            ref_area_elec = np.pi / 4.0 * propulsor.nacelle_diameter_elec**2.0
             parasite_drag_mech = \
-                conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech
+                conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech            
             parasite_drag_elec = \
                 conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec
-            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech  = parasite_drag_mech * ref_area_mech/vehicle_reference_area * propulsor.number_of_engines_mech
-            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec  = parasite_drag_elec * ref_area_elec/vehicle_reference_area * propulsor.number_of_engines_elec
-            total_parasite_drag_mech = parasite_drag_mech * ref_area_mech/vehicle_reference_area * propulsor.number_of_engines_mech
-            total_parasite_drag_elec = parasite_drag_elec * ref_area_elec/vehicle_reference_area * propulsor.number_of_engines_elec
-            total_parasite_drag += total_parasite_drag_mech + total_parasite_drag_elec
+            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech  = parasite_drag_mech * ref_area_mech / vehicle_reference_area * propulsor.number_of_engines_mech
+            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec  = parasite_drag_elec * ref_area_elec / vehicle_reference_area * propulsor.number_of_engines_elec
+            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient = \
+                conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech + \
+                conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec            
+            total_parasite_drag += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient
     else:
         raise Exception('Propulsion network should have arch_tag set to either "conventional" or "complex"')
 
