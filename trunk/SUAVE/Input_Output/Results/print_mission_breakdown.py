@@ -159,7 +159,7 @@ def print_mission_breakdown(results,filename='mission_breakdown.dat', units="imp
     elif SI:
         fid.write(' Total Range (km) ........... ' + str('%9.0f' % TotalRange) + '\n')
     fid.write(' Total Fuel  (kg) ........... '+ str('%9.0f'   % TotalFuel)+'\n')
-    fid.write(' Mission Fuel  (kg) ........... '+ str('%7.0f'   % MissionFuel)+'\n')
+    fid.write(' Mission Fuel  (kg) ........... '+ str('%7.0f'   % MissionFuel) + ' (only meaningful if there are 3 reserve segments)' + '\n')
     fid.write(' Total Time  (hh:mm) ........ '+ time.strftime('    %H:%M', time.gmtime(TotalTime))+'\n')
     # Print timestamp
     fid.write(2*'\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
