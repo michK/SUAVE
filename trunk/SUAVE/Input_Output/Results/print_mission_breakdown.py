@@ -150,6 +150,7 @@ def print_mission_breakdown(results,filename='mission_breakdown.dat', units="imp
 
     #Summary of results [nm]
     TotalFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[-1].conditions.weights.total_mass[-1]   #[kg]
+    MissionFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[-4].conditions.weights.total_mass[-1]   #[kg]
     TotalTime = (results.segments[-1].conditions.frames.inertial.time[-1] - results.segments[0].conditions.frames.inertial.time[0])  #[min]
 
     fid.write(2*'\n')
@@ -158,6 +159,7 @@ def print_mission_breakdown(results,filename='mission_breakdown.dat', units="imp
     elif SI:
         fid.write(' Total Range (km) ........... ' + str('%9.0f' % TotalRange) + '\n')
     fid.write(' Total Fuel  (kg) ........... '+ str('%9.0f'   % TotalFuel)+'\n')
+    fid.write(' Mission Fuel  (kg) ........... '+ str('%7.0f'   % MissionFuel)+'\n')
     fid.write(' Total Time  (hh:mm) ........ '+ time.strftime('    %H:%M', time.gmtime(TotalTime))+'\n')
     # Print timestamp
     fid.write(2*'\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
