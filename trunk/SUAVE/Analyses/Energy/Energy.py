@@ -1,9 +1,8 @@
 ## @ingroup Analyses-Energy
 # Energy.py
 #
-# Created:
+# Created:  
 # Modified: Feb 2016, Andrew Wendorff
-#           Oct 2018, Michael Kruger
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -22,72 +21,48 @@ class Energy(Analysis):
     """
     def __defaults__(self):
         """This sets the default values and methods for the analysis.
-
+            
                     Assumptions:
                     None
-
+            
                     Source:
                     N/A
-
+            
                     Inputs:
                     None
-
+            
                     Outputs:
                     None
-
+            
                     Properties Used:
                     N/A
-                """
+                """        
         self.tag     = 'energy'
         self.network = None
-
+        
     def evaluate_thrust(self,state):
-
+        
         """Evaluate the thrust produced by the energy network.
-
+    
                 Assumptions:
                 Network has an "evaluate_thrust" method.
-
+    
                 Source:
                 N/A
-
+    
                 Inputs:
                 State data container
-
+    
                 Outputs:
                 Results of the thrust evaluation method.
-
+    
                 Properties Used:
-                N/A
+                N/A                
             """
-
+                
+            
         network = self.network
-        results = network.evaluate_thrust(state)
-
+        results = network.evaluate_thrust(state) 
+        
         return results
-
-
-    def evaluate_power(self,state):
-
-        """Evaluate the power produced/required by the energy network.
-
-                Assumptions:
-                Network has an "evaluate_power" method.
-
-                Source:
-                N/A
-
-                Inputs:
-                State data container
-
-                Outputs:
-                Results of the thrust evaluation method.
-
-                Properties Used:
-                N/A
-            """
-
-        network = self.network
-        results = network.evaluate_power(state)
-
-        return results
+    

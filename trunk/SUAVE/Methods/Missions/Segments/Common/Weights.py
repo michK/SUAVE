@@ -121,7 +121,7 @@ def update_weights(segment,state):
     I          = state.numerics.time.integrate
 
     # calculate
-    m = (m0 + np.dot(I, -mdot_fuel )).reshape(np.shape(mdot_fuel)[0], 1)
+    m = m0 + np.dot(I, -mdot_fuel )
 
     # weight
     W = m*g

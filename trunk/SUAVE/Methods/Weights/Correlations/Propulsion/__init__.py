@@ -8,4 +8,3 @@ from engine_piston                          import engine_piston
 from hts_motor                              import hts_motor
 from integrated_propulsion                  import integrated_propulsion
 from integrated_propulsion_general_aviation import integrated_propulsion_general_aviation
-from unified_propsys                        import unified_propsys
