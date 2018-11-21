@@ -55,7 +55,7 @@ def Power_Balance(vehicle, state_sizing):
     results_aero = aerodynamics.evaluate(state)
 
     # Extract drags from aero results
-    CD_tot = results_aero.drag.total  # TODO - Check that this is actual CD_tot
+    CD_tot = results_aero.drag.total  # FIXME - This value does not seem to match result plot of CD_tot
 
     Vinf = state.conditions.freestream.cruise_speed
 
@@ -64,7 +64,7 @@ def Power_Balance(vehicle, state_sizing):
     Vjetm = delta_vjet_mech * Vinf
     Vjete = delta_vjet_elec * Vinf
 
-    fsurf = 0.9
+    fsurf = 0.9  # FIXME - Move to file of constants
 
     # Calculate total drag
     qinf = 0.5 * state.conditions.freestream.density * Vinf**2.0
