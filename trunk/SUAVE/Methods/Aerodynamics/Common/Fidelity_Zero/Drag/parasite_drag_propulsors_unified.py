@@ -111,7 +111,6 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     # consolidate mech and elec propulsors  # NOTE - not consistent reference areas
     parasite_drag_coefficient = parasite_drag_coefficient_mech + parasite_drag_coefficient_elec
     wetted_area =  (nr_fans_mech * Swet_mech) + (nr_fans_elec * Swet_elec)
-    print(wetted_area)
 
     # dump data to conditions
     propulsor_result = Data(
