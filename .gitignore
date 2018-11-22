@@ -76,3 +76,6 @@ ide/Wing/SUAVE.wpr
 /doc/latex
 
 !/doc/suave_logo.png
+
+# Sublime text project
+*.sublime-project
