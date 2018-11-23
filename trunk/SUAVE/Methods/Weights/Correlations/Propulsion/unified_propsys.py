@@ -72,7 +72,7 @@ def unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS, weight_factor=1
     m_fane = (Kfan * mdote**1.2).sum()
     m_nace = (cmnace * Knace * mdote).sum()
 
-    # Calculate powers
+    # Calculate powers  NOTE - Negative values set to zero
     [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgenmot, Pconv, Plink] = \
     calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
