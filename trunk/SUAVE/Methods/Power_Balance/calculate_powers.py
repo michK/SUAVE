@@ -17,6 +17,17 @@ import numpy as np
 
 # @ingroup Methods-Power_Balance
 
+def remove_negatives(data_in):
+    """Replace negative values in array with zero"""
+    data_out = []
+    for i, item in enumerate(data_in):
+        if item >= 0:
+            data_out.append(item)
+        else:
+            data_out.append(0.0)
+    return data_out
+
+
 def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
     # Determine link properties - generator or motor
     if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator        
@@ -51,7 +62,7 @@ def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
         # Solve system
         [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = np.linalg.solve(A, b)
 
-        return PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink
+        return remove_negatives([PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink])
 
     else: # Parallel - Link is motor
         A = np.array((
@@ -85,4 +96,4 @@ def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
         # Solve system
         [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = np.linalg.solve(A, b)
 
-        return PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink
+        return remove_negatives([PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink])
