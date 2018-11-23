@@ -12,6 +12,7 @@ from scipy.optimize import fsolve
 
 import SUAVE
 from SUAVE.Core import Data, Units
+from SUAVE.Methods.Power_Balance.calculate_powers import remove_negatives
 
 # ----------------------------------------------------------------------
 #  Power Balance
@@ -114,7 +115,7 @@ def Power_Balance(vehicle, propsys, state_sizing):
         return np.asarray(residuals).reshape(4,)
 
     args_init = [100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
-    [mdotm_tot, mdote_tot, _, _] = fsolve(power_balance, args_init)
+    [mdotm_tot, mdote_tot, _, _] = remove_negatives(fsolve(power_balance, args_init))
 
     # Calculate individual propulsor stream mass flows and propulsive powers
     mdotm = np.zeros(nr_fans_mech)
