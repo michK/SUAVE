@@ -11,7 +11,7 @@
 # suave imports
 from SUAVE.Core import Units, Data
 from SUAVE.Components.Propulsors.Propulsor import Propulsor
-from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
+from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers, remove_negatives
 
 # package imports
 import numpy as np
@@ -183,7 +183,7 @@ class Unified_Propsys(Propulsor):
                 return residuals
 
             args_init = [300000.0, 300000.0, 100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
-            [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = fsolve(power_balance, args_init)
+            [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = remove_negatives(fsolve(power_balance, args_init))
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
