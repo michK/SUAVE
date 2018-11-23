@@ -45,7 +45,7 @@ class Power_Balance(Analysis):
         self.settings = Data()
         
         
-    def evaluate(self, state_sizing):
+    def evaluate(self, propsys, state_sizing):
         """Evaluate the power balance analysis.
     
         Assumptions:
@@ -69,7 +69,7 @@ class Power_Balance(Analysis):
         power    = SUAVE.Methods.Power_Balance.Power_Balance
 
         # evaluate
-        results = power(vehicle, state_sizing)
+        results = power(vehicle, propsys, state_sizing)
 
         # storing weight breakdown into vehicle
         vehicle.power_balance = results

@@ -8,6 +8,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 import numpy as np
+from scipy.optimize import fsolve
 
 import SUAVE
 from SUAVE.Core import Data, Units
@@ -17,7 +18,7 @@ from SUAVE.Core import Data, Units
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Power_Balance
-def Power_Balance(vehicle, state_sizing):
+def Power_Balance(vehicle, propsys, state_sizing):
     """
     Method runs once per outer iteration loop to size propulsion system
     Assumptions:
@@ -47,6 +48,21 @@ def Power_Balance(vehicle, state_sizing):
     fBLIm = vehicle.fBLIm
     fBLIe = vehicle.fBLIe
 
+    dia_fan_mech = propsys.fan_diameter_mech
+    dia_fan_elec = propsys.fan_diameter_elec
+
+    # Calculate fan areas
+    area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
+    area_fan_elec = np.pi / 4.0 * dia_fan_elec**2.0
+
+    # Calculate jet area
+    area_jet_mech = area_fan_mech * propsys.area_noz_fan * propsys.area_jet_noz
+    area_jet_elec = area_fan_elec * propsys.area_noz_fan * propsys.area_jet_noz
+
+    # Number of fans
+    nr_mech_fans = propsys.number_of_engines_mech
+    nr_elec_fans = propsys.number_of_engines_elec
+
     # Calculate aerodynamics
     aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero_Unified()
     aerodynamics.geometry = vehicle
@@ -59,10 +75,10 @@ def Power_Balance(vehicle, state_sizing):
 
     Vinf = state.conditions.freestream.cruise_speed
 
-    delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
-    delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
-    Vjetm = delta_vjet_mech * Vinf
-    Vjete = delta_vjet_elec * Vinf
+    # delta_vjet_mech = 2.09  # FIXME - From LEARN model for TH, should be calculated
+    # delta_vjet_elec = 2.09  # FIXME - From LEARN model for TH, should be calculated
+    # Vjetm = delta_vjet_mech * Vinf
+    # Vjete = delta_vjet_elec * Vinf
 
     fsurf = 0.9  # FIXME - Move to file of constants
 
@@ -72,12 +88,33 @@ def Power_Balance(vehicle, state_sizing):
 
     # Calculate PKm and PKe
     PKm_tot = (1.0 - fL) * PK_tot
-    PKe_tot = fL * PK_tot    
+    PKe_tot = fL * PK_tot
 
-    # Calculate required mass flows
+    # Solve power balance equations
 
-    mdotm_tot = 2.0 * (PKm_tot - fBLIm * fsurf * Dp * Vinf) / (Vjetm**2.0 - Vinf**2.0)
-    mdote_tot = 2.0 * (PKe_tot - fBLIe * fsurf * Dp * Vinf) / (Vjete**2.0 - Vinf**2.0)
+    def power_balance(params):
+        """Function to calculate resisuals of power balance equations"""
+        mdotm_tot, mdote_tot, Vjetm, Vjete = params
+
+        res1 = PKm_tot - 0.5 * mdotm_tot * (Vjetm**2.0 - Vinf**2.0) - fBLIm * fsurf * Dp * Vinf
+
+        res2 = PKe_tot - 0.5 * mdote_tot * (Vjete**2.0 - Vinf**2.0) - fBLIe * fsurf * Dp * Vinf
+
+        res3 = mdotm_tot - nr_mech_fans * vehicle.cruise_density * area_jet_mech * Vjetm
+
+        res4 = mdote_tot - nr_elec_fans * vehicle.cruise_density * area_jet_elec * Vjete
+
+        residuals = [
+                     abs(res1),
+                     abs(res2),
+                     abs(res3),
+                     abs(res4),
+                    ]
+
+        return np.asarray(residuals).reshape(4,)
+
+    args_init = [100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
+    [mdotm_tot, mdote_tot, _, _] = fsolve(power_balance, args_init)
 
     # Calculate individual propulsor stream mass flows and propulsive powers
     mdotm = np.zeros(nr_fans_mech)
@@ -100,6 +137,6 @@ def Power_Balance(vehicle, state_sizing):
     results.PKm = PKm
     results.PKe = PKe
 
-    results.PK_tot = PKm_tot + PKe_tot
+    # results.PK_tot = PKm_tot + PKe_tot
 
     return results
