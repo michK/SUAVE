@@ -1,6 +1,6 @@
 ## @ingroup Methods-Missions-Segments
 # converge_root.py
-# 
+#
 # Created:  Jul 2014, SUAVE Team
 # Modified: Jan 2016, E. Botero
 
@@ -40,39 +40,41 @@ def converge_root(segment,state):
 
     Properties Used:
     N/A
-    """       
-    
+    """
+
     unknowns = state.unknowns.pack_array()
-    
+
     try:
         root_finder = segment.settings.root_finder
     except AttributeError:
-        root_finder = scipy.optimize.fsolve 
-    
-    unknowns,infodict,ier,msg = root_finder( iterate,
-                                         unknowns,
-                                         args = [segment,state],
-                                         # xtol = state.numerics.tolerance_solution,
-                                         xtol = 0.1,  # FIXME - This might need to be revisited
-                                         full_output=1)
+        root_finder = scipy.optimize.root
 
-    if ier!=1:
+    sol = root_finder(
+                      iterate,
+                      unknowns,
+                      args=[segment,state],
+                      method='hybr',
+                      tol=state.numerics.tolerance_solution,
+                      )
+
+    unknowns, success, msg = sol.x, sol.success, sol.message
+
+    if success!=1:
         print "Segment did not converge. Segment Tag: " + segment.tag
         print "Error Message:\n" + msg
         segment.state.numerics.converged = False
     else:
         segment.state.numerics.converged = True
-         
-                            
+
     return
-    
+
 # ----------------------------------------------------------------------
 #  Helper Functions
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Missions-Segments
 def iterate(unknowns,(segment,state)):
-    
+
     """Runs one iteration of of all analyses for the mission.
 
     Assumptions:
@@ -90,15 +92,15 @@ def iterate(unknowns,(segment,state)):
 
     Properties Used:
     N/A
-    """       
+    """
 
     if isinstance(unknowns,array_type):
         state.unknowns.unpack_array(unknowns)
     else:
         state.unknowns = unknowns
-        
+
     segment.process.iterate(segment,state)
-    
+
     residuals = state.residuals.pack_array()
-        
-    return residuals 
+
+    return residuals
