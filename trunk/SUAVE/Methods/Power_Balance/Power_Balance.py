@@ -46,11 +46,14 @@ def Power_Balance(vehicle, propsys, state_sizing):
     PK_tot = vehicle.PKtot
     
     fL = vehicle.fL
-    fBLIm = vehicle.fBLIm
-    fBLIe = vehicle.fBLIe
+    fBLIm = vehicle.fBLIm    
 
     dia_fan_mech = propsys.fan_diameter_mech
     dia_fan_elec = propsys.fan_diameter_elec
+
+    # Calculate wing BLI from electrical propulsors
+    fBLIe = (nr_fans_elec * dia_fan_elec) / (vehicle.wings['main_wing'].spans.projected -
+        vehicle.fuselages['fuselage'].effective_diameter)
 
     # Calculate fan areas
     area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0

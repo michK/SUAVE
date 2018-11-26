@@ -109,9 +109,12 @@ class Unified_Propsys(Propulsor):
         fL = self.fL
         fS = self.fS
         fBLIm = self.fBLIm
-        fBLIe = self.fBLIe
         dia_fan_mech = self.fan_diameter_mech
         dia_fan_elec = self.fan_diameter_elec
+
+        # Calculate wing BLI from electrical propulsors
+        fBLIe = (nr_fans_elec * dia_fan_elec) / (self.wingspan_projected -
+            self.fuselage_effective_diameter)
 
         # Calculate fan areas
         area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
