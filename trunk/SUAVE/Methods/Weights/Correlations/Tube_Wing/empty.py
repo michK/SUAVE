@@ -130,11 +130,12 @@ def empty(vehicle, results_power_balance, settings=None):
     propulsor_name = vehicle.propulsors.keys()[0] #obtain the key for the propulsor for assignment purposes
     
     propulsors     = vehicle.propulsors[propulsor_name]
-    num_eng        = propulsors.number_of_engines
+
     if propulsor_name=='turbofan' or propulsor_name=='Turbofan':
         # thrust_sls should be sea level static thrust. Using design thrust results in wrong propulsor 
         # weight estimation. Engine sizing should return this value.
         # for now, using thrust_sls = design_thrust / 0.20, just for optimization evaluations
+        num_eng                          = propulsors.number_of_engines
         thrust_sls                       = propulsors.sealevel_static_thrust
         wt_engine_jet                    = Propulsion.engine_jet(thrust_sls)
         wt_propulsion                    = Propulsion.integrated_propulsion(wt_engine_jet,num_eng)
