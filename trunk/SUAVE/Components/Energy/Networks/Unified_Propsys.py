@@ -104,8 +104,8 @@ class Unified_Propsys(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        nr_mech_fans = self.number_of_engines_mech
-        nr_elec_fans = self.number_of_engines_elec
+        nr_fans_mech = self.number_of_engines_mech
+        nr_fans_elec = self.number_of_engines_elec
         fL = self.fL
         fS = self.fS
         fBLIm = self.fBLIm
@@ -167,9 +167,9 @@ class Unified_Propsys(Propulsor):
 
                 res4 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dp[i] * Vinf[i]
 
-                res5 = mdotm - nr_mech_fans * conditions.freestream.density[i] * area_jet_mech * Vjetm
+                res5 = mdotm - nr_fans_mech * conditions.freestream.density[i] * area_jet_mech * Vjetm
 
-                res6 = mdote - nr_elec_fans * conditions.freestream.density[i] * area_jet_elec * Vjete
+                res6 = mdote - nr_fans_elec * conditions.freestream.density[i] * area_jet_elec * Vjete
 
                 residuals = [
                              abs(res1),
