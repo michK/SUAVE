@@ -214,7 +214,7 @@ class Solar(Propulsor):
         return
 
     def residuals(self,segment,state):
-        """ This packs the residuals to be send to the mission solver.
+        """ This packs the residuals to be sent to the mission solver.
 
             Assumptions:
             None
