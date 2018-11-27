@@ -55,10 +55,6 @@ class Unified_Propsys(Propulsor):
             N/A
         """
 
-        self.propulsor        = None
-        self.battery          = None
-        self.motor_efficiency = .95
-        self.throttle         =  1.0
         self.tag              = 'Network'
 
         # Propulsor areas
