@@ -29,10 +29,10 @@ class Unified_Propsys(Propulsor):
         None
 
         Source:
-        Hall, D. K., Huang, A. C., Uranga, A., Greitzer, E. M., Drela, M., and Sato, S.,
-        "Boundary Layer Ingestion Propulsion Benefit for Transport Aircraft",
-        Journal of Propulsion and Power, Vol. 33, No. 5, 2017, pp. 1118-1129,
-        doi:10.2514/1.B36321.
+        Kruger, M., Byahut, S., Uranga, A., Gonzalez, J., Hall, D.K. and Dowdle, A.,
+        2018,
+        Electrified Aircraft Trade-Space Exploration.
+        Aviation Technology, Integration, and Operations Conference (p. 4227).
     """
 
 
