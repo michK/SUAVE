@@ -19,3 +19,6 @@ from Turbine import Turbine
 from Supersonic_Nozzle import Supersonic_Nozzle
 from Shaft_Power_Off_Take import Shaft_Power_Off_Take
 from Gearbox import Gearbox
+from Motor_Simple import Motor_Simple
+from Electrical_Machine_Simple import Electrical_Machine_Simple
+from Battery_Simple import Battery_Simple
