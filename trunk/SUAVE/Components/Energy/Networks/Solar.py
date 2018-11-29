@@ -25,7 +25,7 @@ from SUAVE.Core import Data
 class Solar(Propulsor):
     """ A solar powered system with batteries and maximum power point tracking.
 
-        This network adds an extra unknowns to the mission, the torque matching between motor and propeller.
+        This network adds an extra unknown to the mission, the torque matching between motor and propeller.
 
         Assumptions:
         None
