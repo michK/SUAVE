@@ -45,7 +45,9 @@ class Battery_Simple(Energy_Component):
 
         Properties Used:
         None
-        """           
+        """
+
+        self.tag = 'Battery_Simple'
         self.efficiency = 0.90
 
     def power(self):
@@ -71,7 +73,7 @@ class Battery_Simple(Energy_Component):
         efficiency = self.efficiency
         power = self.inputs.power
     
-        power_out = power / efficiency
+        power_out = efficiency * power
 
         self.outputs.power = power_out
 

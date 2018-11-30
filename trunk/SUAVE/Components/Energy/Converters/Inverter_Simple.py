@@ -46,6 +46,8 @@ class Inverter_Simple(Energy_Component):
         Properties Used:
         None
         """           
+        
+        self.tag = 'Inverter_Simple'
         self.efficiency = 0.98
 
     def power(self):
@@ -71,7 +73,7 @@ class Inverter_Simple(Energy_Component):
         efficiency = self.efficiency
         power = self.inputs.power
     
-        power_out = power / efficiency
+        power_out = efficiency * power
 
         self.outputs.power = power_out
 
