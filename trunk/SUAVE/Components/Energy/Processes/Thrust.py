@@ -144,7 +144,7 @@ class Thrust(Energy_Component):
         M0                   = conditions.freestream.mach_number
         p0                   = conditions.freestream.pressure 
         g                    = conditions.freestream.gravity
-        throttle             = conditions.propulsion.throttle       
+        throttle             = conditions.propulsion.throttle
 
         #unpacking from inputs
         f                           = self.inputs.fuel_to_air_ratio
