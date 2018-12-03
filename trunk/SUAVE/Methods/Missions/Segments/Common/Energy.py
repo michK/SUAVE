@@ -111,5 +111,5 @@ def update_power(segment, state):
 
     # pack conditions
     conditions = state.conditions
-    conditions.frames.body.thrust_force_vector = results.power_required / conditions.freestream.velocity  # Equivalent thrust
+    conditions.frames.body.thrust_force_vector = results.thrust_force_vector  # Equivalent thrust
     conditions.weights.vehicle_mass_rate       = results.vehicle_mass_rate
