@@ -3,6 +3,7 @@
 #
 # Created:  Jun 2014, E. Botero
 # Modified: Jan 2016, T. MacDonald
+#           Nov 2018, M. Kruger
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -18,17 +19,17 @@ from warnings import warn
 
 # ----------------------------------------------------------------------
 #  Propeller Class
-# ----------------------------------------------------------------------    
+# ----------------------------------------------------------------------
 ## @ingroup Components-Energy-Converters
 class Propeller_Lo_Fid(Energy_Component):
     """This is a low-fidelity propeller component.
-    
+
     Assumptions:
     None
 
     Source:
     None
-    """    
+    """
     def __defaults__(self):
         """This sets the default values for the component to function.
 
@@ -46,12 +47,12 @@ class Propeller_Lo_Fid(Energy_Component):
 
         Properties Used:
         None
-        """             
+        """
         self.tip_radius            = 0.0
         self.propulsive_efficiency = 0.0
 
-        
-    def spin(self,conditions):
+
+    def spin(self, conditions, power=0.0):
         """Analyzes a propeller given geometry and operating conditions.
 
         Assumptions:
@@ -80,28 +81,35 @@ class Propeller_Lo_Fid(Energy_Component):
         Properties Used:
         self.tip_radius              [m]
         self.propulsive_efficiency   [-]
-        """    
-           
-        # Unpack    
+        """
+
+        # Unpack
         R     = self.tip_radius
         etap  = self.propulsive_efficiency
-        omega = self.inputs.omega
-        Qm    = self.inputs.torque
         rho   = conditions.freestream.density[:,0,None]
         mu    = conditions.freestream.dynamic_viscosity[:,0,None]
         V     = conditions.freestream.velocity[:,0,None]
         a     = conditions.freestream.speed_of_sound[:,0,None]
         T     = conditions.freestream.temperature[:,0,None]
-        
+
+        try:
+            omega = self.inputs.omega
+            Qm    = self.inputs.torque
+            power  = Qm*omega
+            n      = omega/(2.*np.pi)
+        except AttributeError:
+            power = self.power
+
         # Do very little calculations
-        power  = Qm*omega
-        n      = omega/(2.*np.pi) 
         D      = 2*R
-        
         thrust = etap*power/V
-        
         Cp     = power/(rho*(n*n*n)*(D*D*D*D*D))
         conditions.propulsion.etap = etap
-        
+
+        #pack the computed quantities into outputs
+        self.outputs.thrust  = thrust
+        self.outputs.torque  = Qm
+        self.outputs.power  = power * etap
+        self.outputs.power_coefficient  = Cp
+
         return thrust, Qm, power, Cp
-    
