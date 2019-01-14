@@ -2,4 +2,4 @@
 #Method to calculate aircraft power requirements based on power balance method
 # @ingroup Methods
 
-from Power_Balance import Power_Balance
+from .Power_Balance import Power_Balance
