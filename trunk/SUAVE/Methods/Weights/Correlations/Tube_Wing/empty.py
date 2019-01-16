@@ -5,17 +5,16 @@
 # Modified: Feb 2016, M. Vegh
 #           Jul 2017, M. Clarke
 #           Jun 2018, T. MacDonald
-#           Oct 2018, M. Kruger
 
 # ----------------------------------------------------------------------
 #  Imports
 # ----------------------------------------------------------------------
 import SUAVE
 from SUAVE.Core      import Units, Data
-from tube            import tube
-from systems         import systems
-from tail_horizontal import tail_horizontal
-from tail_vertical   import tail_vertical
+from .tube            import tube
+from .systems         import systems
+from .tail_horizontal import tail_horizontal
+from .tail_vertical   import tail_vertical
 from SUAVE.Methods.Weights.Correlations.Common import wing_main as wing_main
 from SUAVE.Methods.Weights.Correlations.Common import landing_gear as landing_gear
 from SUAVE.Methods.Weights.Correlations.Common import payload as payload
@@ -27,7 +26,7 @@ import warnings
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Weights-Correlations-Tube_Wing
-def empty(vehicle, results_power_balance, settings=None):
+def empty(vehicle,settings=None):
     """ This is for a standard Tube and Wing aircraft configuration.        
 
     Assumptions:
@@ -37,10 +36,6 @@ def empty(vehicle, results_power_balance, settings=None):
         N/A
         
     Inputs:
-     power balance
-          mdotm - array of mechanically powered fans mass flows                  [kg/s]   
-          mdote - array of electrically powered fans mass flows                  [kg/s]
-          PKtot - total installed flow power                                     [W]
       engine - a data dictionary with the fields:                    
           thrust_sls - sea level static thrust of a single engine                [Newtons]
 
@@ -116,7 +111,7 @@ def empty(vehicle, results_power_balance, settings=None):
     wt_cargo   = vehicle.mass_properties.cargo
     num_seats  = vehicle.fuselages['fuselage'].number_coach_seats
     ctrl_type  = vehicle.systems.control
-    ac_type    = vehicle.systems.accessories
+    ac_type    = vehicle.systems.accessories    
     
     if settings == None:
         wt_factors = Data()
@@ -127,7 +122,7 @@ def empty(vehicle, results_power_balance, settings=None):
         wt_factors = settings.weight_reduction_factors
     
     
-    propulsor_name = vehicle.propulsors.keys()[0] #obtain the key for the propulsor for assignment purposes
+    propulsor_name = list(vehicle.propulsors.keys())[0] #obtain the key for the propulsor for assignment purposes
     
     propulsors     = vehicle.propulsors[propulsor_name]
     num_eng        = propulsors.number_of_engines
@@ -159,7 +154,7 @@ def empty(vehicle, results_power_balance, settings=None):
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)    
     
     S_gross_w  = vehicle.reference_area
-    if not vehicle.wings.has_key('main_wing'):
+    if 'main_wing' not in vehicle.wings:
         wt_wing = 0.0
         wing_c_r = 0.0
         warnings.warn("There is no Wing Weight being added to the Configuration", stacklevel=1)
@@ -181,7 +176,7 @@ def empty(vehicle, results_power_balance, settings=None):
     h_fus      = vehicle.fuselages['fuselage'].heights.maximum
     l_fus      = vehicle.fuselages['fuselage'].lengths.total
 
-    if not vehicle.wings.has_key('horizontal_stabilizer'):
+    if 'horizontal_stabilizer' not in vehicle.wings:
         wt_tail_horizontal = 0.0
         S_h = 0.0
         warnings.warn("There is no Horizontal Tail Weight being added to the Configuration", stacklevel=1)
@@ -198,7 +193,7 @@ def empty(vehicle, results_power_balance, settings=None):
         wt_tail_horizontal = wt_tail_horizontal*(1.-wt_factors.empennage)
         vehicle.wings['horizontal_stabilizer'].mass_properties.mass = wt_tail_horizontal        
 
-    if not vehicle.wings.has_key('vertical_stabilizer'):   
+    if 'vertical_stabilizer' not in vehicle.wings:   
         output_3                  = Data()
         output_3.wt_tail_vertical = 0.0
         output_3.wt_rudder        = 0.0
@@ -225,7 +220,7 @@ def empty(vehicle, results_power_balance, settings=None):
 
     # Calculate the equipment empty weight of the aircraft
     wt_empty           = (wt_wing + wt_fuselage + wt_landing_gear + wt_propulsion + output_2.wt_systems + \
-                          wt_tail_horizontal + wt_vtail_tot)
+                          wt_tail_horizontal + wt_vtail_tot) 
     vehicle.fuselages['fuselage'].mass_properties.mass = wt_fuselage
 
 
