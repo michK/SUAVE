@@ -8,7 +8,6 @@
 #  Imports
 # ----------------------------------------------------------------------
 
-from SUAVE.Core import Data
 from SUAVE.Components import Physical_Component
 
 # ----------------------------------------------------------------------
@@ -48,17 +47,9 @@ class Landing_Gear(Physical_Component):
         """
        
         self.tag = 'landing_gear'
-        self.main = Data()
-        self.nose = Data()
-        self.main.strut_length = 0.0
-        self.nose.strut_length = 0.0
 
-        self.main.mass_properties = Data()
-        self.nose.mass_properties = Data()
-        self.main.mass_properties.mass = 0.0
-        self.nose.mass_properties.mass = 0.0
-
-
+     
+     
 # ----------------------------------------------------------------------
 #   Unit Tests
 # ----------------------------------------------------------------------

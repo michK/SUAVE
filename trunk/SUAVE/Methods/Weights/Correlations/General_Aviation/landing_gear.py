@@ -41,7 +41,7 @@ def landing_gear(landing_weight, Nult, strut_length_main, strut_length_nose):
     nose_weight = .125*((Nult*W_l)**.566)*(l_n/12.)**.845
 
     #pack outputs
-    output = Data
+    output = Data()
     output.main = main_weight*Units.lbs
     output.nose = nose_weight*Units.lbs
 

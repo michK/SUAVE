@@ -300,9 +300,6 @@ def empty(vehicle):
         strut_length_nose      = landing_gear_component.nose.strut_length
         wt_landing_gear        = landing_gear(landing_weight, Nult, strut_length_main, strut_length_nose)
 
-        landing_gear_component.main.mass_properties.mass = wt_landing_gear.main
-        landing_gear_component.nose.mass_properties.mass = wt_landing_gear.nose
-
     if 'avionics' not in vehicle:
         warnings.warn('There is no avionics weight being added to the vehicle; many weight correlations are dependant on this', stacklevel=1)
         avionics          = SUAVE.Components.Energy.Peripherals.Avionics()
@@ -321,7 +318,7 @@ def empty(vehicle):
 
     # Calculate the equipment empty weight of the aircraft
 
-    wt_empty           = (wt_wing + wt_fuselage + wt_landing_gear.main+wt_landing_gear.nose + wt_propulsion + output_2.wt_systems + \
+    wt_empty           = (wt_wing + wt_fuselage + wt_landing_gear.main + wt_landing_gear.nose + wt_propulsion + output_2.wt_systems + \
                           wt_tail_horizontal + output_3.wt_tail_vertical)
     vehicle.fuselages['fuselage'].mass_properties.mass = wt_fuselage
 
