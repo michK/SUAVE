@@ -18,7 +18,7 @@ from SUAVE.Core.Arrays import array_type
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Missions-Segments
-def converge_root(segment,state):
+def converge_root(segment):
     """Interfaces the mission to a numerical solver. The solver may be changed by using root_finder.
 
     Assumptions:
@@ -28,9 +28,7 @@ def converge_root(segment,state):
     N/A
 
     Inputs:
-    state.unknowns                     [Data]
     segment                            [Data]
-    state                              [Data]
     segment.settings.root_finder       [Data]
     state.numerics.tolerance_solution  [Unitless]
 
@@ -40,28 +38,24 @@ def converge_root(segment,state):
 
     Properties Used:
     N/A
-    """
-
-    unknowns = state.unknowns.pack_array()
-
+    """       
+    
+    unknowns = segment.state.unknowns.pack_array()
+    
     try:
         root_finder = segment.settings.root_finder
     except AttributeError:
-        root_finder = scipy.optimize.root
+        root_finder = scipy.optimize.fsolve 
+    
+    unknowns,infodict,ier,msg = root_finder( iterate,
+                                         unknowns,
+                                         args = segment,
+                                         xtol = segment.state.numerics.tolerance_solution,
+                                         full_output=1)
 
-    sol = root_finder(
-                      iterate,
-                      unknowns,
-                      args=[segment,state],
-                      method='hybr',
-                      tol=state.numerics.tolerance_solution,
-                      )
-
-    unknowns, success, msg = sol.x, sol.success, sol.message
-
-    if success!=1:
-        print "Segment did not converge. Segment Tag: " + segment.tag
-        print "Error Message:\n" + msg
+    if ier!=1:
+        print("Segment did not converge. Segment Tag: " + segment.tag)
+        print("Error Message:\n" + msg)
         segment.state.numerics.converged = False
     else:
         segment.state.numerics.converged = True
@@ -73,8 +67,8 @@ def converge_root(segment,state):
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Missions-Segments
-def iterate(unknowns,(segment,state)):
-
+def iterate(unknowns, segment):
+    
     """Runs one iteration of of all analyses for the mission.
 
     Assumptions:
@@ -92,15 +86,14 @@ def iterate(unknowns,(segment,state)):
 
     Properties Used:
     N/A
-    """
-
+    """       
     if isinstance(unknowns,array_type):
-        state.unknowns.unpack_array(unknowns)
+        segment.state.unknowns.unpack_array(unknowns)
     else:
-        state.unknowns = unknowns
-
-    segment.process.iterate(segment,state)
-
-    residuals = state.residuals.pack_array()
-
-    return residuals
+        segment.state.unknowns = unknowns
+        
+    segment.process.iterate(segment)
+    
+    residuals = segment.state.residuals.pack_array()
+        
+    return residuals 

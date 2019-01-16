@@ -36,10 +36,9 @@ def initialize_battery(segment,state):
 
     """
 
-
-    if state.initials:
-        energy_initial  = state.initials.conditions.propulsion.battery_energy[-1,0]
-    elif segment.has_key('battery_energy'):
+    if segment.state.initials:
+        energy_initial  = segment.state.initials.conditions.propulsion.battery_energy[-1,0]
+    elif 'battery_energy' in segment:
         energy_initial  = segment.battery_energy
     else:
         energy_initial = 0.0
@@ -52,8 +51,8 @@ def initialize_battery(segment,state):
 #  Update Thrust
 # ----------------------------------------------------------------------
 
-## @ingroup Methods-Missions-Segments-Common
-def update_thrust(segment,state):
+# @ingroup Methods-Missions-Segments-Common
+def update_thrust(segment):
     """ Evaluates the energy network to find the thrust force and mass rate
 
         Inputs -
@@ -75,16 +74,16 @@ def update_thrust(segment,state):
     energy_model = segment.analyses.energy
 
     # evaluate
-    results   = energy_model.evaluate_power(state)
+    results   = energy_model.evaluate_thrust(segment.state)
 
     # pack conditions
-    conditions = state.conditions
+    conditions = segment.state.conditions
     conditions.frames.body.thrust_force_vector = results.thrust_force_vector
     conditions.weights.vehicle_mass_rate       = results.vehicle_mass_rate
 
 
 ## @ingroup Methods-Missions-Segments-Common
-def update_power(segment, state):
+def update_power(segment):
     """ Evaluates the energy network to find the power and mass rate
 
         Inputs -
@@ -107,9 +106,11 @@ def update_power(segment, state):
     energy_model = segment.analyses.energy
 
     # evaluate
-    results   = energy_model.evaluate_power(state)
+    results   = energy_model.evaluate_power(segment.state)
+
+    results.thrust_force_vector = results.PK_tot / segment.conditions.freestream.velocity
 
     # pack conditions
-    conditions = state.conditions
-    conditions.frames.body.thrust_force_vector = results.power_required / conditions.freestream.velocity  # Equivalent thrust
+    conditions = segment.state.conditions
+    conditions.frames.body.thrust_force_vector = results.thrust_force_vector  # Equivalent thrust
     conditions.weights.vehicle_mass_rate       = results.vehicle_mass_rate

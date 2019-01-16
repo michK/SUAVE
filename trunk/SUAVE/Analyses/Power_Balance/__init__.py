@@ -3,4 +3,4 @@
 # @ingroup Analyses
 
 
-from Power_Balance import Power_Balance
+from .Power_Balance import Power_Balance

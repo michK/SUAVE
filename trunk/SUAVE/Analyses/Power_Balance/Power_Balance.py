@@ -71,7 +71,7 @@ class Power_Balance(Analysis):
         # evaluate
         results = power(vehicle, propsys, state_sizing)
 
-        # storing weight breakdown into vehicle
+        # storing power balance results into vehicle
         vehicle.power_balance = results
 
         # done!

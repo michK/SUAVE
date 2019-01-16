@@ -10,6 +10,7 @@
 
 # suave imports
 import SUAVE
+from SUAVE.Core import Data
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
 
 # ----------------------------------------------------------------------
@@ -43,6 +44,9 @@ class Avionics(Energy_Component):
         Properties Used:
         N/A
         """                 
+        self.tag = 'avionics'
+        self.mass_properties = Data()
+        self.mass_properties.uninstalled = 0.0
         self.power_draw = 0.0
         
     def power(self):

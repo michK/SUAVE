@@ -4,7 +4,7 @@
 # Created:  Jul 2014, A. Variyar
 # Modified: Feb 2016, T. MacDonald, A. Variyar, M. Vegh
 #           Oct 2017, E. Botero
-#           Apr 2018, W. Maier
+#           Sep 2018, W. Maier
 
 
 # ----------------------------------------------------------------------
@@ -169,12 +169,11 @@ class Thrust(Energy_Component):
 
 
 
-        ##--------Cantwell method---------------------------------
-
+        #--------Cantwell method---------------------------------
 
         #computing the non dimensional thrust
-        core_thrust_nondimensional  = flow_through_core*(gamma*M0*M0*(core_nozzle.velocity/u0-1) + core_area_ratio*(core_nozzle.static_pressure/p0-1))
-        fan_thrust_nondimensional   = flow_through_fan*(gamma*M0*M0*(fan_nozzle.velocity/u0-1) + fan_area_ratio*(fan_nozzle.static_pressure/p0-1))
+        core_thrust_nondimensional  = flow_through_core*(gamma*M0*M0*(core_nozzle.velocity/u0-1.) + core_area_ratio*(core_nozzle.static_pressure/p0-1.))
+        fan_thrust_nondimensional   = flow_through_fan*(gamma*M0*M0*(fan_nozzle.velocity/u0-1.) + fan_area_ratio*(fan_nozzle.static_pressure/p0-1.))
 
         Thrust_nd                   = core_thrust_nondimensional + fan_thrust_nondimensional
 
@@ -182,7 +181,7 @@ class Thrust(Energy_Component):
         Fsp              = 1./(gamma*M0)*Thrust_nd
 
         #Computing the specific impulse
-        Isp              = Fsp*a0*(1+bypass_ratio)/(f*g)
+        Isp              = Fsp*a0*(1.+bypass_ratio)/(f*g)
 
         #Computing the TSFC
         TSFC             = f*g/(Fsp*a0*(1+bypass_ratio))*(1.-SFC_adjustment) * Units.hour # 1/s is converted to 1/hr here
@@ -191,7 +190,7 @@ class Thrust(Energy_Component):
         mdot_core        = mdhc*np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
 
         #computing the dimensional thrust
-        FD2              = Fsp*a0*(1+bypass_ratio)*mdot_core*no_eng*throttle
+        FD2              = Fsp*a0*(1.+bypass_ratio)*mdot_core*no_eng*throttle
 
         #fuel flow rate
         a = np.array([0.])       
