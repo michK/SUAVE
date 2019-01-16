@@ -11,6 +11,7 @@ from .Settings  import Settings
 from .Vehicle   import Vehicle
 
 from . import Aerodynamics
+from . import Power_Balance
 from . import Stability
 from . import Energy
 from . import Weights

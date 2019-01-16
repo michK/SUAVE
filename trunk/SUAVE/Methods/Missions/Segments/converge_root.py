@@ -1,6 +1,6 @@
 ## @ingroup Methods-Missions-Segments
 # converge_root.py
-# 
+#
 # Created:  Jul 2014, SUAVE Team
 # Modified: Jan 2016, E. Botero
 
@@ -59,10 +59,9 @@ def converge_root(segment):
         segment.state.numerics.converged = False
     else:
         segment.state.numerics.converged = True
-         
-                            
+
     return
-    
+
 # ----------------------------------------------------------------------
 #  Helper Functions
 # ----------------------------------------------------------------------

@@ -12,6 +12,7 @@ from scipy.optimize import fsolve
 
 import SUAVE
 from SUAVE.Core import Data, Units
+from SUAVE.Methods.Power_Balance.calculate_powers import remove_negatives
 
 # ----------------------------------------------------------------------
 #  Power Balance
@@ -45,8 +46,26 @@ def Power_Balance(vehicle, propsys, state_sizing):
     PK_tot = vehicle.PKtot
     
     fL = vehicle.fL
-    fBLIm = vehicle.fBLIm
-    fBLIe = vehicle.fBLIe
+    fBLIm = vehicle.fBLIm    
+
+    dia_fan_mech = propsys.fan_diameter_mech
+    dia_fan_elec = propsys.fan_diameter_elec
+
+    # Calculate wing BLI from electrical propulsors
+    fBLIe = (nr_fans_elec * dia_fan_elec) / (vehicle.wings['main_wing'].spans.projected -
+        vehicle.fuselages['fuselage'].effective_diameter)
+
+    # Calculate fan areas
+    area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
+    area_fan_elec = np.pi / 4.0 * dia_fan_elec**2.0
+
+    # Calculate jet area
+    area_jet_mech = area_fan_mech * propsys.area_noz_fan * propsys.area_jet_noz
+    area_jet_elec = area_fan_elec * propsys.area_noz_fan * propsys.area_jet_noz
+
+    # Number of fans
+    nr_mech_fans = propsys.number_of_engines_mech
+    nr_elec_fans = propsys.number_of_engines_elec
 
     dia_fan_mech = propsys.fan_diameter_mech
     dia_fan_elec = propsys.fan_diameter_elec
@@ -114,7 +133,7 @@ def Power_Balance(vehicle, propsys, state_sizing):
         return np.asarray(residuals).reshape(4,)
 
     args_init = [100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
-    [mdotm_tot, mdote_tot, _, _] = fsolve(power_balance, args_init)
+    [mdotm_tot, mdote_tot, _, _] = remove_negatives(fsolve(power_balance, args_init))
 
     # Calculate individual propulsor stream mass flows and propulsive powers
     mdotm = np.zeros(nr_fans_mech)

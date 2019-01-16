@@ -11,7 +11,7 @@
 # suave imports
 from SUAVE.Core import Units, Data
 from SUAVE.Components.Propulsors.Propulsor import Propulsor
-from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
+from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers, remove_negatives
 
 # package imports
 import numpy as np
@@ -55,10 +55,6 @@ class Unified_Propsys(Propulsor):
             N/A
         """
 
-        self.propulsor        = None
-        self.battery          = None
-        self.motor_efficiency = .95
-        self.throttle         =  1.0
         self.tag              = 'Network'
 
         # Propulsor areas
@@ -104,14 +100,17 @@ class Unified_Propsys(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        nr_mech_fans = self.number_of_engines_mech
-        nr_elec_fans = self.number_of_engines_elec
+        nr_fans_mech = self.number_of_engines_mech
+        nr_fans_elec = self.number_of_engines_elec
         fL = self.fL
         fS = self.fS
         fBLIm = self.fBLIm
-        fBLIe = self.fBLIe
         dia_fan_mech = self.fan_diameter_mech
         dia_fan_elec = self.fan_diameter_elec
+
+        # Calculate wing BLI from electrical propulsors
+        fBLIe = (nr_fans_elec * dia_fan_elec) / (self.wingspan_projected -
+            self.fuselage_effective_diameter)
 
         # Calculate fan areas
         area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
@@ -167,9 +166,9 @@ class Unified_Propsys(Propulsor):
 
                 res4 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dp[i] * Vinf[i]
 
-                res5 = mdotm - nr_mech_fans * conditions.freestream.density[i] * area_jet_mech * Vjetm
+                res5 = mdotm - nr_fans_mech * conditions.freestream.density[i] * area_jet_mech * Vjetm
 
-                res6 = mdote - nr_elec_fans * conditions.freestream.density[i] * area_jet_elec * Vjete
+                res6 = mdote - nr_fans_elec * conditions.freestream.density[i] * area_jet_elec * Vjete
 
                 residuals = [
                              abs(res1),
@@ -183,7 +182,7 @@ class Unified_Propsys(Propulsor):
                 return residuals
 
             args_init = [300000.0, 300000.0, 100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
-            [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = fsolve(power_balance, args_init)
+            [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = remove_negatives(fsolve(power_balance, args_init))
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe

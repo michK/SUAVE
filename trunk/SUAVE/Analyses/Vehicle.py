@@ -105,15 +105,16 @@ class Vehicle(Analysis.Container):
         Analysis.Container.__init__(self,*args,**kwarg)
 
         self._analyses_map = {
-            SUAVE.Analyses.Sizing.Sizing             : 'sizing'       ,
-            SUAVE.Analyses.Weights.Weights           : 'weights'      ,
-            SUAVE.Analyses.Aerodynamics.Aerodynamics : 'aerodynamics' ,
-            SUAVE.Analyses.Stability.Stability       : 'stability'    ,
-            SUAVE.Analyses.Energy.Energy             : 'energy'       ,
-            SUAVE.Analyses.Atmospheric.Atmospheric   : 'atmosphere'   ,
-            SUAVE.Analyses.Planets.Planet            : 'planet'       ,
-            SUAVE.Analyses.Noise.Noise               : 'noise'        ,
-            SUAVE.Analyses.Costs.Costs               : 'costs'        ,
+            SUAVE.Analyses.Sizing.Sizing               : 'sizing'        ,
+            SUAVE.Analyses.Weights.Weights             : 'weights'       ,
+            SUAVE.Analyses.Aerodynamics.Aerodynamics   : 'aerodynamics'  ,
+            SUAVE.Analyses.Stability.Stability         : 'stability'     ,
+            SUAVE.Analyses.Energy.Energy               : 'energy'        ,
+            SUAVE.Analyses.Atmospheric.Atmospheric     : 'atmosphere'    ,
+            SUAVE.Analyses.Planets.Planet              : 'planet'        ,
+            SUAVE.Analyses.Noise.Noise                 : 'noise'         ,
+            SUAVE.Analyses.Costs.Costs                 : 'costs'         ,
+            SUAVE.Analyses.Power_Balance.Power_Balance : 'power_balance' ,
         }
 
     def get_root(self,analysis):
