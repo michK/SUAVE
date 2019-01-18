@@ -108,8 +108,6 @@ def update_power(segment):
     # evaluate
     results   = energy_model.evaluate_power(segment.state)
 
-    results.thrust_force_vector = results.PK_tot / segment.conditions.freestream.velocity
-
     # pack conditions
     conditions = segment.state.conditions
     conditions.frames.body.thrust_force_vector = results.thrust_force_vector  # Equivalent thrust
