@@ -141,6 +141,7 @@ class Unified(Propulsor):
         results.vehicle_mass_rate   = mdot
         results.max_power   = results.power_required
         results.Pbat = battery.inputs.power * np.ones_like(F)
+        results.throttle = results.power_required / results.max_power
 
         self.max_power = results.max_power
         self.max_bat_power = results.Pbat
@@ -148,7 +149,8 @@ class Unified(Propulsor):
         # store data
         results_conditions = Data
         conditions.propulsion = results_conditions(
-                                                   Pbat = results.Pbat
+                                                   Pbat = results.Pbat,
+                                                   throttle = results.throttle
                                                    )
 
         return results
