@@ -65,7 +65,7 @@ class Weights_Tube_Wing_GA(Weights):
         self.settings.weight_reduction_factors.fuselage  = 0.
         self.settings.weight_reduction_factors.empennage = 0. # applied to horizontal and vertical stabilizers
         
-    def evaluate(self,conditions=None):
+    def evaluate(self, results_power_balance, conditions=None):
         """Evaluate the weight analysis.
     
         Assumptions:
@@ -90,9 +90,9 @@ class Weights_Tube_Wing_GA(Weights):
 
         
         # evaluate
-        results = empty(vehicle)
+        results = empty(vehicle, results_power_balance)
         
-        # storing weigth breakdown into vehicle
+        # storing weight breakdown into vehicle
         vehicle.weight_breakdown = results 
 
         # updating empty weight

@@ -23,7 +23,7 @@ import warnings
 #  Empty
 # ----------------------------------------------------------------------
 ## @ingroup Methods-Weights-Correlations-General_Aviation
-def empty(vehicle):
+def empty(vehicle, results_power_balance):
     """ output = SUAVE.Methods.Weights.Correlations.Tube_Wing.empty(engine,wing,aircraft,fuselage,horizontal,vertical)
         Computes the empty weight breakdown of a General Aviation type aircraft
 
@@ -182,19 +182,33 @@ def empty(vehicle):
     mach_number = vehicle.design_mach_number
 
     propulsor_name = list(vehicle.propulsors.keys())[0] #obtain the key for the propulsor for assignment purposes
-    propulsors     = vehicle.propulsors[propulsor_name]
-    num_eng        = propulsors.number_of_engines
+    propulsors     = vehicle.propulsors[propulsor_name]   
 
     if propulsor_name == 'turbofan':
+        num_eng                          = propulsors.number_of_engines
         thrust_sls                       = propulsors.sealevel_static_thrust
         wt_engine_jet                    = Propulsion.engine_jet(thrust_sls)
         wt_propulsion                    = Propulsion.integrated_propulsion(wt_engine_jet,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion
 
     elif propulsor_name == 'internal_combustion':
+        num_eng                          = propulsors.number_of_engines
         rated_power                      = propulsors.rated_power/num_eng
         wt_engine_piston                 = Propulsion.engine_piston(rated_power)
         wt_propulsion                    = Propulsion.integrated_propulsion_general_aviation(wt_engine_piston,num_eng)
+        propulsors.mass_properties.mass  = wt_propulsion
+
+    elif propulsor_name=='unified_propsys':
+        # Unpack inputs
+        num_eng = vehicle.number_of_engines
+        mdotm = results_power_balance.mdotm
+        mdote = results_power_balance.mdote
+        PKtot = results_power_balance.PKtot
+        fL    = vehicle.fL
+        fS    = vehicle.fS
+        Ebat  = vehicle.Ebat
+        Pbat_max = vehicle.power_bat_max  # NOTE - This and other updates might need to happen in Sizing
+        wt_propulsion                    = Propulsion.unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS)
         propulsors.mass_properties.mass  = wt_propulsion
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
