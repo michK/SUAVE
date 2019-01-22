@@ -90,7 +90,7 @@ def parasite_total(state,settings,geometry):
                 conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec            
             total_parasite_drag += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient
     else:
-        raise Exception('Propulsion network should have arch_tag set to either "conventional" or "complex"')
+        raise Exception('Propulsion network should have arch_tag set to either "conventional" or "unified"')
 
     # from pylons
     try:

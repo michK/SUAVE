@@ -10,6 +10,7 @@
 
 # suave imports
 import SUAVE
+from SUAVE.Core import Units
 
 # package imports
 import numpy as np
@@ -49,6 +50,8 @@ class Battery_Simple(Energy_Component):
 
         self.tag = 'Battery_Simple'
         self.efficiency = 0.90
+        self.specific_energy = 250 * Units['Wh/kg']  # Conservative 2035 values
+        self.specific_power = 745 * Units['W/kg']  # Conservative 2035 values
 
     def power(self):
         """Calculates the battery's output power for a given input power

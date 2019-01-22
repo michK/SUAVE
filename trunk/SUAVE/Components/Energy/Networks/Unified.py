@@ -63,10 +63,10 @@ class Unified(Propulsor):
         self.battery           = None
         self.link_converter    = None
         self.link_elec_machine = None
-        self.nr_engines        = None
-        self.gas_turbine       = None
-        self.avionics          = None
-        self.tag               = 'network'
+        # self.nr_engines        = None
+        # self.gas_turbine       = None
+        # self.avionics          = None
+        self.tag               = 'unified'
 
 
     # manage process with a driver function
@@ -101,11 +101,11 @@ class Unified(Propulsor):
 
         # Create network by linking together different components
 
-        # # Set battery energy
-        # battery.current_energy = conditions.propulsion.battery_energy
+        # Set battery energy
+        battery.current_energy = conditions.propulsion.battery_energy
 
         # Step 1 - battery power
-        battery.inputs.power = 300.0 * Units['kW']
+        battery.inputs.power = 500.0 * Units['kW']
 
         # Step 2 - run battery
         battery.power()
@@ -129,14 +129,14 @@ class Unified(Propulsor):
         propeller.power()
 
         # Pack the conditions for outputs
-        pk = propeller.outputs.power
+        PK = propeller.outputs.power
 
         # Create the outputs
-        F    = pk / conditions.freestream.velocity
+        F    = PK / conditions.freestream.velocity
         mdot = np.zeros_like(F)
 
         results = Data()
-        results.power_required = pk * np.ones_like(F)
+        results.power_required = PK * np.ones_like(F)
         results.thrust_force_vector = F
         results.vehicle_mass_rate   = mdot
         results.max_power   = results.power_required

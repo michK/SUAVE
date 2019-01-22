@@ -23,7 +23,7 @@ import warnings
 #  Empty
 # ----------------------------------------------------------------------
 ## @ingroup Methods-Weights-Correlations-General_Aviation
-def empty(vehicle, results_power_balance):
+def empty(vehicle, results_power_balance=None):
     """ output = SUAVE.Methods.Weights.Correlations.Tube_Wing.empty(engine,wing,aircraft,fuselage,horizontal,vertical)
         Computes the empty weight breakdown of a General Aviation type aircraft
 
@@ -213,6 +213,7 @@ def empty(vehicle, results_power_balance):
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
         wt_propulsion                    = propulsors.mass_properties.mass
+        num_eng = propulsors.num_eng
         if wt_propulsion==0:
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)
     #find fuel volume

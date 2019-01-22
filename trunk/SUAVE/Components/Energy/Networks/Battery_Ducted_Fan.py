@@ -58,7 +58,8 @@ class Battery_Ducted_Fan(Propulsor):
         self.tag              = 'Network'
     
     # manage process with a driver function
-    def evaluate_thrust(self,state):
+    # def evaluate_thrust(self,state):
+    def evaluate_power(self,state):  # NOTE - Temporary change
         """ Calculate thrust given the current state of the vehicle
     
             Assumptions:
@@ -86,7 +87,8 @@ class Battery_Ducted_Fan(Propulsor):
         conditions  = state.conditions
         numerics    = state.numerics
   
-        results = propulsor.evaluate_thrust(state)
+        # results = propulsor.evaluate_thrust(state)
+        results = propulsor.evaluate_power(state)  # NOTE - Temporary change
         Pe      = np.multiply(results.thrust_force_vector[:,0],conditions.freestream.velocity[0])
         
         try:
@@ -122,4 +124,5 @@ class Battery_Ducted_Fan(Propulsor):
         results.vehicle_mass_rate   = mdot
         return results
             
-    __call__ = evaluate_thrust
+    # __call__ = evaluate_thrust
+    __call__ = evaluate_power  # NOTE - Temporary change
