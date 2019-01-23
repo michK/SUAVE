@@ -58,8 +58,7 @@ class Battery_Ducted_Fan(Propulsor):
         self.tag              = 'Network'
     
     # manage process with a driver function
-    # def evaluate_thrust(self,state):
-    def evaluate_power(self,state):  # NOTE - Temporary change
+    def evaluate_thrust(self,state):
         """ Calculate thrust given the current state of the vehicle
     
             Assumptions:
@@ -87,14 +86,13 @@ class Battery_Ducted_Fan(Propulsor):
         conditions  = state.conditions
         numerics    = state.numerics
   
-        # results = propulsor.evaluate_thrust(state)
-        results = propulsor.evaluate_power(state)  # NOTE - Temporary change
+        results = propulsor.evaluate_thrust(state)
         Pe      = np.multiply(results.thrust_force_vector[:,0],conditions.freestream.velocity[0])
         
         try:
             initial_energy = conditions.propulsion.battery_energy
             if initial_energy[0][0]==0: #beginning of segment; initialize battery
-                battery.current_energy = battery.current_energy[-1]*np.ones_like(initial_energy)
+                battery.current_energy = battery.current_energy*np.ones_like(initial_energy)
         except AttributeError: #battery energy not initialized, e.g. in takeoff
             battery.current_energy=np.transpose(np.array([battery.current_energy[-1]*np.ones_like(Pe)]))
         
@@ -124,5 +122,4 @@ class Battery_Ducted_Fan(Propulsor):
         results.vehicle_mass_rate   = mdot
         return results
             
-    # __call__ = evaluate_thrust
-    __call__ = evaluate_power  # NOTE - Temporary change
+    __call__ = evaluate_thrust

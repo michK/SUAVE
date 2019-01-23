@@ -62,8 +62,7 @@ class Ducted_Fan(Propulsor):
         
     _component_root_map = None
 
-    # def evaluate_thrust(self,state):
-    def evaluate_power(self,state):  # NOTE - Temporary change
+    def evaluate_thrust(self,state):
         """ Calculate thrust given the current state of the vehicle
     
             Assumptions:
@@ -237,5 +236,4 @@ class Ducted_Fan(Propulsor):
         #compute the thrust
         thrust.size(conditions)
 
-    # __call__ = evaluate_thrust
-    __call__ = evaluate_power  # NOTE - Temporary change
+    __call__ = evaluate_thrust
