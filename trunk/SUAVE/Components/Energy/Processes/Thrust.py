@@ -167,8 +167,6 @@ class Thrust(Energy_Component):
         mdhc                 = self.compressor_nondimensional_massflow
         SFC_adjustment       = self.SFC_adjustment
 
-
-
         #--------Cantwell method---------------------------------
 
         #computing the non dimensional thrust
@@ -181,7 +179,10 @@ class Thrust(Energy_Component):
         Fsp              = 1./(gamma*M0)*Thrust_nd
 
         #Computing the specific impulse
-        Isp              = Fsp*a0*(1.+bypass_ratio)/(f*g)
+        if f ==0:
+            Isp = None
+        else:
+            Isp = Fsp*a0*(1. + bypass_ratio)/(f*g)
 
         #Computing the TSFC
         TSFC             = f*g/(Fsp*a0*(1+bypass_ratio))*(1.-SFC_adjustment) * Units.hour # 1/s is converted to 1/hr here
