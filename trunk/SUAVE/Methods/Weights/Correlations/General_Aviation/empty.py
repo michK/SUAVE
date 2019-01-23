@@ -213,7 +213,7 @@ def empty(vehicle, results_power_balance=None):
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
         wt_propulsion                    = propulsors.mass_properties.mass
-        num_eng = propulsors.num_eng
+        num_eng = propulsors.number_of_engines
         if wt_propulsion==0:
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)
     #find fuel volume
