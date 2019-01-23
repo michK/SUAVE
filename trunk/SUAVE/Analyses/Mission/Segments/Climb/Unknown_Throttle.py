@@ -73,7 +73,6 @@ class Unknown_Throttle(Aerodynamic):
         ones_row = self.state.ones_row
         self.state.unknowns.throttle   = ones_row(1) * 0.5
         self.state.unknowns.body_angle = ones_row(1) * 1.0 * Units.degrees
-        self.state.unknowns.battery_voltage_under_load = ones_row(1) * 400.0 * Units.volt
         self.state.residuals.forces    = ones_row(2) * 0.0
         
         # --------------------------------------------------------------
