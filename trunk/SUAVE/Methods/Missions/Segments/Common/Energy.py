@@ -1,6 +1,6 @@
 ## @ingroup Methods-Missions-Segments-Common
 # Energy.py
-#
+# 
 # Created:  Jul 2014, SUAVE Team
 # Modified: Jan 2016, E. Botero
 #           Jul 2017, E. Botero
@@ -16,34 +16,35 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Missions-Segments-Common
-def initialize_battery(segment,state):
+def initialize_battery(segment):
     """ Sets the initial battery energy at the start of the mission
-
+    
         Assumptions:
         N/A
-
+        
         Inputs:
-            state.initials.conditions:
+            segment.state.initials.conditions:
                 propulsion.battery_energy    [Joules]
             segment.battery_energy           [Joules]
-
+            
         Outputs:
-            state.conditions:
+            segment.state.conditions:
                 propulsion.battery_energy    [Joules]
 
         Properties Used:
         N/A
-
+                                
     """
-
+    
+    
     if segment.state.initials:
         energy_initial  = segment.state.initials.conditions.propulsion.battery_energy[-1,0]
     elif 'battery_energy' in segment:
         energy_initial  = segment.battery_energy
     else:
         energy_initial = 0.0
-
-    state.conditions.propulsion.battery_energy[:,0] = energy_initial
+    
+    segment.state.conditions.propulsion.battery_energy[:,0] = energy_initial
 
     return
 
@@ -51,13 +52,12 @@ def initialize_battery(segment,state):
 #  Update Thrust
 # ----------------------------------------------------------------------
 
-# @ingroup Methods-Missions-Segments-Common
+## @ingroup Methods-Missions-Segments-Common
 def update_thrust(segment):
     """ Evaluates the energy network to find the thrust force and mass rate
 
         Inputs -
             segment.analyses.energy_network    [Function]
-            state                              [Data]
 
         Outputs -
             state.conditions:
@@ -68,8 +68,8 @@ def update_thrust(segment):
         Assumptions -
 
 
-    """
-
+    """    
+    
     # unpack
     energy_model = segment.analyses.energy
 
@@ -80,35 +80,6 @@ def update_thrust(segment):
     conditions = segment.state.conditions
     conditions.frames.body.thrust_force_vector = results.thrust_force_vector
     conditions.weights.vehicle_mass_rate       = results.vehicle_mass_rate
+    
 
-
-## @ingroup Methods-Missions-Segments-Common
-def update_power(segment):
-    """ Evaluates the energy network to find the power and mass rate
-
-        Inputs -
-            segment.analyses.energy_network    [Function]
-            state                              [Data]
-
-        Outputs -
-            state.conditions:
-               power_required                  [W]
-               frames.body.thrust_force_vector [Newtons]
-               weights.vehicle_mass_rate       [kg/s]
-
-
-        Assumptions -
-
-
-    """
-
-    # unpack
-    energy_model = segment.analyses.energy
-
-    # evaluate
-    results   = energy_model.evaluate_power(segment.state)
-
-    # pack conditions
-    conditions = segment.state.conditions
-    conditions.frames.body.thrust_force_vector = results.thrust_force_vector  # Equivalent thrust
-    conditions.weights.vehicle_mass_rate       = results.vehicle_mass_rate
+    
