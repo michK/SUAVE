@@ -1,7 +1,7 @@
 ## @ingroup Components-Energy-Converters
-# Propeller_Simple.py
+# Power_Electronics_Simple.py
 #
-# Created:  Nov 2018, M. Kruger
+# Created:  Feb 2019, M. Kruger
 # Modified:
 
 # ----------------------------------------------------------------------
@@ -15,19 +15,22 @@ import SUAVE
 import numpy as np
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
 
+
 # ----------------------------------------------------------------------
-#  Motor Class
+#  Power Electronics Class
 # ----------------------------------------------------------------------
 ## @ingroup Components-Energy-Converters
-class Propeller_Simple(Energy_Component):
-    """This is a simple propeller component to be used in the Unified energy network.
-    
-    Assumptions:
-    None
+class Power_Electronics_Simple(Energy_Component):
+    """ This is a simple power electronics component.
+        Can function as AC->DC or DC->AC converter.
 
-    Source:
-    None
-    """      
+        Assumptions:
+        None
+
+        Source:
+        None
+    """
+
     def __defaults__(self):
         """This sets the default values for the component to function.
 
@@ -45,13 +48,13 @@ class Propeller_Simple(Energy_Component):
 
         Properties Used:
         None
-        """           
-        
-        self.tag = 'Propeller_Simple'
-        self.efficiency = 0.80
+        """
+
+        self.tag = 'Power_Electronics_Simple'
+        self.efficiency = 0.98
 
     def power(self):
-        """Calculates the propellers output power for a given input power
+        """Calculates the component's output power for a given input power
 
         Assumptions:
         N/A
@@ -67,12 +70,12 @@ class Propeller_Simple(Energy_Component):
 
         Properties Used:
         self.efficiency     [-]
-        """           
+        """
 
         # Unpack
         efficiency = self.efficiency
         power = self.inputs.power
-    
+
         power_out = efficiency * power
 
         self.outputs.power = power_out

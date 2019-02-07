@@ -15,20 +15,22 @@ import SUAVE
 import numpy as np
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
 
+
 # ----------------------------------------------------------------------
 #  Motor Class
 # ----------------------------------------------------------------------
 ## @ingroup Components-Energy-Converters
 class Electrical_Machine_Simple(Energy_Component):
-    """This is a simple electrical machine component to be used in the Unified energy network.
-       This component can function as a motor or generator
-    
-    Assumptions:
-    None
+    """ This is a simple electrical machine component.
+        Can function as a motor or generator
 
-    Source:
-    None
-    """      
+        Assumptions:
+        None
+
+        Source:
+        None
+    """
+
     def __defaults__(self):
         """This sets the default values for the component to function.
 
@@ -46,8 +48,8 @@ class Electrical_Machine_Simple(Energy_Component):
 
         Properties Used:
         None
-        """           
-        
+        """
+
         self.tag = 'Electrical_Machine_Simple'
         self.efficiency = 0.95
 
@@ -68,15 +70,14 @@ class Electrical_Machine_Simple(Energy_Component):
 
         Properties Used:
         self.efficiency     [-]
-        """           
+        """
 
         # Unpack
         efficiency = self.efficiency
         power = self.inputs.power
-    
-        power_out = power / efficiency
+
+        power_out = efficiency * power
 
         self.outputs.power = power_out
 
         return power_out
-        
