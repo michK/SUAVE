@@ -1,8 +1,8 @@
 ## @ingroup Components-Energy-Networks
 # Battery_Ducted_Fan.py
 #
-# Created:  Sep 2014, M. Vegh
-# Modified: Jan 2016, T. MacDonald
+# Created:  Feb 2018, M. Kruger
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -21,7 +21,9 @@ from SUAVE.Components.Propulsors.Propulsor import Propulsor
 
 ## @ingroup Components-Energy-Networks
 class Unified_Network(Propulsor):
-    """ Simply connects a battery to a ducted fan, with an assumed motor efficiency
+    """ Network that can model various combinations of components
+        to model conventional, all-electric, hybrid- or turbo-
+        electric aircraft
 
         Assumptions:
         None
@@ -35,10 +37,13 @@ class Unified_Network(Propulsor):
             This network operates slightly different than most as it attaches a propulsor to the net.
 
             Assumptions:
-            Your system always uses 90 amps...?
+            None
 
             Source:
-            N/A
+            Kruger, M., Byahut, S., Uranga, A., Gonzalez, J., Hall, D.K. and Dowdle, A.,
+            "Electrified Aircraft Trade-Space Exploration",
+            June 2018, AIAA Aviation Technology, Integration, and Operations Conference (AIAA AVIATION).
+            Atlanta, GA, USA
 
             Inputs:
             None
@@ -50,9 +55,21 @@ class Unified_Network(Propulsor):
             N/A
         """
 
+        # Components
         self.propulsor = None
         self.battery = None
-        self.motor_efficiency = .95
+        self.inverter = None
+        self.motor = None
+        self.turbine = None
+        self.machine_link = None
+        self.power_electronics_link = None
+        self.fan_elec = None
+        self.fan_mech = None
+        self.thrust = None
+        # Other
+        self.fS = 0
+        self.fL = 0
+        self.max_thrust = 0
         self.tag = 'Network'
 
     # manage process with a driver function
@@ -73,13 +90,22 @@ class Unified_Network(Propulsor):
             results.vehicle_mass_rate   [kg/s]
 
             Properties Used:
-            Defaulted values
+            N/A
         """
 
+        # if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator
+        # else: # Parallel - Link is motor
         # unpack
 
         propulsor = self.propulsor
         battery = self.battery
+        inverter = self.inverter
+        motor = self.motor
+        turbine = self.turbine
+        machine_link = self.machine_link
+        power_electronics_link = self.power_electronics_link
+        fan_elec = self.fan_elec
+        fan_mech = self.fan_mech
 
         conditions = state.conditions
         numerics = state.numerics
@@ -87,13 +113,6 @@ class Unified_Network(Propulsor):
         results = propulsor.evaluate_thrust(state)
         Pe = np.multiply(results.thrust_force_vector[:, 0],
                          conditions.freestream.velocity[0])
-
-        # try:
-        #     initial_energy = conditions.propulsion.battery_energy
-        #     if initial_energy[0][0]==0: #beginning of segment; initialize battery
-        #         battery.current_energy = battery.current_energy*np.ones_like(initial_energy)
-        # except AttributeError: #battery energy not initialized, e.g. in takeoff
-        #     battery.current_energy=np.transpose(np.array([battery.current_energy[-1]*np.ones_like(Pe)]))
 
         # Set battery energy
         battery.current_energy = conditions.propulsion.battery_energy
@@ -106,8 +125,8 @@ class Unified_Network(Propulsor):
         battery.inputs = battery_logic
 
         battery.energy_calc(numerics)
-        #allow for mass gaining batteries
 
+        #allow for mass gaining batteries
         try:
             mdot = find_mass_gain_rate(battery, -(
                 pbat - battery.resistive_losses))  #put in transpose for solver
