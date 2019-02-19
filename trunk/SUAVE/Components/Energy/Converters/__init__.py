@@ -22,3 +22,5 @@ from .Gearbox import Gearbox
 from .Power_Electronics_Simple import Power_Electronics_Simple
 from .Motor_Simple import Motor_Simple
 from .Electrical_Machine_Simple import Electrical_Machine_Simple
+from .Fan_Simple import Fan_Simple
+from .Gas_Turbine_Simple import Gas_Turbine_Simple
