@@ -19,7 +19,7 @@ from .Weights import Weights
 
 ## @ingroup Analyses-Weights
 class Weights_Tube_Wing_GA(Weights):
-    """ This is class that evaluates the weight of Tube and Wing aircraft
+    """ This is class that evaluates the weight of Tube and Wing GA aircraft
     
     Assumptions:
         None

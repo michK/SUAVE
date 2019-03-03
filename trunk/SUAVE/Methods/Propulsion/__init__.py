@@ -8,6 +8,7 @@ from .turbofan_emission_index import turbofan_emission_index
 from .electric_motor_sizing import size_from_kv, size_from_mass
 from .turbofan_sizing import turbofan_sizing
 from .turbojet_sizing import turbojet_sizing
+from .unified_network_sizing import unified_network_sizing
 from .ramjet_sizing import ramjet_sizing
 from .scramjet_sizing import scramjet_sizing
 from .fm_id import fm_id
