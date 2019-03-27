@@ -10,7 +10,7 @@
 
 # package imports
 import numpy as np
-from scipy.optimize import fsolve
+from scipy.optimize import root
 # SUAVE imports
 from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
@@ -110,6 +110,7 @@ class Unified_Thrust_tmp(Energy_Component):
         PKm = np.zeros(nr_elements)
         mdot_fuel = np.zeros(nr_elements)
         Pbat = np.zeros(nr_elements)
+        Pturb = np.zeros(nr_elements)
 
         for i in range(nr_elements):
 
@@ -130,6 +131,7 @@ class Unified_Thrust_tmp(Energy_Component):
 
                 res6 = mdote - nr_fans_elec * conditions.freestream.density[i] * area_jet_elec * Vjete
 
+                # print(res1,res2,res3,res4,res5,res6)
                 residuals = [
                              abs(res1),
                              abs(res2),
@@ -142,7 +144,17 @@ class Unified_Thrust_tmp(Energy_Component):
                 return residuals
 
             args_init = [300000.0, 300000.0, 100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
-            [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = remove_negatives(fsolve(power_balance, args_init))
+            # args_init = 1 * np.ones(6)  # FIXME - should be more clever guesses
+            # [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = remove_negatives(fsolve(power_balance, args_init))
+            # sol = root(power_balance, args_init, options={'maxfev':int(1e6), 'xtol': 1e-10})
+            sol = root(power_balance, args_init)
+
+            if sol['success'] is not True:
+                print()
+                raise Exception("Power balance equations not converging: {}".format(sol['message']))
+            else:
+                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
+                # print(PKm, PKe, mdotm, mdote, Vjetm, Vjete)
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
@@ -162,11 +174,17 @@ class Unified_Thrust_tmp(Energy_Component):
             # eta_bat = 0.5 + (1.0 - psi) / 2.0
             eta_bat = 0.9  # FIXME Should be calculated
 
-            # Adjust battery power to account for efficiency drop
-            Pbat[i] = Pbat_i / eta_bat
+            # Adjust battery power to account for battery efficiency
+            # Pbat[i] = Pbat_i / eta_bat
+            Pbat[i] = Pbat_i / 1
+
+            # Add turbine power
+            Pturb[i] = Pturb_i
 
             # Calculate vehicle mass rate of change
-            mdot_fuel[i] = Pturb_i / (hfuel * eta_th)
+            mdot_fuel[i] = Pturb_i / (hfuel * eta_th)  # NOTE Could incorporate TSFC here
+
+        print(PKm_tot[0], PKe_tot[0], mdotm_tot[0], mdote_tot[0], Pbat[0], Pturb[0])
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / conditions.freestream.velocity * throttle
 

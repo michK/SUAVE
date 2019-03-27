@@ -96,6 +96,7 @@ class Unified_Network_tmp(Propulsor):
 
         #Unpack
         conditions = state.conditions
+        numerics   = state.numerics
         thrust = self.thrust
 
         # Set battery energy
@@ -167,6 +168,11 @@ class Unified_Network_tmp(Propulsor):
 
         #compute the thrust
         thrust(conditions)
+
+        # Set battery power and current
+        battery.inputs.current  = thrust.outputs.Pbat / battery.max_voltage
+        battery.inputs.power_in = -thrust.outputs.Pbat
+        battery.energy_calc(numerics)
 
         #getting the network outputs from the thrust outputs
         F            = thrust.outputs.thrust*[1,0,0]
