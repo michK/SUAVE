@@ -11,6 +11,7 @@
 # package imports
 import numpy as np
 from scipy.optimize import root
+import pyoptsparse
 # SUAVE imports
 from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
@@ -52,6 +53,7 @@ class Unified_Thrust_tmp(Energy_Component):
         self.total_design = 0.0
         self.outputs.thrust = 0.0
         self.outputs.power = 0.0
+        self.nexus = None
 
     def compute(self, conditions):
         """Computes thrust and other properties as below.
@@ -77,15 +79,18 @@ class Unified_Thrust_tmp(Energy_Component):
         # Unpack the values
 
         # Unpack from inputs
+        hdot          = self.inputs.vertical_velocity
         nr_elements   = self.inputs.nr_elements
         fS            = self.inputs.fS
-        fL            = self.inputs.fL        
+        fL            = self.inputs.fL
         eta_th        = self.inputs.eta_th
         eta_pe        = self.inputs.eta_pe
         eta_mot       = self.inputs.eta_mot
         eta_fan       = self.inputs.eta_fan
         Vinf          = self.inputs.Vinf
+        rho_inf       = self.inputs.rho_inf
         Dp            = self.inputs.Dp
+        Dpar          = self.inputs.Dpar
         Dpp_DP        = self.inputs.Dpp_DP
         fBLIe         = self.inputs.fBLIe
         fBLIm         = self.inputs.fBLIm
@@ -97,8 +102,8 @@ class Unified_Thrust_tmp(Energy_Component):
         hfuel         = self.inputs.hfuel
 
         # Unpack from conditions
-        u_inf = conditions.freestream.velocity
         throttle = conditions.propulsion.throttle
+        W        = conditions.weights.total_mass * 9.81
 
         # Set up system of equations to solve power balance
         # Initialize solution arrays
@@ -106,60 +111,85 @@ class Unified_Thrust_tmp(Energy_Component):
         PKe_tot = np.zeros(nr_elements)
         mdotm_tot = np.zeros(nr_elements)
         mdote_tot = np.zeros(nr_elements)
-        PKe = np.zeros(nr_elements)
-        PKm = np.zeros(nr_elements)
+        Vjetm_tot = np.zeros(nr_elements)
+        Vjete_tot = np.zeros(nr_elements)
+        # PKe = np.zeros(nr_elements)
+        # PKm = np.zeros(nr_elements)
         mdot_fuel = np.zeros(nr_elements)
         Pbat = np.zeros(nr_elements)
         Pturb = np.zeros(nr_elements)
 
         for i in range(nr_elements):
 
-            def power_balance(params):
+            def power_balance(xdict):
                 """Function to calculate residuals of power balance equations"""
-                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
 
-                res1 = fL - PKe / (PKe + PKm)
+                x = xdict['xvars']
+                funcs = {}
 
-                res2 = mdotm * (Vjetm - Vinf[i]) + mdote * (Vjete - Vinf[i]) - \
-                    Dp[i] * (1.0 - fBLIm * Dpp_DP[i] - fBLIe * Dpp_DP[i])
+                PKm   = x[0]
+                PKe   = x[1]
+                Vjetm = x[2]
+                Vjete = x[3]
+                mdotm = x[4]
+                mdote = x[5]
 
-                res3 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dp[i] * Vinf[i]
+                # Derived quantities
+                deltaPhiSurf = 0  # NOTE This should somehow be calculated/estimated
 
-                res4 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dp[i] * Vinf[i]
+                # Equality constraints
+                funcs['con1'] = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
+                funcs['con2'] = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]
+                funcs['con3'] = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
+                    (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + Dp[i]
+                funcs['con4'] = fL - PKe / (PKe + PKm)
+                funcs['con5'] = fL - mdote / (mdotm + mdote)
 
-                res5 = mdotm - nr_fans_mech * conditions.freestream.density[i] * area_jet_mech * Vjetm
+                # Inequality constraints - NOTE These still use rho_inf
+                funcs['con6'] = mdotm - nr_fans_mech * rho_inf[i] * area_jet_mech * Vjetm
+                funcs['con7'] = mdote - nr_fans_elec * rho_inf[i] * area_jet_elec * Vjete
 
-                res6 = mdote - nr_fans_elec * conditions.freestream.density[i] * area_jet_elec * Vjete
+                # Cost
+                funcs['obj'] = (0.5 * (Vjetm - Vinf[i])**2 * mdotm) + (0.5 * (Vjete - Vinf[i])**2 * mdote)
 
-                # print(res1,res2,res3,res4,res5,res6)
-                residuals = [
-                             abs(res1),
-                             abs(res2),
-                             abs(res3),
-                             abs(res4),
-                             abs(res5),
-                             abs(res6),
-                            ]
+                fail = False
 
-                return residuals
+                return funcs, fail
 
-            args_init = [300000.0, 300000.0, 100.0, 100.0, 50.0, 50.0]  # FIXME - should be more clever guesses
-            # args_init = 1 * np.ones(6)  # FIXME - should be more clever guesses
-            # [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = remove_negatives(fsolve(power_balance, args_init))
-            # sol = root(power_balance, args_init, options={'maxfev':int(1e6), 'xtol': 1e-10})
-            sol = root(power_balance, args_init)
+            # Define problem
+            opt_prob = pyoptsparse.Optimization('Power Balance', power_balance)
 
-            if sol['success'] is not True:
-                print()
-                raise Exception("Power balance equations not converging: {}".format(sol['message']))
-            else:
-                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
-                # print(PKm, PKe, mdotm, mdote, Vjetm, Vjete)
+            # Define objective
+            opt_prob.addObj('obj')
+
+            # Define inputs
+            x0 = [100e3, 100e3, 100, 100, 100, 100]
+            low = np.zeros(6)
+            opt_prob.addVarGroup('xvars', 6, lower=low, value=x0)
+
+            # Define constraints
+            # Equality
+            opt_prob.addCon('con1', upper=0, lower=0)
+            opt_prob.addCon('con2', upper=0, lower=0)
+            opt_prob.addCon('con3', upper=0, lower=0)
+            opt_prob.addCon('con4', upper=0, lower=0)
+            opt_prob.addCon('con5', upper=0, lower=0)
+            # Inequality
+            opt_prob.addCon('con6', upper=0)
+            opt_prob.addCon('con7', upper=0)
+
+            snopt = pyoptsparse.SLSQP()
+
+            sol = snopt(opt_prob, sens='FD')
+
+            PKm, PKe, Vjetm, Vjete, mdotm, mdote = sol.xStar['xvars']
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
             mdotm_tot[i] = mdotm
             mdote_tot[i] = mdote
+            Vjetm_tot[i] = Vjetm
+            Vjete_tot[i] = Vjete
 
             PK_tot = PKm + PKe
 
@@ -175,8 +205,7 @@ class Unified_Thrust_tmp(Energy_Component):
             eta_bat = 0.9  # FIXME Should be calculated
 
             # Adjust battery power to account for battery efficiency
-            # Pbat[i] = Pbat_i / eta_bat
-            Pbat[i] = Pbat_i / 1
+            Pbat[i] = Pbat_i / eta_bat
 
             # Add turbine power
             Pturb[i] = Pturb_i
@@ -184,19 +213,26 @@ class Unified_Thrust_tmp(Energy_Component):
             # Calculate vehicle mass rate of change
             mdot_fuel[i] = Pturb_i / (hfuel * eta_th)  # NOTE Could incorporate TSFC here
 
-        print(PKm_tot[0], PKe_tot[0], mdotm_tot[0], mdote_tot[0], Pbat[0], Pturb[0])
+        thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 
-        thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / conditions.freestream.velocity * throttle
-
+        # print(PKm_tot[i-2] ,PKe_tot[i-2], mdotm_tot[i-2], mdote_tot[i-2], Vjetm_tot[i-2], Vjete_tot[i-2])
         # compute power
-        power = thrust * u_inf
+        power = thrust * Vinf
 
         # pack outputs
         self.outputs.thrust = thrust
         self.outputs.power = PK_tot
         self.outputs.mdot = mdot_fuel.reshape(nr_elements, 1)
         self.outputs.Pbat = Pbat
-        self.outputs.PKm = PKm
-        self.outputs.PKe = PKe
+        self.outputs.PKm_tot = PKm_tot
+        self.outputs.PKe_tot = PKe_tot
+        self.outputs.mdotm_tot = mdotm_tot
+        self.outputs.mdote_tot = mdote_tot
+        self.outputs.Vjetm_tot = Vjetm_tot
+        self.outputs.Vjete_tot = Vjete_tot
 
     __call__ = compute
+
+
+if __name__ == '__main__':
+    main()

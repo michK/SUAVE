@@ -134,37 +134,42 @@ class Unified_Network_tmp(Propulsor):
         eta_mot = 0.95
         eta_fan = 0.9
 
-        CD_tot = conditions.aerodynamics.drag_breakdown.total
 
         CD_par = conditions.aerodynamics.drag_breakdown.parasite.total
+        CD_tot = conditions.aerodynamics.drag_breakdown.total
 
-        Vinf = conditions.freestream.velocity
+        Vinf    = conditions.freestream.velocity
+        rho_inf = conditions.freestream.density
 
         fsurf = 0.9
 
         # Calculate total drag
-        qinf = 0.5 * conditions.freestream.density * Vinf**2.0
+        qinf = 0.5 * rho_inf * Vinf**2.0
         Dp = CD_tot * qinf * self.reference_area
+        Dpar = CD_par * qinf * self.reference_area
         Dpp_DP = CD_par / CD_tot
 
-        thrust.inputs.nr_elements   = np.shape(CD_tot)[0]
-        thrust.inputs.fS            = fS
-        thrust.inputs.fL            = fL
-        thrust.inputs.eta_th        = eta_th
-        thrust.inputs.eta_pe        = eta_pe
-        thrust.inputs.eta_mot       = eta_mot
-        thrust.inputs.eta_fan       = eta_fan
-        thrust.inputs.Vinf          = Vinf
-        thrust.inputs.Dp            = Dp
-        thrust.inputs.Dpp_DP        = Dpp_DP
-        thrust.inputs.fBLIe         = fBLIe
-        thrust.inputs.fBLIm         = fBLIm
-        thrust.inputs.fsurf         = fsurf
-        thrust.inputs.nr_fans_elec  = nr_fans_elec
-        thrust.inputs.nr_fans_mech  = nr_fans_mech
-        thrust.inputs.area_jet_mech = area_jet_mech
-        thrust.inputs.area_jet_elec = area_jet_elec
-        thrust.inputs.hfuel         = hfuel
+        thrust.inputs.nr_elements       = np.shape(CD_tot)[0]
+        thrust.inputs.vertical_velocity = - conditions.frames.inertial.velocity_vector[:,2]
+        thrust.inputs.fS                = fS
+        thrust.inputs.fL                = fL
+        thrust.inputs.eta_th            = eta_th
+        thrust.inputs.eta_pe            = eta_pe
+        thrust.inputs.eta_mot           = eta_mot
+        thrust.inputs.eta_fan           = eta_fan
+        thrust.inputs.Vinf              = Vinf
+        thrust.inputs.rho_inf           = rho_inf
+        thrust.inputs.Dp                = Dp
+        thrust.inputs.Dpar              = Dpar
+        thrust.inputs.Dpp_DP            = Dpp_DP
+        thrust.inputs.fBLIe             = fBLIe
+        thrust.inputs.fBLIm             = fBLIm
+        thrust.inputs.fsurf             = fsurf
+        thrust.inputs.nr_fans_elec      = nr_fans_elec
+        thrust.inputs.nr_fans_mech      = nr_fans_mech
+        thrust.inputs.area_jet_mech     = area_jet_mech
+        thrust.inputs.area_jet_elec     = area_jet_elec
+        thrust.inputs.hfuel             = hfuel
 
         #compute the thrust
         thrust(conditions)
@@ -183,12 +188,14 @@ class Unified_Network_tmp(Propulsor):
         F            = F_vec
 
         #Pack the conditions for outputs
-        battery_energy = battery.current_energy
-        battery_draw = thrust.outputs.Pbat
-        conditions.propulsion.battery_energy = battery_energy
-        conditions.propulsion.battery_draw = battery_draw
-        conditions.propulsion.PKm = thrust.outputs.PKm
-        conditions.propulsion.PKe = thrust.outputs.PKe
+        conditions.propulsion.PKm = thrust.outputs.PKm_tot
+        conditions.propulsion.PKe = thrust.outputs.PKe_tot
+        conditions.propulsion.mdotm = thrust.outputs.mdotm_tot
+        conditions.propulsion.mdote = thrust.outputs.mdote_tot
+        conditions.propulsion.Vjetm = thrust.outputs.Vjetm_tot
+        conditions.propulsion.Vjete = thrust.outputs.Vjete_tot
+        conditions.propulsion.battery_energy = battery.current_energy
+        conditions.propulsion.battery_draw = thrust.outputs.Pbat
 
         results = Data()
         results.vehicle_mass_rate = mdot
