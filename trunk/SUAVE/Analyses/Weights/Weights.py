@@ -20,7 +20,7 @@ from SUAVE.Analyses import Analysis
 ## @ingroup Analyses-Weights
 class Weights(Analysis):
     """ This is a class that call the functions that computes the weight of 
-    an aircraft depending on its configration
+    an aircraft depending on its configuration
     
     Assumptions:
         None
