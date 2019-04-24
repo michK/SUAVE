@@ -19,7 +19,7 @@ from .Weights import Weights
 
 ## @ingroup Analyses-Weights
 class Weights_Tube_Wing_GA(Weights):
-    """ This is class that evaluates the weight of Tube and Wing GA aircraft
+    """ This a class that evaluates the weight of Tube and Wing GA aircraft
     
     Assumptions:
         None
@@ -88,10 +88,9 @@ class Weights_Tube_Wing_GA(Weights):
         settings = self.settings
         # results_power_balance = vehicle.results_power_balance
         empty    = SUAVE.Methods.Weights.Correlations.General_Aviation.empty
-
         
         # evaluate
-        results = empty(vehicle, results_power_balance=None)
+        results = empty(vehicle)
         
         # storing weight breakdown into vehicle
         vehicle.weight_breakdown = results 
