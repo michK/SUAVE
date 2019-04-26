@@ -118,12 +118,18 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
         opt = pyOpt.PSQP()  
         
     elif solver == 'NSGA2':
-        opt = pyOpt.NSGA2(pll_type='POA') 
+        opt = pyOpt.NSGA2(pll_type='POA')
+        opt.setOption('PopSize', 20)
+        opt.setOption('maxGen', 5)
     
     elif solver == 'ALPSO':
         #opt = pyOpt.pyALPSO.ALPSO(pll_type='DPM') #this requires DPM, which is a parallel implementation
         opt = pyOpt.ALPSO()
-        
+        opt.setOption('SwarmSize', 10)
+        opt.setOption('maxOuterIter', 3)
+        opt.setOption('maxInnerIter', 6)
+        opt.setOption('minInnerIter', 3)
+
     elif solver == 'CONMIN':
         opt = pyOpt.CONMIN() 
         
@@ -141,9 +147,18 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
     if FD == 'parallel':
         outputs = opt(opt_prob, sens='FD',sensMode='pgc')
         
-    elif solver == 'SNOPT' or solver == 'SLSQP':
-        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist')
+    elif solver == 'SNOPT':
+        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist', hotStart='ALPSO.hist')
+
+    elif solver == 'SLSQP':
+        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, hotStart='NSGA2.hist')
   
+    elif solver == 'ALPSO':
+        outputs = opt(opt_prob, storeHistory='ALPSO.hist')
+
+    elif solver == 'NSGA2':
+        outputs = opt(opt_prob, storeHistory='NSGA2.hist')
+
     else:
         outputs = opt(opt_prob)        
    
