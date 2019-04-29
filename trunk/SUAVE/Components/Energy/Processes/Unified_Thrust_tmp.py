@@ -82,6 +82,8 @@ class Unified_Thrust_tmp(Energy_Component):
         nr_elements   = self.inputs.nr_elements
         fS            = self.inputs.fS
         fL            = self.inputs.fL
+        eta_pm        = self.inputs.eta_pm
+        eta_pe        = self.inputs.eta_pe
         eta_th        = self.inputs.eta_th
         eta_pe        = self.inputs.eta_pe
         eta_mot       = self.inputs.eta_mot
@@ -122,7 +124,6 @@ class Unified_Thrust_tmp(Energy_Component):
 
             def power_balance(xdict):
                 """Function to calculate residuals of power balance equations"""
-                global mdotm, mdote
 
                 x = xdict['xvars']
                 funcs = {}
@@ -131,10 +132,8 @@ class Unified_Thrust_tmp(Energy_Component):
                 PKe   = x[1]
                 Vjetm = x[2]
                 Vjete = x[3]
-                # mdotm = x[4]
-                # mdote = x[5]
-                mdotm = 100
-                mdote = 100
+                mdotm = x[4]
+                mdote = x[5]                
 
                 # Derived quantities
                 deltaPhiSurf = 0  # NOTE This should somehow be calculated/estimated
@@ -145,6 +144,8 @@ class Unified_Thrust_tmp(Energy_Component):
                 funcs['con3'] = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
                     (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + Dp[i]
                 funcs['con4'] = fL - PKe / (PKe + PKm)
+                funcs['con5'] = PKm - 0.5 * eta_pm * mdotm * (Vjetm**2 - Vinf[i]**2)
+                funcs['con6'] = PKe - 0.5 * eta_pe * mdote * (Vjete**2 - Vinf[i]**2)
                 # funcs['con5'] = fL - mdote / (mdotm + mdote)
 
                 # Inequality constraints - NOTE These still use rho_inf
@@ -152,8 +153,8 @@ class Unified_Thrust_tmp(Energy_Component):
                 # funcs['con7'] = mdote - nr_fans_elec * rho_inf[i] * area_jet_elec * Vjete
 
                 # Cost
-                funcs['obj'] = (0.5 * (Vjetm - Vinf[i])**2 * mdotm) + (0.5 * (Vjete - Vinf[i])**2 * mdote)
-                # funcs['obj'] = 0
+                # funcs['obj'] = (0.5 * (Vjetm - Vinf[i])**2 * mdotm) + (0.5 * (Vjete - Vinf[i])**2 * mdote)
+                funcs['obj'] = 0
 
                 fail = False
 
@@ -166,9 +167,9 @@ class Unified_Thrust_tmp(Energy_Component):
             opt_prob.addObj('obj')
 
             # Define inputs
-            low = np.zeros(4)
-            x0 = [100e3, 100e3, 100, 100]
-            opt_prob.addVarGroup('xvars', 4, lower=low, value=x0)
+            low = np.zeros(6)
+            x0 = [100e3, 100e3, 100, 100, 100, 100]
+            opt_prob.addVarGroup('xvars', 6, lower=low, value=x0)
 
             # Define constraints
             # Equality
@@ -176,7 +177,8 @@ class Unified_Thrust_tmp(Energy_Component):
             opt_prob.addCon('con2', upper=0, lower=0)
             opt_prob.addCon('con3', upper=0, lower=0)
             opt_prob.addCon('con4', upper=0, lower=0)
-            # opt_prob.addCon('con5', upper=0, lower=0)
+            opt_prob.addCon('con5', upper=0, lower=0)
+            opt_prob.addCon('con6', upper=0, lower=0)
             # Inequality
             # opt_prob.addCon('con6', upper=0)
             # opt_prob.addCon('con7', upper=0)
@@ -188,7 +190,8 @@ class Unified_Thrust_tmp(Energy_Component):
             sol = slsqp(opt_prob, sens='FD')
 
             # PKm, PKe, Vjetm, Vjete, mdotm, mdote = sol.xStar['xvars']
-            PKm, PKe, Vjetm, Vjete = sol.xStar['xvars']
+            PKm, PKe, Vjetm, Vjete, mdotm, mdote = sol.xStar['xvars']
+            import pdb; pdb.set_trace()  # breakpoint e0933fac //
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
