@@ -19,12 +19,14 @@ class TestPowerBalance(unittest.TestCase):
         thrust.inputs.nr_elements   = 1
         thrust.inputs.fS            = 0.5
         thrust.inputs.fL            = 0.5
+        thrust.inputs.eta_pm        = 0.9
+        thrust.inputs.eta_pe        = 0.9
         thrust.inputs.eta_th        = 0.5
         thrust.inputs.eta_pe        = 0.98
         thrust.inputs.eta_mot       = 0.95
         thrust.inputs.eta_fan       = 0.9
-        thrust.inputs.fBLIe         = 0.2
-        thrust.inputs.fBLIm         = 0.2
+        thrust.inputs.fBLIe         = 0
+        thrust.inputs.fBLIm         = 0
         thrust.inputs.fsurf         = 0.9
         thrust.inputs.nr_fans_elec  = 2
         thrust.inputs.nr_fans_mech  = 2
@@ -48,7 +50,7 @@ class TestPowerBalance(unittest.TestCase):
         # self.assertAlmostEqual(thrust.outputs.Vjetm_tot, 94,     places=0, msg="Should be about 94")
         # self.assertAlmostEqual(thrust.outputs.Vjete_tot, 94,     places=0, msg="Should be about 94")
 
-        self.assertAlmostEqual(1, 1)
+        # self.assertAlmostEqual(1, 1)
 
 if __name__ == '__main__':
     unittest.main()

@@ -10,7 +10,8 @@
 
 # package imports
 import numpy as np
-import pyoptsparse
+# import pyoptsparse
+from scipy.optimize import root
 # SUAVE imports
 from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
@@ -120,78 +121,50 @@ class Unified_Thrust_tmp(Energy_Component):
         Pbat = np.zeros(nr_elements)
         Pturb = np.zeros(nr_elements)
 
+        # Tentatively assume phi_surf is unaffected
+        deltaPhiSurf = 0
+
         for i in range(nr_elements):
 
-            def power_balance(xdict):
+            def power_balance(params):
                 """Function to calculate residuals of power balance equations"""
-
-                x = xdict['xvars']
-                funcs = {}
-
-                PKm   = x[0]
-                PKe   = x[1]
-                Vjetm = x[2]
-                Vjete = x[3]
-                mdotm = x[4]
-                mdote = x[5]                
+                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
+                # print(PKm, PKe, mdotm, mdote, Vjetm, Vjete)
 
                 # Derived quantities
-                deltaPhiSurf = 0  # NOTE This should somehow be calculated/estimated
+                phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
+                phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
 
-                # Equality constraints
-                funcs['con1'] = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-                funcs['con2'] = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]
-                funcs['con3'] = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
+                # Residuals
+                res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
+                res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
+                res3 = phi_jet_m - PKm * (1 - eta_pm)
+                res4 = phi_jet_e - PKe * (1 - eta_pe)
+                res5 = fL - PKe / (PKe + PKm)
+                res6 = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
                     (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + Dp[i]
-                funcs['con4'] = fL - PKe / (PKe + PKm)
-                funcs['con5'] = PKm - 0.5 * eta_pm * mdotm * (Vjetm**2 - Vinf[i]**2)
-                funcs['con6'] = PKe - 0.5 * eta_pe * mdote * (Vjete**2 - Vinf[i]**2)
-                # funcs['con5'] = fL - mdote / (mdotm + mdote)
 
-                # Inequality constraints - NOTE These still use rho_inf
-                # funcs['con6'] = mdotm - nr_fans_mech * rho_inf[i] * area_jet_mech * Vjetm
-                # funcs['con7'] = mdote - nr_fans_elec * rho_inf[i] * area_jet_elec * Vjete
+                residuals = [
+                             res1,
+                             res2,
+                             res3,
+                             res4,
+                             res5,
+                             res6,
+                            ]
 
-                # Cost
-                # funcs['obj'] = (0.5 * (Vjetm - Vinf[i])**2 * mdotm) + (0.5 * (Vjete - Vinf[i])**2 * mdote)
-                funcs['obj'] = 0
+                return residuals
 
-                fail = False
+            args_init = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0]  # FIXME - should be more clever guesses                        
+            scale = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0]
+            sol = root(power_balance, args_init, method='hybr', options={'diag':scale})
+            # sol = root(power_balance, args_init, method='hybr')
+            # sol = root(power_balance, args_init, method='broyden1')
 
-                return funcs, fail
-
-            # Define problem
-            opt_prob = pyoptsparse.Optimization('Power Balance', power_balance)
-
-            # Define objective
-            opt_prob.addObj('obj')
-
-            # Define inputs
-            low = np.zeros(6)
-            x0 = [100e3, 100e3, 100, 100, 100, 100]
-            opt_prob.addVarGroup('xvars', 6, lower=low, value=x0)
-
-            # Define constraints
-            # Equality
-            opt_prob.addCon('con1', upper=0, lower=0)
-            opt_prob.addCon('con2', upper=0, lower=0)
-            opt_prob.addCon('con3', upper=0, lower=0)
-            opt_prob.addCon('con4', upper=0, lower=0)
-            opt_prob.addCon('con5', upper=0, lower=0)
-            opt_prob.addCon('con6', upper=0, lower=0)
-            # Inequality
-            # opt_prob.addCon('con6', upper=0)
-            # opt_prob.addCon('con7', upper=0)
-
-            # snopt = pyoptsparse.SNOPT()
-            slsqp = pyoptsparse.SLSQP()
-
-            # sol = snopt(opt_prob, sens='FD')
-            sol = slsqp(opt_prob, sens='FD')
-
-            # PKm, PKe, Vjetm, Vjete, mdotm, mdote = sol.xStar['xvars']
-            PKm, PKe, Vjetm, Vjete, mdotm, mdote = sol.xStar['xvars']
-            import pdb; pdb.set_trace()  # breakpoint e0933fac //
+            if sol['success'] == True:
+                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
+            else:
+                raise Exception("Power balance system not converging")
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
