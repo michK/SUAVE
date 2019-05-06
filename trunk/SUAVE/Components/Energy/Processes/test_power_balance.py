@@ -13,14 +13,14 @@ class TestPowerBalance(unittest.TestCase):
         thrust.inputs.vertical_velocity = np.array([500]) * Units['ft/min']
         thrust.inputs.Vinf          = np.array([77])
         thrust.inputs.rho_inf       = np.array([0.77])
-        thrust.inputs.Dp            = np.array([2900])
+        thrust.inputs.Dp            = np.array([2900.0])
         thrust.inputs.Dpp_DP        = 0.5
         thrust.inputs.Dpar          = thrust.inputs.Dpp_DP * thrust.inputs.Dp
         thrust.inputs.nr_elements   = 1
         thrust.inputs.fS            = 0.5
         thrust.inputs.fL            = 0.5
-        thrust.inputs.eta_pm        = 0.9
-        thrust.inputs.eta_pe        = 0.9
+        thrust.inputs.eta_propm     = 0.9
+        thrust.inputs.eta_prope     = 0.9
         thrust.inputs.eta_th        = 0.5
         thrust.inputs.eta_pe        = 0.98
         thrust.inputs.eta_mot       = 0.95
@@ -43,8 +43,9 @@ class TestPowerBalance(unittest.TestCase):
 
         print(thrust.outputs)
 
-        # self.assertAlmostEqual(thrust.outputs.PKm_tot,   188712, places=0, msg="Should be about 188712")
-        # self.assertAlmostEqual(thrust.outputs.PKe_tot,   188712, places=0, msg="Should be about 188712")
+        # self.assertAlmostEqual(thrust.outputs.thrust, 2900.0, places=0, msg="Thrust should be 2900 N")
+        # self.assertAlmostEqual(thrust.outputs.PKm,    111650, places=0, msg="Should be about 111650 W")
+        # self.assertAlmostEqual(thrust.outputs.PKe,    111650, places=0, msg="Should be about 111650 W")
         # self.assertAlmostEqual(thrust.outputs.mdotm_tot, 114,    places=0, msg="Should be about 114")
         # self.assertAlmostEqual(thrust.outputs.mdote_tot, 114,    places=0, msg="Should be about 114")
         # self.assertAlmostEqual(thrust.outputs.Vjetm_tot, 94,     places=0, msg="Should be about 94")

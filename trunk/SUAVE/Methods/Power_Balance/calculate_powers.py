@@ -62,7 +62,7 @@ def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
         # Solve system
         # Solution vars (in order):
         # PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink
-        sol = np.linalg.solve(A, b)
+        sol = np.linalg.solve(A.astype(float), b.astype(float))
 
         return remove_negatives(sol)
 

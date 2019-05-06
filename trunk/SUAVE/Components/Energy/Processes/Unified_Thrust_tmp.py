@@ -1,4 +1,4 @@
-## @ingroup Components-Energy-Processes
+# @ingroup Components-Energy-Processes
 # Unified_Thrust.py
 #
 # Created:  Feb 2018, M. Kruger
@@ -20,7 +20,9 @@ from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers, remov
 # ----------------------------------------------------------------------
 #  Thrust Process
 # ----------------------------------------------------------------------
-## @ingroup Components-Energy-Processes
+# @ingroup Components-Energy-Processes
+
+
 class Unified_Thrust_tmp(Energy_Component):
     """A class that handles computation of thrust and other outputs for a gas turbine engine.
 
@@ -79,33 +81,33 @@ class Unified_Thrust_tmp(Energy_Component):
         # Unpack the values
 
         # Unpack from inputs
-        hdot          = self.inputs.vertical_velocity
-        nr_elements   = self.inputs.nr_elements
-        fS            = self.inputs.fS
-        fL            = self.inputs.fL
-        eta_pm        = self.inputs.eta_pm
-        eta_pe        = self.inputs.eta_pe
-        eta_th        = self.inputs.eta_th
-        eta_pe        = self.inputs.eta_pe
-        eta_mot       = self.inputs.eta_mot
-        eta_fan       = self.inputs.eta_fan
-        Vinf          = self.inputs.Vinf
-        rho_inf       = self.inputs.rho_inf
-        Dp            = self.inputs.Dp
-        Dpar          = self.inputs.Dpar
-        Dpp_DP        = self.inputs.Dpp_DP
-        fBLIe         = self.inputs.fBLIe
-        fBLIm         = self.inputs.fBLIm
-        fsurf         = self.inputs.fsurf
-        nr_fans_mech  = self.inputs.nr_fans_mech
-        nr_fans_elec  = self.inputs.nr_fans_elec
+        hdot = self.inputs.vertical_velocity
+        nr_elements = self.inputs.nr_elements
+        fS = self.inputs.fS
+        fL = self.inputs.fL
+        eta_propm = self.inputs.eta_propm
+        eta_prope = self.inputs.eta_prope
+        eta_th = self.inputs.eta_th
+        eta_pe = self.inputs.eta_pe
+        eta_mot = self.inputs.eta_mot
+        eta_fan = self.inputs.eta_fan
+        Vinf = self.inputs.Vinf
+        rho_inf = self.inputs.rho_inf
+        Dp = self.inputs.Dp
+        Dpar = self.inputs.Dpar
+        Dpp_DP = self.inputs.Dpp_DP
+        fBLIe = self.inputs.fBLIe
+        fBLIm = self.inputs.fBLIm
+        fsurf = self.inputs.fsurf
+        nr_fans_mech = self.inputs.nr_fans_mech
+        nr_fans_elec = self.inputs.nr_fans_elec
         area_jet_mech = self.inputs.area_jet_mech
         area_jet_elec = self.inputs.area_jet_elec
-        hfuel         = self.inputs.hfuel
+        hfuel = self.inputs.hfuel
 
         # Unpack from conditions
         throttle = conditions.propulsion.throttle
-        W        = conditions.weights.total_mass * 9.81
+        W = conditions.weights.total_mass * 9.81
 
         # Set up system of equations to solve power balance
         # Initialize solution arrays
@@ -126,45 +128,63 @@ class Unified_Thrust_tmp(Energy_Component):
 
         for i in range(nr_elements):
 
-            def power_balance(params):
-                """Function to calculate residuals of power balance equations"""
-                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
-                # print(PKm, PKe, mdotm, mdote, Vjetm, Vjete)
+            T = Dp[i]
 
-                # Derived quantities
-                phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
-                phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
+            def power_balance_m(params_m):
+                """
+                Function to calculate residuals of mechanical side power balance equations
+                """
+                global Tm
+                mdotm, Vjetm = params_m
+
+                Tm = (1 - fL) * T
 
                 # Residuals
-                res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-                res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
-                res3 = phi_jet_m - PKm * (1 - eta_pm)
-                res4 = phi_jet_e - PKe * (1 - eta_pe)
-                res5 = fL - PKe / (PKe + PKm)
-                res6 = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
-                    (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + Dp[i]
+                res1 = Tm - mdotm * (Vjetm - Vinf[i])
+                res2 = Tm * Vinf[i] - 0.5 * eta_propm * mdotm * (Vjetm**2 - Vinf[i]**2)
 
-                residuals = [
-                             res1,
-                             res2,
-                             res3,
-                             res4,
-                             res5,
-                             res6,
-                            ]
+                res_m = np.array([res1, res2])
 
-                return residuals
+                return res_m.reshape(2,)
 
-            args_init = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0]  # FIXME - should be more clever guesses                        
-            scale = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0]
-            sol = root(power_balance, args_init, method='hybr', options={'diag':scale})
-            # sol = root(power_balance, args_init, method='hybr')
-            # sol = root(power_balance, args_init, method='broyden1')
+            def power_balance_e(params_e):
+                """
+                Function to calculate residuals of electrical side power balance equations
+                """
+                global Te
+                mdote, Vjete = params_e
 
-            if sol['success'] == True:
-                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
+                Te = fL * T
+
+                # Residuals
+                res3 = Te - mdote * (Vjete - Vinf[i])
+                res4 = Te * Vinf[i] - 0.5 * eta_prope * mdote * (Vjete**2 - Vinf[i]**2)
+
+                res_e = np.array([res3, res4])
+
+                return res_e.reshape(2,)
+
+            args_init_m = [60.0, 30.0]  # FIXME - should be more clever guesses
+            args_init_e = [60.0, 30.0]
+            scale_m = args_init_m
+            scale_e = args_init_e
+            sol_m = root(power_balance_m, args_init_m, method='hybr', options={'diag': scale_m, 'eps': 1})
+            sol_e = root(power_balance_e, args_init_e, method='hybr', options={'diag': scale_e, 'eps': 1})
+            # sol_m = root(power_balance_m, args_init_m, method='hybr')
+            # sol_e = root(power_balance_e, args_init_e, method='hybr')
+
+            if sol_m['success'] == True:
+                [mdotm, Vjetm] = sol_m['x']
             else:
-                raise Exception("Power balance system not converging")
+                raise Exception("Power balance system not converging (mech side)")
+
+            if sol_e['success'] == True:
+                [mdote, Vjete] = sol_e['x']
+            else:
+                raise Exception("Power balance system not converging (elec side)")
+
+            PKm = Tm * Vinf[i]
+            PKe = Te * Vinf[i]
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
@@ -195,7 +215,8 @@ class Unified_Thrust_tmp(Energy_Component):
             # Calculate vehicle mass rate of change
             mdot_fuel[i] = Pturb_i / (hfuel * eta_th)  # NOTE Could incorporate TSFC here
 
-        thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
+        # thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
+        thrust = T
 
         # print(PKm_tot[i-2] ,PKe_tot[i-2], mdotm_tot[i-2], mdote_tot[i-2], Vjetm_tot[i-2], Vjete_tot[i-2])
         # compute power
@@ -203,6 +224,8 @@ class Unified_Thrust_tmp(Energy_Component):
 
         # pack outputs
         self.outputs.thrust = thrust
+        self.outputs.PKm = PKm
+        self.outputs.PKe = PKe
         self.outputs.power = PK_tot
         self.outputs.mdot = mdot_fuel.reshape(nr_elements, 1)
         self.outputs.Pbat = Pbat
