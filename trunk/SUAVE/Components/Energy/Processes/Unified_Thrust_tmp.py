@@ -122,49 +122,61 @@ class Unified_Thrust_tmp(Energy_Component):
         Pturb = np.zeros(nr_elements)
 
         # Tentatively assume phi_surf is unaffected
-        deltaPhiSurf = 0
+        deltaPhiSurf_m = 0
+        deltaPhiSurf_e = 0
 
         for i in range(nr_elements):
 
-            def power_balance(params):
-                """Function to calculate residuals of power balance equations"""
-                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
-                # print(PKm, PKe, mdotm, mdote, Vjetm, Vjete)
+            def power_balance_m(params):
+                """Function to calculate residuals of power balance equations, mech side"""
+                PKm, mdotm, Vjetm = params
 
                 # Derived quantities
                 phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
-                phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
 
                 # Residuals
                 res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-                res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
-                res3 = phi_jet_m - PKm * (1 - eta_pm)
-                res4 = phi_jet_e - PKe * (1 - eta_pe)
-                res5 = fL - PKe / (PKe + PKm)
-                res6 = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
-                    (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + Dp[i]
+                res2 = phi_jet_m - PKm * (1 - eta_pm)
+                res3 = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - deltaPhiSurf_m / Vinf[i] - \
+                    (Vjetm - Vinf[i]) * mdotm + Dp[i]
 
-                residuals = [
-                             res1,
-                             res2,
-                             res3,
-                             res4,
-                             res5,
-                             res6,
-                            ]
+                residuals = np.array([res1, res2, res3,])
 
-                return residuals
+                return residuals.reshape(3,)
 
-            args_init = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0]  # FIXME - should be more clever guesses                        
-            scale = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0]
-            sol = root(power_balance, args_init, method='hybr', options={'diag':scale})
-            # sol = root(power_balance, args_init, method='hybr')
-            # sol = root(power_balance, args_init, method='broyden1')
+            def power_balance_e(params):
+                """Function to calculate residuals of power balance equations, elec side"""
+                PKe, mdote, Vjete = params
 
-            if sol['success'] == True:
-                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
+                # Derived quantities
+                phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
+
+                # Residuals
+                res1 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
+                res2 = phi_jet_e - PKe * (1 - eta_pe)
+                res3 = hdot[i] * W[i] / Vinf[i] - fBLIe * Dpar[i] - deltaPhiSurf_e / Vinf[i] - \
+                    (Vjete - Vinf[i]) * mdote + Dp[i]
+
+                residuals = np.array([res1, res2, res3,])
+
+                return residuals.reshape(3,)
+
+            args_init_m = [100000.0, 50.0, 50.0]  # FIXME - should be more clever guesses                        
+            args_init_e = [100000.0, 50.0, 50.0]  # FIXME - should be more clever guesses                        
+            scale_m = args_init_m
+            scale_e = args_init_e
+            sol_m = root(power_balance_m, args_init_m, method='hybr', options={'diag':scale_m})
+            sol_e = root(power_balance_e, args_init_e, method='hybr', options={'diag':scale_e})
+
+            if sol_m['success'] == True:
+                [PKm, mdotm, Vjetm] = sol_m['x']
             else:
-                raise Exception("Power balance system not converging")
+                raise Exception("Power balance system not converging (mech side)")
+
+            if sol_e['success'] == True:
+                [PKe, mdote, Vjete] = sol_e['x']
+            else:
+                raise Exception("Power balance system not converging (elec side)")
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
