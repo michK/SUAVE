@@ -131,8 +131,8 @@ class Unified_Network_tmp(Propulsor):
 
         # Efficiencies
         # Propulsive efficiencies
-        eta_pm = 0.9
-        eta_pe = 0.9
+        eta_propm = 0.9
+        eta_prope = 0.9
         # Component efficiencies
         eta_pe  = 0.98
         eta_mot = 0.95
@@ -157,8 +157,8 @@ class Unified_Network_tmp(Propulsor):
         thrust.inputs.vertical_velocity = - conditions.frames.inertial.velocity_vector[:,2]
         thrust.inputs.fS                = fS
         thrust.inputs.fL                = fL
-        thrust.inputs.eta_pm            = eta_pm
-        thrust.inputs.eta_pe            = eta_pe
+        thrust.inputs.eta_propm         = eta_propm
+        thrust.inputs.eta_prope         = eta_prope
         thrust.inputs.eta_th            = eta_th
         thrust.inputs.eta_pe            = eta_pe
         thrust.inputs.eta_mot           = eta_mot

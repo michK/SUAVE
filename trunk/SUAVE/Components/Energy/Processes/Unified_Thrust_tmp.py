@@ -86,8 +86,8 @@ class Unified_Thrust_tmp(Energy_Component):
         nr_elements   = self.inputs.nr_elements
         fS            = self.inputs.fS
         fL            = self.inputs.fL
-        eta_pm        = self.inputs.eta_pm
-        eta_pe        = self.inputs.eta_pe
+        eta_propm     = self.inputs.eta_propm
+        eta_prope     = self.inputs.eta_prope
         eta_th        = self.inputs.eta_th
         eta_pe        = self.inputs.eta_pe
         eta_mot       = self.inputs.eta_mot
@@ -118,8 +118,6 @@ class Unified_Thrust_tmp(Energy_Component):
         mdote_tot = np.zeros(nr_elements)
         Vjetm_tot = np.zeros(nr_elements)
         Vjete_tot = np.zeros(nr_elements)
-        # PKe = np.zeros(nr_elements)
-        # PKm = np.zeros(nr_elements)
         mdot_fuel = np.zeros(nr_elements)
         Pbat = np.zeros(nr_elements)
         Pturb = np.zeros(nr_elements)
@@ -131,59 +129,31 @@ class Unified_Thrust_tmp(Energy_Component):
 
             def power_balance(params):
                 """Function to calculate residuals of power balance equations"""
-                global residuals
-                # PKm, PKe, mdotm, mdote, Vjetm, Vjete, phi_jet_m, phi_jet_e = params
-                PKm, mdotm, Vjetm = params
-                # print(PKm, PKe, mdotm, mdote, Vjetm, Vjete)
+                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
 
                 # Derived quantities
                 phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
-                # phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
+                phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
 
                 # Residuals
-                # res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-                # res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
-                # res3 = phi_jet_m - PKm * (1 - eta_pm)
-                # res4 = phi_jet_e - PKe * (1 - eta_pe)
-                # res5 = fL - PKe / (PKe + PKm)
-                # res6 = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i] - \
-                #     (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + Dp[i]
-                # res7 = - phi_jet_m + 0.5 * (Vjetm - Vinf[i])**2 * mdotm
-                # res8 = - phi_jet_e + 0.5 * (Vjete - Vinf[i])**2 * mdote
-
-                # residuals = np.array([res1, res2, res3, res4, res5, res6, res7, res8])
-
-                # Single propulsive stream
-
                 res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-                res2 = phi_jet_m - PKm * (1 - eta_pm)
-                res3 = hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - deltaPhiSurf / Vinf[i] - \
-                    (Vjetm - Vinf[i]) * mdotm + Dp[i]
-                # res4 = - phi_jet_m + 0.5 * (Vjetm - Vinf[i])**2 * mdotm
+                res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
+                res3 = phi_jet_m - PKm * (1 - eta_propm)
+                res4 = phi_jet_e - PKe * (1 - eta_prope)
+                res5 = fL - PKe / (PKe + PKm)
+                res6 = Dp[i] - (Vjetm - Vinf[i]) * (1 - fL) * mdotm - (Vjete - Vinf[i]) * fL * mdote + \
+                    hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i]
 
-                residuals = np.array([res1, res2, res3]).reshape(3,)
-                # residuals = np.array([res1, res2, res3])
+                residuals = [res1, res2, res3, res4, res5, res6]
 
                 return residuals
-                # return np.sum(residuals**2)
             
-            # args_init = [100000.0, 100000.0, 50.0, 50.0, 50.0, 50.0, 25000.0, 25000.0]
-            args_init = [150000.0, 100.0, 100.0]
-            scale = args_init
-            # sol = root(power_balance, args_init, method='hybr', options={'diag':scale})
+            args_init = [150000.0, 150000.0, 100.0, 100.0, 100.0, 100.0]
+            scale = args_init            
             sol = root(power_balance, args_init, method='hybr')
-            # sol = root(power_balance, args_init, method='broyden1')
-            # sol = minimize(power_balance, args_init, method='SLSQP')
-            # sol = basinhopping(power_balance, args_init, niter=1000)
-            # minimizer_kwargs = dict(method='SLSQP')
-            # sol = basinhopping(power_balance, args_init, minimizer_kwargs=minimizer_kwargs)
-
-            # print(sol)
 
             if sol['success'] == True:
-                # [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
-                [PKm, mdotm, Vjetm] = sol['x']
-                [PKe, mdote, Vjete] = [0, 0, 0]
+                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
             else:
                 raise Exception("Power balance system not converging")
 
