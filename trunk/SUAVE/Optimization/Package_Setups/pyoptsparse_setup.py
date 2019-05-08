@@ -148,7 +148,8 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
         outputs = opt(opt_prob, sens='FD',sensMode='pgc')
         
     elif solver == 'SNOPT':
-        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist', hotStart='ALPSO.hist')
+        # outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist', hotStart='ALPSO.hist')
+        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist')
 
     elif solver == 'SLSQP':
         outputs = opt(opt_prob, sens='FD', sensStep = sense_step, hotStart='NSGA2.hist')

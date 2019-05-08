@@ -198,7 +198,7 @@ def empty(vehicle):
         wt_propulsion                    = Propulsion.integrated_propulsion_general_aviation(wt_engine_piston,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion
 
-    elif propulsor_name=='unified_propsys':
+    elif propulsor_name == 'unified_propsys':
         # Unpack inputs
         num_eng = propulsors.number_of_engines
         wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, vehicle.mdottot)

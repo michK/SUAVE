@@ -11,6 +11,7 @@
 # suave imports
 from SUAVE.Core import Units
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
+from SUAVE.Methods.Utilities.soft_max import soft_max
 
 # package imports
 import numpy as np
@@ -135,16 +136,16 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
             m_tms_store.append(mass_tms)
 
         # Find max values of component masses
-        m_fanm = max(m_fanm_store)
-        m_nacm = max(m_nacm_store)
-        m_fane = max(m_fane_store)
-        m_nace = max(m_nace_store)
-        m_core = max(m_core_store)
-        m_prop_mot = max(m_prop_mot_store)
-        m_pe_prop_mot = max(m_pe_prop_mot_store)
-        m_gen = max(m_gen_store)
-        m_pe_link = max(m_pe_link_store)
-        m_tms = max(m_tms_store)
+        m_fanm =        soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
+        m_nacm =        soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
+        m_fane =        soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
+        m_nace =        soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
+        m_core =        soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
+        m_prop_mot =    soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
+        m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
+        m_gen =         soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
+        m_pe_link =     soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
+        m_tms =         soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
 
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_gen + m_pe_link + mass_tms
