@@ -20,6 +20,8 @@ from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers, remove_negatives
 
+nan = float('nan')
+
 # ----------------------------------------------------------------------
 #  Thrust Process
 # ----------------------------------------------------------------------
@@ -155,7 +157,8 @@ class Unified_Thrust_tmp(Energy_Component):
             if sol['success'] == True:
                 [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
             else:
-                raise Exception("Power balance system not converging")
+                print("Power balance system not convered")
+                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = np.ones(6) * nan
 
             PKm_tot[i] = PKm
             PKe_tot[i] = PKe
