@@ -11,14 +11,12 @@
 # package imports
 import numpy as np
 import scipy
-# import pyoptsparse
 from scipy.optimize import root
-from scipy.optimize import minimize
-from scipy.optimize import basinhopping
+
 # SUAVE imports
 from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
-from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers, remove_negatives
+from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
 nan = float('nan')
 
@@ -129,45 +127,74 @@ class Unified_Thrust_tmp(Energy_Component):
 
         for i in range(nr_elements):
 
+            # def power_balance(params):
+            #     """Function to calculate residuals of power balance equations"""
+            #     PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
+
+            #     # Derived quantities
+            #     phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
+            #     phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
+
+            #     # Residuals
+            #     res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
+            #     res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
+            #     res3 = phi_jet_m - PKm * (1 - eta_propm)
+            #     res4 = phi_jet_e - PKe * (1 - eta_prope)
+            #     res5 = fL - PKe / (PKe + PKm)
+            #     res6 = Dp[i] - (Vjetm - Vinf[i]) * (1 - fL) * mdotm - (Vjete - Vinf[i]) * fL * mdote + \
+            #         hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i]
+
+            #     residuals = [res1, res2, res3, res4, res5, res6]
+
+            #     return residuals
+
             def power_balance(params):
                 """Function to calculate residuals of power balance equations"""
-                PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
+                PK, mdot, Vjetm, Vjete = params
 
                 # Derived quantities
+                PKm = (1 - fL) * PK
+                PKe = fL * PK
+                mdotm = (1 - fL) * mdot
+                mdote = fL * mdot
                 phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
                 phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
 
                 # Residuals
-                res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-                res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
-                res3 = phi_jet_m - PKm * (1 - eta_propm)
-                res4 = phi_jet_e - PKe * (1 - eta_prope)
-                res5 = fL - PKe / (PKe + PKm)
-                res6 = Dp[i] - (Vjetm - Vinf[i]) * (1 - fL) * mdotm - (Vjete - Vinf[i]) * fL * mdote + \
+                res1 = PK - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i] - \
+                    0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]
+                res2 = phi_jet_m - PKm * (1 - eta_propm)
+                res3 = phi_jet_e - PKe * (1 - eta_prope)
+                res4 = Dp[i] - (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + \
                     hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i]
 
-                residuals = [res1, res2, res3, res4, res5, res6]
+                power_balance.PKm = PKm
+                power_balance.PKe = PKe
+                power_balance.mdotm = mdotm
+                power_balance.mdote = mdote
 
-                return residuals
+                residuals = [res1, res2, res3, res4]
+
+                return np.array(residuals).reshape(4,)
             
-            args_init = [150000.0, 150000.0, 100.0, 100.0, 100.0, 100.0]
+            args_init = [100000.0, 500.0, 100.0, 100.0]
             scale = args_init            
             sol = root(power_balance, args_init, method='hybr')
 
             if sol['success'] == True:
-                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = sol['x']
+                [_, _, Vjetm, Vjete] = sol['x']
             else:
-                print("Power balance system not convered")
-                [PKm, PKe, mdotm, mdote, Vjetm, Vjete] = np.ones(6) * nan
+                print("Power balance system not converged")
+                [_, _, Vjetm, Vjete] = np.ones(4) * nan
 
-            PKm_tot[i] = PKm
-            PKe_tot[i] = PKe
-            mdotm_tot[i] = mdotm
-            mdote_tot[i] = mdote
+            PKm_tot[i] = power_balance.PKm
+            PKe_tot[i] = power_balance.PKe
+            mdotm_tot[i] = power_balance.mdotm
+            mdote_tot[i] = power_balance.mdote
             Vjetm_tot[i] = Vjetm
             Vjete_tot[i] = Vjete
 
-            PK_tot = PKm + PKe
+            PK_tot = power_balance.PKm + power_balance.PKe
 
             [PKe_i, PKm_i, PfanE_i, PfanM_i, Pmot_i, Pinv_i, Pbat_i, Pturb_i, Pmot_link_i, Pconv_i, Plink_i] = \
                 calculate_powers(PK_tot, fS, fL, eta_pe, eta_mot, eta_fan)
