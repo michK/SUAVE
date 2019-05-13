@@ -60,6 +60,11 @@ class Unified_Network_tmp(Propulsor):
         # Propulsor areas
         self.mech_fan_dia = 1.0 * Units.m
         self.elec_fan_dia = 1.0 * Units.m
+        self.mech_nac_dia = 1.0 * Units.m
+        self.elec_nac_dia = 1.0 * Units.m
+
+        self.nacelle_length_mech = 1.0 * Units.m
+        self.nacelle_length_elec = 1.0 * Units.m
 
         self.area_noz_fan = 0.6  # FIXME - Find reasonable values
         self.area_jet_noz = 0.95  # FIXME - Find reasonable values
@@ -67,6 +72,8 @@ class Unified_Network_tmp(Propulsor):
         # areas needed for drag; not in there yet
         self.areas             = Data()
         self.areas.wetted      = 0.0
+        self.areas_wetted_mech = 1.0 * Units['m^2']
+        self.areas_wetted_elec = 1.0 * Units['m^2']
 
         # max power tracker
         self.max_power = 0.01
@@ -113,8 +120,8 @@ class Unified_Network_tmp(Propulsor):
         fL = self.fL
         fS = self.fS
         fBLIm = self.fBLIm
-        dia_fan_mech = self.fan_diameter_mech
-        dia_fan_elec = self.fan_diameter_elec
+        # dia_fan_mech = self.fan_diameter_mech
+        # dia_fan_elec = self.fan_diameter_elec
 
         # Calculate wing BLI from electrical propulsors
         # fBLIe = (nr_fans_elec * dia_fan_elec) / (self.wingspan_projected -
@@ -122,12 +129,12 @@ class Unified_Network_tmp(Propulsor):
         fBLIe = self.fBLIe
 
         # Calculate fan areas
-        area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
-        area_fan_elec = np.pi / 4.0 * dia_fan_elec**2.0
+        # area_fan_mech = np.pi / 4.0 * dia_fan_mech**2.0
+        # area_fan_elec = np.pi / 4.0 * dia_fan_elec**2.0
 
         # Calculate jet area
-        area_jet_mech = area_fan_mech * self.area_noz_fan * self.area_jet_noz
-        area_jet_elec = area_fan_elec * self.area_noz_fan * self.area_jet_noz
+        # area_jet_mech = area_fan_mech * self.area_noz_fan * self.area_jet_noz
+        # area_jet_elec = area_fan_elec * self.area_noz_fan * self.area_jet_noz
 
         # Efficiencies
         # Propulsive efficiencies
@@ -173,8 +180,8 @@ class Unified_Network_tmp(Propulsor):
         thrust.inputs.fsurf             = fsurf
         thrust.inputs.nr_fans_elec      = nr_fans_elec
         thrust.inputs.nr_fans_mech      = nr_fans_mech
-        thrust.inputs.area_jet_mech     = area_jet_mech
-        thrust.inputs.area_jet_elec     = area_jet_elec
+        # thrust.inputs.area_jet_mech     = area_jet_mech
+        # thrust.inputs.area_jet_elec     = area_jet_elec
         thrust.inputs.hfuel             = hfuel
 
         #compute the thrust

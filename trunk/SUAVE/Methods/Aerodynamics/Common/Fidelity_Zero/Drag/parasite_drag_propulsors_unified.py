@@ -23,7 +23,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Aerodynamics-Common-Fidelity_Zero-Drag
-def parasite_drag_propulsors_unified(state,settings,geometry):
+def parasite_drag_propulsors_unified(state, settings, geometry):
     """Computes the parasite drag due to the unified model propulsion system
        Modified from parasite_drag_propulsor.py
        The main difference is that there are now two types of propulsors, one type
@@ -61,26 +61,26 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     propsys = geometry
 
     # mechanical propulsors;
-    Sref_mech      = np.pi / 4.0 * propsys.nacelle_diameter_mech**2.0
+    Sref_mech      = np.pi / 4.0 * propsys.mech_nac_dia**2.0
     Swet_mech      = propsys.areas_wetted_mech
     l_nacelle_mech = propsys.nacelle_length_mech
-    d_nacelle_mech = propsys.nacelle_diameter_mech
-    nr_fans_mech = propsys.number_of_engines_mech
-    f_embed_mech = 1.0
+    d_nacelle_mech = propsys.mech_nac_dia
+    nr_fans_mech   = propsys.number_of_engines_mech
+    f_embed_mech   = 1.0
 
     # electrical propulsors
-    Sref_elec      = np.pi / 4.0 * propsys.nacelle_diameter_elec**2.0
+    Sref_elec      = np.pi / 4.0 * propsys.elec_nac_dia**2.0
     Swet_elec      = propsys.areas_wetted_elec
     l_nacelle_elec = propsys.nacelle_length_elec
-    d_nacelle_elec = propsys.nacelle_diameter_elec
-    nr_fans_elec = propsys.number_of_engines_elec
-    f_embed_elec = 0.5
+    d_nacelle_elec = propsys.elec_nac_dia
+    nr_fans_elec   = propsys.number_of_engines_elec
+    f_embed_elec   = 0.5
 
     # conditions
     freestream = conditions.freestream
-    Mc  = freestream.mach_number
-    Tc  = freestream.temperature
-    re  = freestream.reynolds_number
+    Mc         = freestream.mach_number
+    Tc         = freestream.temperature
+    re         = freestream.reynolds_number
 
     # mechanical propulsors
     # reynolds number

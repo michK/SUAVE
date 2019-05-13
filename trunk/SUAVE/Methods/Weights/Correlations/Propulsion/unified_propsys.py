@@ -79,8 +79,8 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
 
             # Sizing constants from LEARN.
             Kcore  = 45.605
-            Kfan   = 1.2972
-            Knace  = 4.5641
+            Kfan   = 1.2972 * 0.1
+            Knace  = 4.5641 * 0.1
             cmnace = 1.0
             c_core = 400.0 * Units['kJ/kg']
             pm_mot = 8.0 * Units['hp/lb']
@@ -149,6 +149,17 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
 
         mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
                 m_gen + m_pe_link + mass_tms
+
+        # print("m_core + {}".format(m_core))
+        # print("m_fanm + {}".format(m_fanm))
+        # print("m_fane + {}".format(m_fane))
+        # print("m_nacm + {}".format(m_nacm))
+        # print("m_nace + {}".format(m_nace))
+        # print("m_prop_mot + {}".format(m_prop_mot))
+        # print("m_pe_prop_mot + {}".format(m_pe_prop_mot))
+        # print("m_gen + {}".format(m_gen))
+        # print("m_pe_link + {}".format(m_pe_link))
+        # print("mass_tms + {}".format(mass_tms))
 
         mass_propsys = mprop * weight_factor
 

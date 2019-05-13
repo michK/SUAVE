@@ -77,8 +77,8 @@ def parasite_total(state,settings,geometry):
             total_parasite_drag += parasite_drag * ref_area/vehicle_reference_area * propulsor.number_of_engines
     elif propulsors.values()[0]['arch_tag'] == 'unified': # unified model
         for propulsor in propulsors.values():
-            ref_area_mech = np.pi / 4.0 * propulsor.nacelle_diameter_mech**2.0
-            ref_area_elec = np.pi / 4.0 * propulsor.nacelle_diameter_elec**2.0
+            ref_area_mech = np.pi / 4.0 * propulsor.mech_nac_dia**2.0
+            ref_area_elec = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
             parasite_drag_mech = \
                 conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech            
             parasite_drag_elec = \

@@ -102,8 +102,8 @@ class Unified_Thrust_tmp(Energy_Component):
         fsurf         = self.inputs.fsurf
         nr_fans_mech  = self.inputs.nr_fans_mech
         nr_fans_elec  = self.inputs.nr_fans_elec
-        area_jet_mech = self.inputs.area_jet_mech
-        area_jet_elec = self.inputs.area_jet_elec
+        # area_jet_mech = self.inputs.area_jet_mech
+        # area_jet_elec = self.inputs.area_jet_elec
         hfuel         = self.inputs.hfuel
 
         # Unpack from conditions

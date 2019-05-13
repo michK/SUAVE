@@ -65,8 +65,8 @@ def parasite_drag_pylon_unified(state,settings,geometry):
 
     # Estimating pylon drag
     for propulsor in geometry.propulsors:
-        ref_area_mech = np.pi / 4.0 * propulsor.nacelle_diameter_mech**2.0
-        ref_area_elec = np.pi / 4.0 * propulsor.nacelle_diameter_elec**2.0
+        ref_area_mech = np.pi / 4.0 * propulsor.mech_nac_dia**2.0
+        ref_area_elec = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
         pylon_parasite_drag_mech += pylon_factor_mech *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * (ref_area_mech / geometry.reference_area * propulsor.number_of_engines_mech)
         pylon_parasite_drag_elec += pylon_factor_elec *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec * (ref_area_elec / geometry.reference_area * propulsor.number_of_engines_elec)
         pylon_wetted_area_mech   += pylon_factor_mech *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.number_of_engines_mech
