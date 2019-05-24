@@ -194,7 +194,7 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
 
         mprop = propsys.number_of_engines_mech * (m_core + m_fanm + m_nacm) + \
                 propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
-                m_gen + m_pe_link + mass_tms + m_fuel_tank +
+                m_gen + m_pe_link + mass_tms
 
         propsys.info.m_core        = m_core
         propsys.info.m_fanm        = m_fanm
