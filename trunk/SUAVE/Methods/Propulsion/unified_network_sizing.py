@@ -22,16 +22,15 @@ def unified_network_sizing(vehicle):
     nr_fans_mech = propsys.number_of_engines_mech
     nr_fans_elec = propsys.number_of_engines_elec
 
-    mdottot = vehicle.mdottot
-    
     fL = vehicle.fL_cruise  # Size propulsors for cruise
-    # print(fL)
-   
-    mdotm_tot = (1 - fL) * mdottot
-    mdote_tot = fL * mdottot
 
-    mdotm = mdotm_tot / vehicle.propulsors.unified_propsys.number_of_engines_mech
-    mdote = mdote_tot / vehicle.propulsors.unified_propsys.number_of_engines_elec
+    propsys.mdottot = vehicle.mdottot
+   
+    mdotm_tot = (1 - fL) * propsys.mdottot
+    mdote_tot = fL * propsys.mdottot
+
+    mdotm = mdotm_tot / nr_fans_mech
+    mdote = mdote_tot / nr_fans_elec
 
     Acapm = 0.00515 * mdotm  # Raymer Chapter 10.3.4 for M <= 0.8
     Acape = 0.00515 * mdote
@@ -48,16 +47,27 @@ def unified_network_sizing(vehicle):
         Afanm = Acapm / (A_Astar_inlet / A_Astar_face)
         Afane = Acape / (A_Astar_inlet / A_Astar_face)
 
-    vehicle.propulsors.unified_propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
-    vehicle.propulsors.unified_propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
+    # Fan diameters
+    propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
+    propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
 
-    vehicle.propulsors.unified_propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # RaymerChapter 10.3.4 for M <= 0.8
-    vehicle.propulsors.unified_propsys.elec_nac_dia = Dnace = Dfane / 0.8
+    # Nacelle diameters and lengths
+    propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # RaymerChapter 10.3.4 for M <= 0.8
+    propsys.elec_nac_dia = Dnace = Dfane / 0.8
+    propsys.nacelle_length_mech = 1.5 * Dnacm
+    propsys.nacelle_length_elec = 1.5 * Dnace
 
-    nacelle_length_mech = 1.5 * vehicle.propulsors.unified_propsys.mech_nac_dia
-    nacelle_length_elec = 1.5 * vehicle.propulsors.unified_propsys.elec_nac_dia
+    # Wetted areas
+    propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * Dnacm
+    # print("Sizing: {}".format(propsys.mech_fan_dia))
+    propsys.areas_wetted_elec = 1.1 * 0.5 * propsys.nacelle_length_elec * np.pi * Dnace
 
-    vehicle.propulsors.unified_propsys.areas_wetted_mech = nacelle_length_mech * np.pi * Dnacm
-    vehicle.propulsors.unified_propsys.areas_wetted_elec = nacelle_length_elec * np.pi * Dnace
+    # Set summary information
+    propsys.info.mech_fan_dia = Dfanm
+    propsys.info.elec_fan_dia = Dfane
+    propsys.info.areas_wetted_mech_tot = vehicle.propulsors.unified_propsys.areas_wetted_mech * nr_fans_mech
+    propsys.info.areas_wetted_elec_tot = vehicle.propulsors.unified_propsys.areas_wetted_elec * nr_fans_elec
+    propsys.info.areas_wetted_mech_pylons = propsys.info.areas_wetted_mech_tot * 0.2
+    propsys.info.areas_wetted_elec_pylons = 0
 
-    return
+    return propsys
