@@ -23,7 +23,7 @@ import numpy as np
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
+def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -49,9 +49,8 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
             N/A
     """
 
-    # TODO Add loop that loops over fS and fL
-    # and calculates max power/mass flow required
-    # by different components
+    # unpack
+    propsys = vehicle.propulsors.unified_propsys
 
     # Create arrays of fL and fS to loop over
     fL_arr = np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent])
@@ -79,9 +78,6 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
 
             # Sizing constants from LEARN.
             Kcore  = 45.605
-            Kfan   = 1.2972 * 0.1
-            Knace  = 4.5641 * 0.1
-            cmnace = 1.0
             c_core = 400.0 * Units['kJ/kg']
             pm_mot = 8.0 * Units['hp/lb']
             pm_pe  = 10.0 * Units['hp/lb']
@@ -94,15 +90,19 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
             eta_pe  = 0.98  # Power electronics
             eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5
 
-            # Fan and nacelle weights
-            m_fanm = (Kfan * mdotm**1.2).sum()
-            m_nacm = (cmnace * Knace * mdotm).sum()
-            m_fane = (Kfan * mdote**1.2).sum()
-            m_nace = (cmnace * Knace * mdote).sum()
-
-            # Calculate powers  NOTE - Negative values set to zeros
             [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgenmot, Pconv, Plink] = \
             calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+
+            # Split power between different components for proper sizing
+            PfanM   = PfanM / propsys.number_of_engines_mech
+            PfanE   = PfanE / propsys.number_of_engines_elec
+            Pmot    = Pmot  / propsys.number_of_engines_elec
+            Pinv    = Pinv  / propsys.number_of_engines_elec
+            Pturb   = Pturb / propsys.number_of_engines_mech
+            Pbat    = Pbat
+            Pgenmot = Pgenmot
+            Pconv   = Pconv
+            Plink   = Plink
 
             mdot_core = Pturb / c_core
 
@@ -110,7 +110,52 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
             m_prop_mot    = Pmot / pm_mot
             m_pe_prop_mot = Pinv / pm_pe
             m_gen         = Pgenmot / pm_mot
-            m_pe_link     = Pconv / pm_pe            
+            m_pe_link     = Pconv / pm_pe
+
+            # Fan weights
+            # Mechanical
+            kp  = 0.108
+            Np  = 1  # br of propellers in single propulsor unit
+            Dp  = propsys.mech_fan_dia / Units.ft
+            Pto = PfanM / Units.hp
+            Bp  = 10  # Number of blades
+            m_fanm = (kp * Np * (Dp * Pto * np.sqrt(Bp))**0.78174).sum() * Units.lbs
+
+            # Electrical
+            kp  = 0.108
+            Np  = 1  # br of propellers in single propulsor unit
+            Dp  = propsys.elec_fan_dia / Units.ft
+            Pto = PfanE / Units.hp
+            Bp  = 10  # Number of blades
+            m_fane = (kp * Np * (Dp * Pto * np.sqrt(Bp))**0.78174).sum() * Units.lbs
+
+            # Nacelle weights
+            # Mechanical
+            Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
+            NLt  = propsys.nacelle_length_mech / Units.ft
+            Nw   = propsys.mech_nac_dia / Units.ft
+            Nz   = vehicle.envelope.ultimate_load
+            Weng = m_core / Units.lbs
+            Kp   = 1.0  # Propeller/fan book-kept separately
+            Ktr  = 1.18  # With thrust reverser, 1.0 without
+            Wec  = 2.331 * Weng**0.901 * Kp * Ktr
+            Nen  = propsys.number_of_engines_mech
+            Sn   = propsys.areas_wetted_mech / Units['ft^2']
+            m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs
+            # Electrical
+            Kng  = 1.0  # For non-pylon mounted nacelle (i.e. electrical in this framework)
+            NLt  = propsys.nacelle_length_elec / Units.ft
+            Nw   = propsys.elec_nac_dia / Units.ft
+            Nz   = vehicle.envelope.ultimate_load
+            Weng = m_prop_mot / Units.lbs
+            Kp   = 1.0  # Propeller/fan book-kept separately
+            Ktr  = 1.0  # With thrust reverser, 1.0 without
+            Wec  = 2.331 * Weng**0.901 * Kp * Ktr
+            Nen  = propsys.number_of_engines_elec
+            Sn   = propsys.areas_wetted_elec / Units['ft^2']
+            m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs
 
             # Thermal management system
             q_bat  = (1.0 - eta_bat) * Pbat
@@ -136,30 +181,33 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1):
             m_tms_store.append(mass_tms)
 
         # Find max values of component masses
-        m_fanm =        soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
-        m_nacm =        soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
-        m_fane =        soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
-        m_nace =        soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
-        m_core =        soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
-        m_prop_mot =    soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
+        m_fanm        = soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
+        m_nacm        = soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
+        m_fane        = soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
+        m_nace        = soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
+        m_core        = soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
+        m_prop_mot    = soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
         m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
-        m_gen =         soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
-        m_pe_link =     soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
-        m_tms =         soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
+        m_gen         = soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
+        m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
+        m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
 
-        mprop = m_core + m_fanm + m_fane + m_nacm + m_nace + m_prop_mot + m_pe_prop_mot + \
-                m_gen + m_pe_link + mass_tms
+        mprop = propsys.number_of_engines_mech * (m_core + m_fanm + m_nacm) + \
+                propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
+                m_gen + m_pe_link + mass_tms + m_fuel_tank +
 
-        # print("m_core + {}".format(m_core))
-        # print("m_fanm + {}".format(m_fanm))
-        # print("m_fane + {}".format(m_fane))
-        # print("m_nacm + {}".format(m_nacm))
-        # print("m_nace + {}".format(m_nace))
-        # print("m_prop_mot + {}".format(m_prop_mot))
-        # print("m_pe_prop_mot + {}".format(m_pe_prop_mot))
-        # print("m_gen + {}".format(m_gen))
-        # print("m_pe_link + {}".format(m_pe_link))
-        # print("mass_tms + {}".format(mass_tms))
+        propsys.info.m_core        = m_core
+        propsys.info.m_fanm        = m_fanm
+        propsys.info.m_fane        = m_fane
+        propsys.info.m_nacm        = m_nacm
+        propsys.info.m_nace        = m_nace
+        propsys.info.m_prop_mot    = m_prop_mot
+        propsys.info.m_pe_prop_mot = m_pe_prop_mot
+        propsys.info.m_gen         = m_gen
+        propsys.info.m_pe_link     = m_pe_link
+        propsys.info.mass_tms      = mass_tms
+        propsys.info.weight_factor = weight_factor
+        propsys.info.weight_total  = mprop * weight_factor
 
         mass_propsys = mprop * weight_factor
 
