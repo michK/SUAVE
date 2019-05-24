@@ -17,8 +17,10 @@ from SUAVE.Core import Data
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Aerodynamics-Common-Fidelity_Zero-Drag
-def parasite_drag_pylon_unified(state,settings,geometry):
-    """Computes the parasite drag due to pylons as a proportion of the propulsor drag
+def parasite_drag_pylon_unified(state, settings, vehicle):
+    """
+    Adapted from parasite_drag_pylon. Computes the parasite drag due to pylons as a proportion of the propulsor drag
+    for unified propulsion system
 
     Assumptions:
     Basic fit
@@ -34,8 +36,8 @@ def parasite_drag_pylon_unified(state,settings,geometry):
       wetted_area                                                   [m^2]
       parasite_drag_coefficient                                     [Unitless]
       reynolds_number                                               [Unitless]
-    geometry.reference_area                                         [m^2]
-    geometry.propulsors.
+    vehicle.reference_area                                         [m^2]
+    vehicle.propulsors.
       nacelle_diameter                                              [m]
       number_of_engines_mech                                               [Unitless]
       number_of_engines_elec                                               [Unitless]
@@ -46,35 +48,26 @@ def parasite_drag_pylon_unified(state,settings,geometry):
     Properties Used:
     N/A
     """
+
     # unpack
-
     conditions = state.conditions
-    configuration = settings
+    propulsor = vehicle.propulsors.unified_propsys
 
-    pylon_factor_mech        =  0.20 # 20% of propulsor drag
-    pylon_factor_elec        =  0.10 # 10% of propulsor drag - No pylons but still installation losses
-    n_propulsors        =  len(geometry.propulsors)  # number of propulsive system in vehicle (NOT # of ENGINES)
-    pylon_parasite_drag_mech = 0.00
-    pylon_parasite_drag_elec = 0.00
-    pylon_wetted_area_mech   = 0.00
-    pylon_wetted_area_elec   = 0.00
-    pylon_cf            = 0.00
-    pylon_compr_fact    = 0.00
-    pylon_rey_fact      = 0.00
-    pylon_FF            = 0.00
+    pylon_factor_mech        =  0.2 # 20% of propulsor drag
+    pylon_factor_elec        =  0.1 # No pylons but still installation effects
+    n_propulsors             =  len(vehicle.propulsors)  # number of propulsive system in vehicle (NOT # of ENGINES)
 
     # Estimating pylon drag
-    for propulsor in geometry.propulsors:
-        ref_area_mech = np.pi / 4.0 * propulsor.mech_nac_dia**2.0
-        ref_area_elec = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
-        pylon_parasite_drag_mech += pylon_factor_mech *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * (ref_area_mech / geometry.reference_area * propulsor.number_of_engines_mech)
-        pylon_parasite_drag_elec += pylon_factor_elec *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec * (ref_area_elec / geometry.reference_area * propulsor.number_of_engines_elec)
-        pylon_wetted_area_mech   += pylon_factor_mech *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.number_of_engines_mech
-        pylon_wetted_area_elec   += pylon_factor_elec *  conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_elec * propulsor.number_of_engines_elec
-        pylon_cf            += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].skin_friction_coefficient
-        pylon_compr_fact    += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].compressibility_factor
-        pylon_rey_fact      += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].reynolds_factor
-        pylon_FF            += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].form_factor
+    ref_area_mech            = np.pi / 4.0 * propulsor.mech_nac_dia**2.0
+    ref_area_elec            = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
+    pylon_parasite_drag_mech = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * ref_area_mech / vehicle.reference_area * propulsor.number_of_engines_mech
+    pylon_parasite_drag_elec = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec * ref_area_elec / vehicle.reference_area * propulsor.number_of_engines_elec
+    pylon_wetted_area_mech   = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.number_of_engines_mech
+    pylon_wetted_area_elec   = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_elec * propulsor.number_of_engines_elec
+    pylon_cf                 = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].skin_friction_coefficient
+    pylon_compr_fact         = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].compressibility_factor
+    pylon_rey_fact           = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].reynolds_factor
+    pylon_FF                 = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].form_factor
 
     pylon_cf            /= n_propulsors
     pylon_compr_fact    /= n_propulsors
@@ -88,7 +81,7 @@ def parasite_drag_pylon_unified(state,settings,geometry):
     # dump data to conditions
     pylon_result = Data(
         wetted_area                    = pylon_wetted_area,
-        reference_area                 = geometry.reference_area,
+        reference_area                 = vehicle.reference_area,
         parasite_drag_coefficient      = pylon_parasite_drag_coefficient,
         skin_friction_coefficient      = pylon_cf,
         compressibility_factor         = pylon_compr_fact,
@@ -98,4 +91,4 @@ def parasite_drag_pylon_unified(state,settings,geometry):
 
     conditions.aerodynamics.drag_breakdown.parasite['pylon'] = pylon_result
 
-    return pylon_parasite_drag_mech + pylon_parasite_drag_elec
+    return pylon_parasite_drag_coefficient
