@@ -107,9 +107,13 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
         opt.setOption('Function precision', sense_step**2.)
         opt.setOption('Difference interval', sense_step)
         opt.setOption('Central difference interval', CD_step)
+        opt.setOption('Verify level', 2)
+        # opt.setOption('Major step limit', 2.0)
+        # opt.setOption('Penalty parameter', 0.5)
         
     elif solver == 'SLSQP':
         opt = pyOpt.SLSQP()
+        # opt.setOption('ACC', 1e-6)  # Default
          
     elif solver == 'FSQP':
         opt = pyOpt.FSQP()
@@ -125,10 +129,10 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
     elif solver == 'ALPSO':
         #opt = pyOpt.pyALPSO.ALPSO(pll_type='DPM') #this requires DPM, which is a parallel implementation
         opt = pyOpt.ALPSO()
-        opt.setOption('SwarmSize', 10)
-        opt.setOption('maxOuterIter', 3)
-        opt.setOption('maxInnerIter', 6)
-        opt.setOption('minInnerIter', 3)
+        # opt.setOption('SwarmSize', 10)
+        # opt.setOption('maxOuterIter', 3)
+        # opt.setOption('maxInnerIter', 6)
+        # opt.setOption('minInnerIter', 3)
 
     elif solver == 'CONMIN':
         opt = pyOpt.CONMIN() 
@@ -152,7 +156,8 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
         outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist')
 
     elif solver == 'SLSQP':
-        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, hotStart='NSGA2.hist')
+        # outputs = opt(opt_prob, sens='FD', sensStep = sense_step, hotStart='NSGA2.hist')
+        outputs = opt(opt_prob, sens='FD', sensStep = sense_step)
   
     elif solver == 'ALPSO':
         outputs = opt(opt_prob, storeHistory='ALPSO.hist')

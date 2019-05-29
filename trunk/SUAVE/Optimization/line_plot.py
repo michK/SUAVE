@@ -90,9 +90,9 @@ def line_plot(problem, number_of_points,  plot_obj=1, plot_const=1, sweep_index=
         bar.update(i + 1)
         opt_prob.inputs[:,1][idx0]= inputs[0,i]
    
-        # obj[i]             = problem.objective()*obj_scaling
-        sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT')
-        obj[i] = sol.fStar * obj_scaling
+        obj[i]             = problem.objective()*obj_scaling
+        # sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT')
+        # obj[i] = sol.fStar * obj_scaling
         constraint_val[:,i] = problem.all_constraints().tolist()
 
     bar.finish()

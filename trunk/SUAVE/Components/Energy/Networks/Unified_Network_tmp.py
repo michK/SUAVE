@@ -60,7 +60,7 @@ class Unified_Network_tmp(Propulsor):
         self.info = Data()
 
         # Total mass flow
-        self.mdottot = 1000.0 * Units['kg/s']
+        self.mdottot = 400.0 * Units['kg/s']
 
         # Propulsor areas
         self.mech_fan_dia = 1.0 * Units.m

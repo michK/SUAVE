@@ -14,7 +14,7 @@ def unified_network_sizing(vehicle):
     This function takes the total mass flow through all propulsors
     and sizes the fans appropriately, based on the number of propulsors
 
-    Method for fan sizing from Raymer
+    Method for fan and nacelle sizing from Raymer
     """
 
     propsys = vehicle.propulsors.unified_propsys
@@ -24,10 +24,10 @@ def unified_network_sizing(vehicle):
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
 
-    propsys.mdottot = vehicle.mdottot
+    propsys.mdot_cruise = vehicle.mdottot_cruise
    
-    mdotm_tot = (1 - fL) * propsys.mdottot
-    mdote_tot = fL * propsys.mdottot
+    mdotm_tot = (1 - fL) * propsys.mdot_cruise
+    mdote_tot = fL * propsys.mdot_cruise
 
     mdotm = mdotm_tot / nr_fans_mech
     mdote = mdote_tot / nr_fans_elec

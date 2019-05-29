@@ -23,7 +23,7 @@ import numpy as np
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
+def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -72,10 +72,6 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
     for fL in fL_arr:
         for fS in fS_arr:
 
-            # Ensure mass flows are arrays
-            mdotm = (1 - fL) * mdottot
-            mdote = fL * mdottot
-
             # Sizing constants from LEARN.
             Kcore  = 45.605
             c_core = 400.0 * Units['kJ/kg']
@@ -115,7 +111,7 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
             # Fan weights
             # Mechanical
             kp  = 0.108
-            Np  = 1  # br of propellers in single propulsor unit
+            Np  = 1  # nr of propellers in single propulsor unit
             Dp  = propsys.mech_fan_dia / Units.ft
             Pto = PfanM / Units.hp
             Bp  = 10  # Number of blades
@@ -123,7 +119,7 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
 
             # Electrical
             kp  = 0.108
-            Np  = 1  # br of propellers in single propulsor unit
+            Np  = 1  # nr of propellers in single propulsor unit
             Dp  = propsys.elec_fan_dia / Units.ft
             Pto = PfanE / Units.hp
             Bp  = 10  # Number of blades
@@ -192,9 +188,9 @@ def unified_propsys(vehicle, PKtot, mdottot, weight_factor=1.0):
         m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
         m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
 
-        mprop = propsys.number_of_engines_mech * (m_core + m_fanm + m_nacm) + \
+        mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
                 propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
-                m_gen + m_pe_link + mass_tms
+                mass_tms
 
         propsys.info.m_core        = m_core
         propsys.info.m_fanm        = m_fanm
