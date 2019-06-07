@@ -214,7 +214,7 @@ class Unified_Thrust_tmp(Energy_Component):
             Pturb[i] = Pturb_i
 
             # Calculate vehicle mass rate of change
-            mdot_fuel[i] = Pturb_i / (hfuel * eta_th)  # NOTE Could incorporate TSFC here
+            mdot_fuel[i] = 0.72 * 3.57 * Pturb_i / (hfuel * eta_th)  # NOTE Could incorporate TSFC here
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 

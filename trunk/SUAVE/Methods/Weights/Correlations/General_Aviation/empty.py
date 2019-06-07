@@ -168,10 +168,10 @@ def empty(vehicle):
     S_gross_w   = vehicle.reference_area
     fuel        = vehicle.fuel
     fuel.number_of_tanks = 2
-    fuel.internal_volume = 1466.0 * Units.liter
+    fuel.internal_volume = 1419 * Units.liter
     fuel.density = 810 * Units['kg/m^3']
-    # fuel.mass_properties.mass = fuel.density * fuel.internal_volume
-    fuel.mass_properties.mass = 0.0  # FIXME This just affects landing weight for gear sizing
+    fuel.mass_properties.mass = fuel.density * fuel.internal_volume
+    # fuel.mass_properties.mass = 0.0  # FIXME This just affects landing weight for gear sizing
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     TOW         = vehicle.mass_properties.max_takeoff
@@ -203,7 +203,8 @@ def empty(vehicle):
         # Unpack inputs
         num_eng = propulsors.number_of_engines_mech
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
-        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot)
+        weight_factor = 3.68
+        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
         propulsors.mass_properties.mass = wt_propulsion
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
