@@ -17,7 +17,7 @@ import scipy as sp
 # ----------------------------------------------------------------------
 
 ## @ingroup Optimization-Package_Setups
-def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08): #
+def SciPy_Solve(problem, solver='SLSQP', sense_step=1.4901161193847656e-08, accuracy=1.4901161193847656e-08**2):
     """ This converts your SUAVE Nexus problem into a SciPy optimization problem and solves it
         SciPy has many algorithms, they can be switched out by using the solver input. 
 
@@ -61,7 +61,7 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08): #
 
     # Finalize problem statement and run
     if solver=='SLSQP':
-        outputs = sp.optimize.fmin_slsqp(wrapper,x,f_eqcons=problem.equality_constraint,f_ieqcons=problem.inequality_constraint,bounds=bnds,iter=200, epsilon = sense_step, acc  = sense_step**2)
+        outputs = sp.optimize.fmin_slsqp(wrapper,x,f_eqcons=problem.equality_constraint,f_ieqcons=problem.inequality_constraint,bounds=bnds,iter=200, epsilon = sense_step, acc  = accuracy)
     else:
         outputs = sp.optimize.minimize(wrapper,x,method=solver)
     
@@ -89,9 +89,12 @@ def SciPy_Problem(problem,x):
         None
     """      
     
-    print('Inputs')
-    print(x)        
     obj   = problem.objective(x)
+    # con = problem.constraints(x)
+    print('Inputs')
+    print(x)
+    # print('Constraints')
+    # print(con)
     print('Obj')
     print(obj)
 

@@ -103,6 +103,8 @@ def Pyopt_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  nonderiv
         opt.setOption('Function precision', sense_step**2.)
         opt.setOption('Difference interval', sense_step)
         opt.setOption('Central difference interval', CD_step)
+        # opt.setOption('iPrint', 0)
+        # opt.setOption('iSumm', 0)
 
     elif solver == 'COBYLA':
         import pyOpt.pyCOBYLA
@@ -112,6 +114,7 @@ def Pyopt_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  nonderiv
         import pyOpt.pySLSQP
         opt = pyOpt.pySLSQP.SLSQP()
         opt.setOption('MAXIT', 200)
+        opt.setOption('ACC', sense_step**2)
     elif solver == 'KSOPT':
         import pyOpt.pyKSOPT
         opt = pyOpt.pyKSOPT.KSOPT()
