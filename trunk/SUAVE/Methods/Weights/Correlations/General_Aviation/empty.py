@@ -203,7 +203,7 @@ def empty(vehicle):
         # Unpack inputs
         num_eng = propulsors.number_of_engines_mech
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
-        weight_factor = 3.68
+        weight_factor = 2.15
         wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
         propulsors.mass_properties.mass = wt_propulsion
 
