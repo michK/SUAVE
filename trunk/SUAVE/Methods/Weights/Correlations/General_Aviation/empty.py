@@ -168,9 +168,10 @@ def empty(vehicle):
     S_gross_w   = vehicle.reference_area
     fuel        = vehicle.fuel
     fuel.number_of_tanks = 2
-    fuel.internal_volume = 1466.0 * Units.liter
+    fuel.internal_volume = 1419 * Units.liter
     fuel.density = 810 * Units['kg/m^3']
     fuel.mass_properties.mass = fuel.density * fuel.internal_volume
+    # fuel.mass_properties.mass = 0.0  # FIXME This just affects landing weight for gear sizing
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     TOW         = vehicle.mass_properties.max_takeoff
@@ -182,23 +183,33 @@ def empty(vehicle):
     mach_number = vehicle.design_mach_number
 
     propulsor_name = list(vehicle.propulsors.keys())[0] #obtain the key for the propulsor for assignment purposes
-    propulsors     = vehicle.propulsors[propulsor_name]
-    num_eng        = propulsors.number_of_engines
+    propulsors     = vehicle.propulsors[propulsor_name]   
 
     if propulsor_name == 'turbofan':
+        num_eng                          = propulsors.number_of_engines
         thrust_sls                       = propulsors.sealevel_static_thrust
         wt_engine_jet                    = Propulsion.engine_jet(thrust_sls)
         wt_propulsion                    = Propulsion.integrated_propulsion(wt_engine_jet,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion
 
     elif propulsor_name == 'internal_combustion':
+        num_eng                          = propulsors.number_of_engines
         rated_power                      = propulsors.rated_power/num_eng
         wt_engine_piston                 = Propulsion.engine_piston(rated_power)
         wt_propulsion                    = Propulsion.integrated_propulsion_general_aviation(wt_engine_piston,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion
 
+    elif propulsor_name == 'unified_propsys':
+        # Unpack inputs
+        num_eng = propulsors.number_of_engines_mech
+        fuel.number_of_tanks = propulsors.nr_fuel_tanks
+        weight_factor = 2.15
+        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
+        propulsors.mass_properties.mass = wt_propulsion
+
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
         wt_propulsion                    = propulsors.mass_properties.mass
+        num_eng = propulsors.number_of_engines
         if wt_propulsion==0:
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)
     #find fuel volume
@@ -210,7 +221,7 @@ def empty(vehicle):
 
     else:
         m_fuel                      = fuel.mass_properties.mass
-        landing_weight              = TOW-m_fuel  #just assume this for now
+        landing_weight              = TOW-m_fuel  #just assume this for now        
         N_tank                      = fuel.number_of_tanks
         V_fuel_int                  = fuel.internal_volume #fuel in internal (as opposed to external tanks)
         V_fuel                      = m_fuel/fuel.density  #total fuel

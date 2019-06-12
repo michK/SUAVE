@@ -19,7 +19,7 @@ from .Weights import Weights
 
 ## @ingroup Analyses-Weights
 class Weights_Tube_Wing_GA(Weights):
-    """ This is class that evaluates the weight of Tube and Wing aircraft
+    """ This a class that evaluates the weight of Tube and Wing GA aircraft
     
     Assumptions:
         None
@@ -65,7 +65,7 @@ class Weights_Tube_Wing_GA(Weights):
         self.settings.weight_reduction_factors.fuselage  = 0.
         self.settings.weight_reduction_factors.empennage = 0. # applied to horizontal and vertical stabilizers
         
-    def evaluate(self,conditions=None):
+    def evaluate(self, conditions=None):
         """Evaluate the weight analysis.
     
         Assumptions:
@@ -86,13 +86,13 @@ class Weights_Tube_Wing_GA(Weights):
         # unpack
         vehicle  = self.vehicle
         settings = self.settings
+        # results_power_balance = vehicle.results_power_balance
         empty    = SUAVE.Methods.Weights.Correlations.General_Aviation.empty
-
         
         # evaluate
         results = empty(vehicle)
         
-        # storing weigth breakdown into vehicle
+        # storing weight breakdown into vehicle
         vehicle.weight_breakdown = results 
 
         # updating empty weight

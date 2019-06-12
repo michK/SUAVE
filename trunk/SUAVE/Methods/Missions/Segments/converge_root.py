@@ -45,20 +45,34 @@ def converge_root(segment):
     try:
         root_finder = segment.settings.root_finder
     except AttributeError:
-        root_finder = scipy.optimize.fsolve 
+        root_finder = scipy.optimize.fsolve
     
-    unknowns,infodict,ier,msg = root_finder( iterate,
-                                         unknowns,
-                                         args = segment,
-                                         xtol = segment.state.numerics.tolerance_solution,
-                                         full_output=1)
+    if root_finder == scipy.optimize.fsolve:
+        unknowns,infodict,ier,msg = root_finder(iterate,
+                                                unknowns,
+                                                args = segment,
+                                                xtol = segment.state.numerics.tolerance_solution,
+                                                full_output=1)
+        if ier!=1:
+            print("Segment did not converge. Segment Tag: " + segment.tag)
+            print("Error Message:\n" + msg)
+            segment.state.numerics.converged = False
+        else:
+            segment.state.numerics.converged = True
+    
+    elif root_finder == scipy.optimize.root:
+        sol = root_finder(iterate,
+                          unknowns,
+                          method='lm',
+                          args = segment,
+                          tol = segment.state.numerics.tolerance_solution)
 
-    if ier!=1:
-        print("Segment did not converge. Segment Tag: " + segment.tag)
-        print("Error Message:\n" + msg)
-        segment.state.numerics.converged = False
-    else:
-        segment.state.numerics.converged = True
+        if sol['success'] == True:
+            segment.state.numerics.converged = True
+            unknowns = sol['x']
+        else:
+            print("Segment did not converge. Segment Tag: " + segment.tag)
+            print("Error Message:\n" + sol['message'])    
 
     return
 

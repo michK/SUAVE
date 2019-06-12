@@ -60,9 +60,11 @@ def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
                     ))
 
         # Solve system
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink] = np.linalg.solve(A, b)
+        # Solution vars (in order):
+        # PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink
+        sol = np.linalg.solve(A, b)
 
-        return remove_negatives([PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink])
+        return remove_negatives(sol)
 
     else: # Parallel - Link is motor
         A = np.array((
@@ -94,6 +96,8 @@ def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
                     ))
 
         # Solve system
-        [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink] = np.linalg.solve(A, b)
+        # Solution vars (in order):
+        # PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink
+        sol = np.linalg.solve(A, b)
 
-        return remove_negatives([PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink])
+        return remove_negatives(sol)

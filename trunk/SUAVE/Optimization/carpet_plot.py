@@ -12,6 +12,8 @@ from SUAVE.Core import Data
 import numpy as np
 import matplotlib.pyplot as plt
 
+import progressbar
+
 # ----------------------------------------------------------------------
 #  carpet_plot
 # ----------------------------------------------------------------------
@@ -73,16 +75,25 @@ def carpet_plot(problem, number_of_points,  plot_obj=1, plot_const=0, sweep_inde
     inputs[1,:] = np.linspace(bnd[idx1][0], bnd[idx1][1], number_of_points)
 
     
+    bar = progressbar.ProgressBar(maxval=20, \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+
+    print("Performing variable sweep:")
+    bar.start()
     #inputs defined; now run sweep
     for i in range(0, number_of_points):
+        bar.update(i + 1)
         for j in range(0,number_of_points):
+            bar.update(j)
             #problem.optimization_problem.inputs=base_inputs  #overwrite any previous modification
             opt_prob.inputs[:,1][idx0]= inputs[0,i]
             opt_prob.inputs[:,1][idx1]= inputs[1,j]
    
             obj[j,i]             = problem.objective()*obj_scaling
             constraint_val[:,j,i]= problem.all_constraints().tolist()
-  
+
+    bar.finish()
+
     if plot_obj==1:
         plt.figure(0)
         CS = plt.contourf(inputs[0,:],inputs[1,:], obj, linewidths=2)

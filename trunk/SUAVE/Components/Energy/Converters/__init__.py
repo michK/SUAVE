@@ -14,10 +14,13 @@ from .Motor_Lo_Fid import Motor_Lo_Fid
 from .Propeller import Propeller
 from .Propeller_Lo_Fid import Propeller_Lo_Fid
 from .Ram import Ram
-from .Rocket_Combustor import Rocket_Combustor
-from .de_Laval_Nozzle import de_Laval_Nozzle
 from .Solar_Panel import Solar_Panel
 from .Turbine import Turbine
 from .Supersonic_Nozzle import Supersonic_Nozzle
 from .Shaft_Power_Off_Take import Shaft_Power_Off_Take
 from .Gearbox import Gearbox
+from .Power_Electronics_Simple import Power_Electronics_Simple
+from .Motor_Simple import Motor_Simple
+from .Electrical_Machine_Simple import Electrical_Machine_Simple
+from .Fan_Simple import Fan_Simple
+from .Gas_Turbine_Simple import Gas_Turbine_Simple
