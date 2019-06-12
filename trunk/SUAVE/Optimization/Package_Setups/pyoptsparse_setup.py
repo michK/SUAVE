@@ -17,7 +17,7 @@ from SUAVE.Optimization import helper_functions as help_fun
 # ----------------------------------------------------------------------
 
 ## @ingroup Optimization-Package_Setups
-def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  nonderivative_line_search=False):
+def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  nonderivative_line_search=False):
     """ This converts your SUAVE Nexus problem into a PyOptsparse optimization problem and solves it.
         Pyoptsparse has many algorithms, they can be switched out by using the solver input. 
 
@@ -104,12 +104,19 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
     if solver == 'SNOPT':
         opt = pyOpt.SNOPT()
         CD_step = (sense_step**2.)**(1./3.)  #based on SNOPT Manual Recommendations
-        opt.setOption('Function precision', sense_step**2.)
+        opt.setOption('Function precision', sense_step**2)
         opt.setOption('Difference interval', sense_step)
         opt.setOption('Central difference interval', CD_step)
+        # opt.setOption('Major feasibility tolerance', sense_step**2)
+        # opt.setOption('Minor feasibility tolerance', sense_step**2)
+        # opt.setOption('Major optimality tolerance', sense_step**2)
+        # opt.setOption('Penalty parameter', 0.01)
+        # opt.setOption('Major step limit', 0.01)
         
     elif solver == 'SLSQP':
         opt = pyOpt.SLSQP()
+        # opt.setOption('ACC', sense_step**2)  # Default
+        opt.setOption('ACC', 1e-16)  # Default
          
     elif solver == 'FSQP':
         opt = pyOpt.FSQP()
@@ -118,12 +125,18 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
         opt = pyOpt.PSQP()  
         
     elif solver == 'NSGA2':
-        opt = pyOpt.NSGA2(pll_type='POA') 
+        opt = pyOpt.NSGA2(pll_type='POA')
+        opt.setOption('PopSize', 20)
+        opt.setOption('maxGen', 5)
     
     elif solver == 'ALPSO':
         #opt = pyOpt.pyALPSO.ALPSO(pll_type='DPM') #this requires DPM, which is a parallel implementation
         opt = pyOpt.ALPSO()
-        
+        # opt.setOption('SwarmSize', 10)
+        # opt.setOption('maxOuterIter', 3)
+        # opt.setOption('maxInnerIter', 6)
+        # opt.setOption('minInnerIter', 3)
+
     elif solver == 'CONMIN':
         opt = pyOpt.CONMIN() 
         
@@ -139,11 +152,22 @@ def Pyoptsparse_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  no
     if nonderivative_line_search==True:
         opt.setOption('Nonderivative linesearch')
     if FD == 'parallel':
-        outputs = opt(opt_prob, sens_type='FD',sens_mode='pgc')
+        outputs = opt(opt_prob, sens='FD',sensMode='pgc')
         
-    elif solver == 'SNOPT' or solver == 'SLSQP':
-        outputs = opt(opt_prob, sens='FD', sensStep = sense_step)
+    elif solver == 'SNOPT':
+        # outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist', hotStart='ALPSO.hist')
+        outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist')
+
+    elif solver == 'SLSQP':
+        # outputs = opt(opt_prob, sens='FD', sensStep = sense_step, hotStart='NSGA2.hist')
+        outputs = opt(opt_prob, sens='FD', sensStep=sense_step)
   
+    elif solver == 'ALPSO':
+        outputs = opt(opt_prob, storeHistory='ALPSO.hist')
+
+    elif solver == 'NSGA2':
+        outputs = opt(opt_prob, storeHistory='NSGA2.hist')
+
     else:
         outputs = opt(opt_prob)        
    
@@ -205,4 +229,5 @@ def PyOpt_Problem(problem,xdict):
     print('Con')
     print(const)
    
-    return funcs,fail
+    return funcs, fail
+

@@ -9,4 +9,7 @@ from .estimate_landing_field_length  import estimate_landing_field_length
 from .find_takeoff_weight_given_tofl import find_takeoff_weight_given_tofl
 from .size_mission_range_given_weights import size_mission_range_given_weights
 from .size_weights_given_mission_range import size_weights_given_mission_range
+from .estimate_balanced_field_length import estimate_balanced_field_length
+from .estimate_wing_fuel_vol import estimate_wing_fuel_vol
+from .wing_loading_approach import wing_loading_approach
 

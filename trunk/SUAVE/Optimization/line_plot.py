@@ -8,9 +8,14 @@
 #  Imports
 # -------------------------------------------
  
+import SUAVE
 from SUAVE.Core import Data
+from .Package_Setups import pyoptsparse_setup
+
 import numpy as np
 import matplotlib.pyplot as plt
+
+import progressbar
 
 # ----------------------------------------------------------------------
 #  line_plot
@@ -75,13 +80,22 @@ def line_plot(problem, number_of_points,  plot_obj=1, plot_const=1, sweep_index=
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
  
 
-    
+    bar = progressbar.ProgressBar(maxval=20, \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+
+    print("Performing variable sweep:")
+    bar.start()
     #inputs defined; now run sweep
     for i in range(0, number_of_points):
+        bar.update(i + 1)
         opt_prob.inputs[:,1][idx0]= inputs[0,i]
    
         obj[i]             = problem.objective()*obj_scaling
-        constraint_val[:,i]= problem.all_constraints().tolist()
+        # sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT')
+        # obj[i] = sol.fStar * obj_scaling
+        constraint_val[:,i] = problem.all_constraints().tolist()
+
+    bar.finish()
   
     if plot_obj==1:
         plt.figure(0)

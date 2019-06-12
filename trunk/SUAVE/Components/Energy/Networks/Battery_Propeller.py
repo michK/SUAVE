@@ -119,7 +119,8 @@ class Battery_Propeller(Propulsor):
         # step 3
         motor.omega(conditions)
         # link
-        propeller.inputs.omega =  motor.outputs.omega
+        propeller.inputs.omega = motor.outputs.omega
+        propeller.inputs.torque = motor.outputs.torque
         propeller.thrust_angle = self.thrust_angle
         # step 4
         F, Q, P, Cp = propeller.spin(conditions)
@@ -152,8 +153,8 @@ class Battery_Propeller(Propulsor):
         # link
         battery.inputs.current  = esc.outputs.currentin*self.number_of_engines + avionics_payload_current
         battery.inputs.power_in = -(esc.outputs.voltageout*esc.outputs.currentin*self.number_of_engines + avionics_payload_power)
-        battery.energy_calc(numerics)        
-    
+        battery.energy_calc(numerics)
+
         # Pack the conditions for outputs
         rpm                  = motor.outputs.omega*60./(2.*np.pi)
         current              = esc.outputs.currentin

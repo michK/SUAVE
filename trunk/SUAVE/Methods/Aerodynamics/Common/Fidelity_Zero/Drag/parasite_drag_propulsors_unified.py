@@ -23,7 +23,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Aerodynamics-Common-Fidelity_Zero-Drag
-def parasite_drag_propulsors_unified(state,settings,geometry):
+def parasite_drag_propulsors_unified(state, settings, geometry):
     """Computes the parasite drag due to the unified model propulsion system
        Modified from parasite_drag_propulsor.py
        The main difference is that there are now two types of propulsors, one type
@@ -60,27 +60,28 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
 
     propsys = geometry
 
-    # mechanical propulsors;
-    Sref_mech      = np.pi / 4.0 * propsys.nacelle_diameter_mech**2.0
+    # mechanical propulsors
+    Sref_mech      = np.pi / 4.0 * propsys.mech_nac_dia**2.0
     Swet_mech      = propsys.areas_wetted_mech
+    # print("Drag: {}".format(propsys.mech_fan_dia))
     l_nacelle_mech = propsys.nacelle_length_mech
-    d_nacelle_mech = propsys.nacelle_diameter_mech
-    nr_fans_mech = propsys.number_of_engines_mech
-    f_embed_mech = 1.0
+    d_nacelle_mech = propsys.mech_nac_dia
+    nr_fans_mech   = propsys.number_of_engines_mech
+    f_embed_mech   = 1.0
 
     # electrical propulsors
-    Sref_elec      = np.pi / 4.0 * propsys.nacelle_diameter_elec**2.0
+    Sref_elec      = np.pi / 4.0 * propsys.elec_nac_dia**2.0
     Swet_elec      = propsys.areas_wetted_elec
     l_nacelle_elec = propsys.nacelle_length_elec
-    d_nacelle_elec = propsys.nacelle_diameter_elec
-    nr_fans_elec = propsys.number_of_engines_elec
-    f_embed_elec = 0.5
+    d_nacelle_elec = propsys.elec_nac_dia
+    nr_fans_elec   = propsys.number_of_engines_elec
+    f_embed_elec   = 1.0
 
     # conditions
     freestream = conditions.freestream
-    Mc  = freestream.mach_number
-    Tc  = freestream.temperature
-    re  = freestream.reynolds_number
+    Mc         = freestream.mach_number
+    Tc         = freestream.temperature
+    re         = freestream.reynolds_number
 
     # mechanical propulsors
     # reynolds number
@@ -108,24 +109,24 @@ def parasite_drag_propulsors_unified(state,settings,geometry):
     # find the final result
     parasite_drag_coefficient_elec = f_embed_elec * k_prop * cf_prop * Swet_elec / Sref_elec
 
-    # consolidate mech and elec propulsors  # NOTE - not consistent reference areas
-    parasite_drag_coefficient = parasite_drag_coefficient_mech + parasite_drag_coefficient_elec
+    # consolidate mech and elec propulsors
+    # parasite_drag_coefficient = parasite_drag_coefficient_mech + parasite_drag_coefficient_elec
     wetted_area =  (nr_fans_mech * Swet_mech) + (nr_fans_elec * Swet_elec)
 
     # dump data to conditions
     propulsor_result = Data(
-        wetted_area          = wetted_area    ,
-        wetted_area_mech          = Swet_mech    ,
-        wetted_area_elec          = Swet_elec    ,
-        reference_area_mech       = Sref_mech    ,
-        reference_area_elec       = Sref_elec    ,
-        parasite_drag_coefficient = parasite_drag_coefficient,
+        wetted_area                    = wetted_area,
+        wetted_area_mech               = Swet_mech,
+        wetted_area_elec               = Swet_elec,
+        reference_area_mech            = Sref_mech,
+        reference_area_elec            = Sref_elec,
+        # parasite_drag_coefficient      = parasite_drag_coefficient,  # NOTE I think only used for printing
         parasite_drag_coefficient_mech = parasite_drag_coefficient_mech,
         parasite_drag_coefficient_elec = parasite_drag_coefficient_elec,
-        skin_friction_coefficient = cf_prop ,
-        compressibility_factor    = k_comp  ,
-        reynolds_factor           = k_reyn  ,
-        form_factor               = k_prop  ,
+        skin_friction_coefficient      = cf_prop,
+        compressibility_factor         = k_comp,
+        reynolds_factor                = k_reyn,
+        form_factor                    = k_prop,
     )
     conditions.aerodynamics.drag_breakdown.parasite[propsys.tag] = propulsor_result
 
