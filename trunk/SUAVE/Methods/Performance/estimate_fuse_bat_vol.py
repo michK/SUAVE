@@ -20,7 +20,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Performance
-def estimate_wing_fuel_vol(vehicle, fuel_fraction=0.5):
+def estimate_fuse_bat_vol(vehicle, vol_frac=0.05):
     """ Estimate wing volume that can be used to store fuel
 
     Source:
@@ -32,10 +32,10 @@ def estimate_wing_fuel_vol(vehicle, fuel_fraction=0.5):
 
     Inputs:
     vehicle
-    fuel_fraction - Fraction of total wing volume usable for fuel storage
+    vol_frac - Fraction of total fuselage volume usable for battery storage
 
     Outputs:
-    wing_fuel_vol                   [m^3]
+    fuse_bat_vol                   [m^3]
 
     Properties Used:
     N/A
@@ -44,13 +44,12 @@ def estimate_wing_fuel_vol(vehicle, fuel_fraction=0.5):
     # ==============================================
     # Unpack
     # ==============================================
-    wing = vehicle.wings.main_wing
-    t_c = wing.thickness_to_chord
-    lambda_w = wing.sweeps.quarter_chord
-    Sw = vehicle.reference_area
-    AR = wing.aspect_ratio
-    kQ = 0.95
+    fuse = vehicle.fuselages.fuselage
+    area_front = fuse.areas.front_projected
+    length = fuse.lengths.total
+    width = fuse.width
+    vol_fuse = area_front * (length - 2 * width)
 
-    wing_fuel_vol = fuel_fraction * kQ * t_c / np.sqrt(1 + lambda_w) * Sw * np.sqrt(Sw / AR)
+    fuse_bat_vol = vol_frac * vol_fuse
     
-    return wing_fuel_vol
+    return fuse_bat_vol

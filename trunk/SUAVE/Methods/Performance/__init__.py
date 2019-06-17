@@ -11,6 +11,7 @@ from .size_mission_range_given_weights import size_mission_range_given_weights
 from .size_weights_given_mission_range import size_weights_given_mission_range
 from .estimate_balanced_field_length import estimate_balanced_field_length
 from .estimate_wing_fuel_vol import estimate_wing_fuel_vol
+from .estimate_fuse_bat_vol import estimate_fuse_bat_vol
 from .wing_loading_approach import wing_loading_approach
 from .V_n_diagram import V_n_diagram
 
