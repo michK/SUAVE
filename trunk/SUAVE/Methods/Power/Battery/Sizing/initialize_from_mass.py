@@ -34,7 +34,7 @@ def initialize_from_mass(battery, mass):
         mass
 
 
-    """    
+    """
     battery.mass_properties.mass = mass
-    battery.max_energy           = mass*battery.specific_energy
-    battery.max_power            = mass*battery.specific_power
+    battery.max_energy           = mass * battery.specific_energy
+    battery.max_power            = mass * battery.specific_power
