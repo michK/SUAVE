@@ -241,7 +241,6 @@ def empty(vehicle):
         wing_c_r   = vehicle.wings['main_wing'].chords.root
         #now run weight script for the wing
         m_wing = wing_main_torenbeek(b, S_gross_w, mto, m_zf)
-        print("Wing mass: {}".format(m_wing))
         vehicle.wings['main_wing'].mass_properties.mass = m_wing
 
     if 'horizontal_stabilizer' not in vehicle.wings:
