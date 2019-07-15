@@ -14,7 +14,7 @@ import numpy as np
 #  Methods
 # ----------------------------------------------------------------------
 ## @ingroup Methods-Power-Battery-Sizing
-def initialize_from_mass(battery, mass):
+def initialize_from_mass(battery, mass, discharge_depth=1):
     """
     Calculate the max energy and power based of the mass
     Assumptions:
@@ -36,5 +36,5 @@ def initialize_from_mass(battery, mass):
 
     """
     battery.mass_properties.mass = mass
-    battery.max_energy           = mass * battery.specific_energy
+    battery.max_energy           = discharge_depth * mass * battery.specific_energy
     battery.max_power            = mass * battery.specific_power
