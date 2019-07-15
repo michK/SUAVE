@@ -9,7 +9,7 @@
 import numpy as np
 
 
-def unified_network_sizing(vehicle):
+def unified_network_sizing(propsys, vehicle):
     """
     This function takes the total mass flow through all propulsors
     and sizes the fans appropriately, based on the number of propulsors
@@ -17,7 +17,7 @@ def unified_network_sizing(vehicle):
     Method for fan and nacelle sizing from Raymer
     """
 
-    propsys = vehicle.propulsors.unified_propsys
+    # propsys = vehicle.propulsors.unified_propsys
 
     nr_fans_mech = propsys.number_of_engines_mech
     nr_fans_elec = propsys.number_of_engines_elec
@@ -59,8 +59,12 @@ def unified_network_sizing(vehicle):
 
     # Wetted areas
     propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * Dnacm
-    # print("Sizing: {}".format(propsys.mech_fan_dia))
     propsys.areas_wetted_elec = 1.1 * 0.5 * propsys.nacelle_length_elec * np.pi * Dnace
+
+    # Update BLI amounts
+    wingspan_projected = vehicle.wings.main_wing.spans.projected
+    fuselage_effective_diameter = vehicle.fuselages.fuselage.effective_diameter
+    propsys.fBLIe = (nr_fans_elec * Dnace) / (wingspan_projected - fuselage_effective_diameter)
 
     # Set summary information
     propsys.info.mech_fan_dia = Dfanm
@@ -69,5 +73,7 @@ def unified_network_sizing(vehicle):
     propsys.info.areas_wetted_elec_tot = vehicle.propulsors.unified_propsys.areas_wetted_elec * nr_fans_elec
     propsys.info.areas_wetted_mech_pylons = propsys.info.areas_wetted_mech_tot * 0.2
     propsys.info.areas_wetted_elec_pylons = 0
+    propsys.info.fBLIe = propsys.fBLIe
+    propsys.info.fBLIm = propsys.fBLIm
 
-    return propsys
+    return

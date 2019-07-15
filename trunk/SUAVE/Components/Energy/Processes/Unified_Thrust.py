@@ -76,8 +76,6 @@ class Unified_Thrust(Energy_Component):
           power                              [W]
 
         Properties Used:
-        self.
-          TODO
         """
         # Unpack the values
 
@@ -102,9 +100,8 @@ class Unified_Thrust(Energy_Component):
         fsurf         = self.inputs.fsurf
         nr_fans_mech  = self.inputs.nr_fans_mech
         nr_fans_elec  = self.inputs.nr_fans_elec
-        # area_jet_mech = self.inputs.area_jet_mech
-        # area_jet_elec = self.inputs.area_jet_elec
-        hfuel         = self.inputs.hfuel
+        max_bat_power = self.inputs.max_bat_power
+        Cp            = self.inputs.Cp
 
         # Unpack from conditions
         throttle = conditions.propulsion.throttle
@@ -126,28 +123,6 @@ class Unified_Thrust(Energy_Component):
         deltaPhiSurf = 0
 
         for i in range(nr_elements):
-
-            # def power_balance(params):
-            #     """Function to calculate residuals of power balance equations"""
-            #     PKm, PKe, mdotm, mdote, Vjetm, Vjete = params
-
-            #     # Derived quantities
-            #     phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
-            #     phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
-
-            #     # Residuals
-            #     res1 = PKm - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i]
-            #     res2 = PKe - 0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]                
-            #     res3 = phi_jet_m - PKm * (1 - eta_propm)
-            #     res4 = phi_jet_e - PKe * (1 - eta_prope)
-            #     res5 = fL - PKe / (PKe + PKm)
-            #     res6 = Dp[i] - (Vjetm - Vinf[i]) * (1 - fL) * mdotm - (Vjete - Vinf[i]) * fL * mdote + \
-            #         hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i]
-
-            #     residuals = [res1, res2, res3, res4, res5, res6]
-
-            #     return residuals
-
             def power_balance(params):
                 """Function to calculate residuals of power balance equations"""
                 PK, mdot, Vjetm, Vjete = params
@@ -203,9 +178,8 @@ class Unified_Thrust(Energy_Component):
             PKe = PKe_i
 
             # Ragone relation for battery efficiency
-            # psi = Pbat_i / self.Pbat_max
-            # eta_bat = 0.5 + (1.0 - psi) / 2.0
-            eta_bat = 0.9  # FIXME Should be calculated
+            psi = Pbat_i / max_bat_power
+            eta_bat = 0.5 + (1.0 - psi) / 2.0
 
             # Adjust battery power to account for battery efficiency
             Pbat[i] = Pbat_i / eta_bat
@@ -213,8 +187,8 @@ class Unified_Thrust(Energy_Component):
             # Add turbine power
             Pturb[i] = Pturb_i
 
-            # Calculate vehicle mass rate of change
-            mdot_fuel[i] = 0.72 * 3.57 * Pturb_i / (hfuel * eta_th)  # NOTE Could incorporate TSFC here
+            # Calculate fuel flow through turbine
+            mdot_fuel[i] = Cp * Pturb_i
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 

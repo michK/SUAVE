@@ -77,6 +77,12 @@ class Unified_Network(Propulsor):
         self.areas_wetted_mech = 1.0 * Units['m^2']
         self.areas_wetted_elec = 1.0 * Units['m^2']
 
+        # BLI and parameters required for BLI estimation
+        self.fBLIm = 0.0
+        self.fBLIe = 0.0
+        self.wingspan_projected = 1.0 * Units.m
+        self.fuselage_effective_diameter = 1.0 * Units.m
+
         # max power tracker
         self.max_power = 0.01
         self.max_bat_power = 0.01
@@ -117,16 +123,16 @@ class Unified_Network(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        nr_fans_mech = self.number_of_engines_mech
-        nr_fans_elec = self.number_of_engines_elec
-        fL = self.fL
-        fS = self.fS
-        fBLIm = self.fBLIm
-
-        # Calculate wing BLI from electrical propulsors
-        # fBLIe = (nr_fans_elec * dia_fan_elec) / (self.wingspan_projected -
-            # self.fuselage_effective_diameter)
-        fBLIe = self.fBLIe
+        nr_fans_mech  = self.number_of_engines_mech
+        mech_nac_dia  = self.mech_nac_dia
+        nr_fans_elec  = self.number_of_engines_elec
+        elec_nac_dia  = self.elec_nac_dia
+        fL            = self.fL
+        fS            = self.fS
+        fBLIe         = self.fBLIe
+        fBLIm         = self.fBLIm
+        max_bat_power = self.battery.max_power
+        Cp            = self.Cp
 
         # Efficiencies
         # Propulsive efficiencies
@@ -173,6 +179,8 @@ class Unified_Network(Propulsor):
         thrust.inputs.nr_fans_elec      = nr_fans_elec
         thrust.inputs.nr_fans_mech      = nr_fans_mech
         thrust.inputs.hfuel             = hfuel
+        thrust.inputs.max_bat_power     = max_bat_power
+        thrust.inputs.Cp                = Cp
 
         #compute the thrust
         thrust(conditions)
