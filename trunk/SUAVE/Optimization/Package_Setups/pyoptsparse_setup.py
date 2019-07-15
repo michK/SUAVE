@@ -122,17 +122,17 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
         opt = pyOpt.PSQP()  
         
     elif solver == 'NSGA2':
-        opt = pyOpt.NSGA2(pll_type='POA')
-        opt.setOption('PopSize', 20)
-        opt.setOption('maxGen', 5)
+        # opt = pyOpt.NSGA2(pll_type='POA')
+        opt = pyOpt.NSGA2(pll_type='None')
+        # opt.setOption('PopSize', 10)
+        opt.setOption('maxGen', 2)
     
     elif solver == 'ALPSO':
         #opt = pyOpt.pyALPSO.ALPSO(pll_type='DPM') #this requires DPM, which is a parallel implementation
         opt = pyOpt.ALPSO()
-        # opt.setOption('SwarmSize', 10)
-        # opt.setOption('maxOuterIter', 3)
-        # opt.setOption('maxInnerIter', 6)
-        # opt.setOption('minInnerIter', 3)
+        opt.setOption('SwarmSize', 12)
+        opt.setOption('maxOuterIter', 6)
+        opt.setOption('maxInnerIter', 6)
 
     elif solver == 'CONMIN':
         opt = pyOpt.CONMIN() 

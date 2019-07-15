@@ -80,7 +80,7 @@ def line_plot(problem, number_of_points,  plot_obj=1, plot_const=1, sweep_index=
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
  
 
-    bar = progressbar.ProgressBar(maxval=20, \
+    bar = progressbar.ProgressBar(maxval=100, \
         widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 
     print("Performing variable sweep:")
