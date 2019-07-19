@@ -201,8 +201,8 @@ def empty(vehicle):
         # Unpack inputs
         num_eng = propulsors.number_of_engines_mech        
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
-        weight_factor = 2.15
-        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
+        weight_factor = 2.15  # TODO Check this
+        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)        
         propulsors.mass_properties.mass = wt_propulsion
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model

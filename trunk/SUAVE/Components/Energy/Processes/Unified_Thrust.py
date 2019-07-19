@@ -97,6 +97,8 @@ class Unified_Thrust(Energy_Component):
         Dpp_DP        = self.inputs.Dpp_DP
         fBLIe         = self.inputs.fBLIe
         fBLIm         = self.inputs.fBLIm
+        fBLIe         = 0.3  # NOTE Remember to uncomment
+        fBLIm         = 0.3  # NOTE Remember to uncomment
         fsurf         = self.inputs.fsurf
         nr_fans_mech  = self.inputs.nr_fans_mech
         nr_fans_elec  = self.inputs.nr_fans_elec
@@ -148,12 +150,16 @@ class Unified_Thrust(Energy_Component):
                 power_balance.mdotm = mdotm
                 power_balance.mdote = mdote
 
+                power_balance.res1 = res1
+                power_balance.res2 = res2
+                power_balance.res3 = res3
+                power_balance.res4 = res4
+
                 residuals = [res1, res2, res3, res4]
 
                 return np.array(residuals).reshape(4,)
             
             args_init = [100000.0, 500.0, 100.0, 100.0]
-            scale = args_init            
             sol = root(power_balance, args_init, method='hybr')
 
             if sol['success'] == True:
