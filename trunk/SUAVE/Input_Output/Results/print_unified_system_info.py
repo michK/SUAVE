@@ -8,6 +8,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 import datetime
+from .identify_architecture import identify_arch
 
 # ----------------------------------------------------------------------
 #  Print output file with weight breakdown
@@ -42,8 +43,13 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     # start printing
     fid = open(filename,'w')   # Open output file
     fid.write('Output file with unified propulsion system information\n\n') #Start output printing
+    fid.write(' AIRCRAFT PROPULSION SYSTEM ARCHITECTURE \n')
+    fid.write(' Max fS = {}\n'.format(propsys.info.fS_max))
+    fid.write(' Max fS segment = {}\n'.format(propsys.info.fS_max_segment))
+    fid.write(' Max fL = {}\n'.format(propsys.info.fL_max))
+    fid.write(' Max fL segment = {}\n'.format(propsys.info.fL_max_segment))
+    fid.write(' ARCHITECTURE:................................... :{}\n\n'.format(identify_arch(propsys)))
     fid.write(' COMPONENT WEIGHTS \n')
-     
     fid.write(' Core ........................................... : ' + str( '%8.1F' % propsys_info.m_core)        + ' kg\n')
     fid.write(' Mechanical fans ................................ : ' + str( '%8.1F' % propsys_info.m_fanm)        + ' kg\n')
     fid.write(' Electrical fans ................................ : ' + str( '%8.1F' % propsys_info.m_fane)        + ' kg\n')
