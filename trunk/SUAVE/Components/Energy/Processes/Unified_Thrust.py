@@ -97,8 +97,6 @@ class Unified_Thrust(Energy_Component):
         Dpp_DP        = self.inputs.Dpp_DP
         fBLIe         = self.inputs.fBLIe
         fBLIm         = self.inputs.fBLIm
-        fBLIe         = 0.3  # NOTE Remember to uncomment
-        fBLIm         = 0.3  # NOTE Remember to uncomment
         fsurf         = self.inputs.fsurf
         nr_fans_mech  = self.inputs.nr_fans_mech
         nr_fans_elec  = self.inputs.nr_fans_elec
@@ -128,6 +126,22 @@ class Unified_Thrust(Energy_Component):
             def power_balance(params):
                 """Function to calculate residuals of power balance equations"""
                 PK, mdot, Vjetm, Vjete = params
+
+                # Print out variable values:
+                # print("Vinf : {}".format(Vinf[i]))
+                # print("fL : {}".format(fL))
+                # print("fS : {}".format(fS))
+                # print("fsurf : {}".format(fsurf))
+                # print("Dpar : {}".format(Dpar[i]))
+                # print("eta_propm : {}".format(eta_propm))
+                # print("eta_prope : {}".format(eta_prope))
+                # print("hdot : {}".format(hdot[i]))
+                # print("W : {}".format(W[i]))
+                # print("deltaPhiSurf : {}".format(deltaPhiSurf))
+                # print("fBLIm : {}".format(fBLIm))
+                # print("fBLIe : {}".format(fBLIe))
+                # print("fBLIm : {}".format(fBLIm))
+                # print("fBLIe : {}".format(fBLIe))
 
                 # Derived quantities
                 PKm = (1 - fL) * PK
