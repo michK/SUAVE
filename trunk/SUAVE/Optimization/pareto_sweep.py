@@ -8,18 +8,60 @@
 #  Imports
 # -------------------------------------------
 
-import SUAVE
-from SUAVE.Core import Data
-from .Package_Setups import pyoptsparse_setup
+import sys
+import os
+import pdb
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 import progressbar
 
+import multiprocessing, logging
+from functools import partial
+from contextlib import contextmanager
+from itertools import repeat
+
+import SUAVE
+from SUAVE.Core import Data
+from .Package_Setups import pyoptsparse_setup
+
+class ForkablePdb(pdb.Pdb):
+
+    _original_stdin_fd = sys.stdin.fileno()
+    _original_stdin = None
+
+    def __init__(self):
+        pdb.Pdb.__init__(self, nosigint=True)
+
+    def _cmdloop(self):
+        current_stdin = sys.stdin
+        try:
+            if not self._original_stdin:
+                self._original_stdin = os.fdopen(self._original_stdin_fd)
+            sys.stdin = self._original_stdin
+            self.cmdloop()
+        finally:
+            sys.stdin = current_stdin
+
 # ----------------------------------------------------------------------
 #  pareto_sweep
 # ----------------------------------------------------------------------
+
+def optimize_objective(i, args):
+    """thread worker function to be run in parallel on multiple threads"""
+
+
+    problem, opt_prob, obj_scaling, inputs, idx0 = args
+
+    opt_prob.inputs[:,1][idx0]= inputs[0,i]
+    opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
+    problem.optimization_problem = opt_prob
+    # ForkablePdb().set_trace()
+    sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', sense_step=1e-06)
+    obj = sol.fStar * obj_scaling
+
+    return obj
 
 
 def pareto_sweep(problem, number_of_points, sweep_index):
@@ -52,6 +94,9 @@ def pareto_sweep(problem, number_of_points, sweep_index):
         N/A
     """
 
+    mpl = multiprocessing.log_to_stderr()
+    mpl.setLevel(logging.INFO)
+
     idx0             = sweep_index # local name
 
     opt_prob         = problem.optimization_problem
@@ -71,24 +116,16 @@ def pareto_sweep(problem, number_of_points, sweep_index):
     #create inputs matrix
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
 
-    bar = progressbar.ProgressBar(maxval=number_of_points, \
-        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-
     print("Performing variable sweep:")
-    bar.start()
-    #inputs defined; now run sweep
-    for i in range(0, number_of_points):        
-        opt_prob.inputs[:,1][idx0]= inputs[0,i]
 
-        # obj[i] = problem.objective() * obj_scaling
-        opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
-        problem.optimization_problem = opt_prob
-        sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', sense_step=1e-06)
-        obj[i] = sol.fStar * obj_scaling
+    # Run sweep on multiple threads
+    num_workers = multiprocessing.cpu_count()
+    args = [problem, opt_prob, obj_scaling, inputs, idx0]
+    # with multiprocessing.Pool(processes=num_workers) as pool:
+    with multiprocessing.Pool(processes=1) as pool:
+        results = pool.starmap(optimize_objective, zip(range(number_of_points), repeat(args)))
 
-        bar.update(i)
-
-    bar.finish()
+    obj = results
 
     # Create plot
     fig, ax = plt.subplots()
