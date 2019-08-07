@@ -83,7 +83,7 @@ def pareto_sweep(problem, number_of_points, sweep_index):
         # obj[i] = problem.objective() * obj_scaling
         opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
         problem.optimization_problem = opt_prob
-        sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', sense_step=1e-06)
+        sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', FD='parallel', sense_step=1e-06)
         obj[i] = sol.fStar * obj_scaling
 
         bar.update(i)
