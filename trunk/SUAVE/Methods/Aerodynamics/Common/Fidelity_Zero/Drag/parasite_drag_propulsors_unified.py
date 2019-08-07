@@ -120,7 +120,6 @@ def parasite_drag_propulsors_unified(state, settings, geometry):
         wetted_area_elec               = Swet_elec,
         reference_area_mech            = Sref_mech,
         reference_area_elec            = Sref_elec,
-        # parasite_drag_coefficient      = parasite_drag_coefficient,  # NOTE I think only used for printing
         parasite_drag_coefficient_mech = parasite_drag_coefficient_mech,
         parasite_drag_coefficient_elec = parasite_drag_coefficient_elec,
         skin_friction_coefficient      = cf_prop,

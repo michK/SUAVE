@@ -15,7 +15,7 @@ from .payload import payload
 from .systems import systems
 from .tail_horizontal import tail_horizontal
 from .tail_vertical import tail_vertical
-from .wing_main import wing_main
+from .wing_main_torenbeek import wing_main_torenbeek
 from SUAVE.Methods.Weights.Correlations import Propulsion as Propulsion
 import warnings
 
@@ -167,17 +167,15 @@ def empty(vehicle):
     # Unpack inputs
     S_gross_w   = vehicle.reference_area
     fuel        = vehicle.fuel
-    fuel.number_of_tanks = 2
-    fuel.internal_volume = 1419 * Units.liter
-    fuel.density = 810 * Units['kg/m^3']
-    fuel.mass_properties.mass = fuel.density * fuel.internal_volume
-    # fuel.mass_properties.mass = 0.0  # FIXME This just affects landing weight for gear sizing
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
-    TOW         = vehicle.mass_properties.max_takeoff
-    wt_zf       = vehicle.mass_properties.max_zero_fuel
+    mto         = vehicle.mass_properties.max_takeoff
+    m_zf        = mto  # For weight calculation purpose
     num_pax     = vehicle.passengers
     wt_cargo    = vehicle.mass_properties.cargo
+    fuel.mass_properties.mass = 200
+    fuel.density = 810 * Units['kg/m^3']
+    fuel.internal_volume = fuel.mass_properties.mass / fuel.density
 
     q_c         = vehicle.design_dynamic_pressure
     mach_number = vehicle.design_mach_number
@@ -201,10 +199,10 @@ def empty(vehicle):
 
     elif propulsor_name == 'unified_propsys':
         # Unpack inputs
-        num_eng = propulsors.number_of_engines_mech
+        num_eng = propulsors.number_of_engines_mech        
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
-        weight_factor = 2.15
-        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
+        weight_factor = 2.15  # TODO Check this
+        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)        
         propulsors.mass_properties.mass = wt_propulsion
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
@@ -221,15 +219,15 @@ def empty(vehicle):
 
     else:
         m_fuel                      = fuel.mass_properties.mass
-        landing_weight              = TOW-m_fuel  #just assume this for now        
+        landing_weight              = mto
         N_tank                      = fuel.number_of_tanks
         V_fuel_int                  = fuel.internal_volume #fuel in internal (as opposed to external tanks)
-        V_fuel                      = m_fuel/fuel.density  #total fuel
+        V_fuel                      = m_fuel / fuel.density  #total fuel
         fuel.mass_properties.volume = V_fuel
 
     #main wing
     if 'main_wing' not in vehicle.wings:
-        wt_wing = 0.0
+        m_wing = 0.0
         wing_c_r = 0.0
         warnings.warn("There is no Wing Weight being added to the Configuration", stacklevel=1)
 
@@ -242,8 +240,8 @@ def empty(vehicle):
         mac_w      = vehicle.wings['main_wing'].chords.mean_aerodynamic
         wing_c_r   = vehicle.wings['main_wing'].chords.root
         #now run weight script for the wing
-        wt_wing                                         = wing_main(S_gross_w, m_fuel, AR_w, sweep_w, q_c, taper_w, t_c_w,Nult,TOW)
-        vehicle.wings['main_wing'].mass_properties.mass = wt_wing
+        m_wing = wing_main_torenbeek(b, S_gross_w, mto, m_zf)
+        vehicle.wings['main_wing'].mass_properties.mass = m_wing
 
     if 'horizontal_stabilizer' not in vehicle.wings:
         wt_tail_horizontal = 0.0
@@ -259,7 +257,7 @@ def empty(vehicle):
         mac_h              = vehicle.wings['horizontal_stabilizer'].chords.mean_aerodynamic
         t_c_h              = vehicle.wings['horizontal_stabilizer'].thickness_to_chord
         l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0] + vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] - vehicle.wings['main_wing'].origin[0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
-        wt_tail_horizontal = tail_horizontal(S_h, AR_h, sweep_h, q_c, taper_h, t_c_h,Nult,TOW)
+        wt_tail_horizontal = tail_horizontal(S_h, AR_h, sweep_h, q_c, taper_h, t_c_h,Nult,mto)
 
         vehicle.wings['horizontal_stabilizer'].mass_properties.mass = wt_tail_horizontal
 
@@ -279,7 +277,7 @@ def empty(vehicle):
         t_c_v      = vehicle.wings['vertical_stabilizer'].thickness_to_chord
         sweep_v    = vehicle.wings['vertical_stabilizer'].sweeps.quarter_chord
         t_tail     = vehicle.wings['vertical_stabilizer'].t_tail
-        output_3   = tail_vertical(S_v, AR_v, sweep_v, q_c, taper_v, t_c_v, Nult,TOW,t_tail)
+        output_3   = tail_vertical(S_v, AR_v, sweep_v, q_c, taper_v, t_c_v, Nult,mto,t_tail)
 
         vehicle.wings['vertical_stabilizer'].mass_properties.mass = output_3.wt_tail_vertical
 
@@ -293,7 +291,7 @@ def empty(vehicle):
         V_int      = vehicle.fuselages['fuselage'].mass_properties.internal_volume
         num_seats  = vehicle.fuselages['fuselage'].number_coach_seats
         #calculate fuselage weight
-        wt_fuselage = fuselage(S_fus, Nult, TOW, w_fus, h_fus, l_fus, l_w2h, q_c, V_fuse, diff_p_fus)
+        wt_fuselage = fuselage(S_fus, Nult, mto, w_fus, h_fus, l_fus, l_w2h, q_c, V_fuse, diff_p_fus)
     else:
         print('got here')
         warnings.warn('There is no Fuselage weight being added to the vehicle', stacklevel=1)
@@ -325,17 +323,17 @@ def empty(vehicle):
         has_air_conditioner = 1
 
     # Calculating Empty Weight of Aircraft
-    output_2           = systems(W_uav,V_fuel, V_fuel_int, N_tank, num_eng, l_fus, b, TOW, Nult, num_seats, mach_number, has_air_conditioner)
+    output_2           = systems(W_uav,V_fuel, V_fuel_int, N_tank, num_eng, l_fus, b, mto, Nult, num_seats, mach_number, has_air_conditioner)
 
     # Calculate the equipment empty weight of the aircraft
 
-    wt_empty           = (wt_wing + wt_fuselage + wt_landing_gear.main + wt_landing_gear.nose + wt_propulsion + output_2.wt_systems + \
+    wt_empty           = (m_wing + wt_fuselage + wt_landing_gear.main + wt_landing_gear.nose + wt_propulsion + output_2.wt_systems + \
                           wt_tail_horizontal + output_3.wt_tail_vertical)
     vehicle.fuselages['fuselage'].mass_properties.mass = wt_fuselage
 
     # packup outputs
-    output                   = payload(TOW, wt_empty, num_pax, wt_cargo)
-    output.wing              = wt_wing
+    output                   = payload(mto, wt_empty, num_pax, wt_cargo)
+    output.wing              = m_wing
     output.fuselage          = wt_fuselage
     output.propulsion        = wt_propulsion
     output.landing_gear_main = wt_landing_gear.main

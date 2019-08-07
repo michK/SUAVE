@@ -7,3 +7,4 @@ from .print_parasite_drag import print_parasite_drag
 from .print_engine_data import print_engine_data
 from .print_weights import print_weight_breakdown
 from .print_unified_system_info import print_unified_system_info
+from .identify_architecture import identify_arch

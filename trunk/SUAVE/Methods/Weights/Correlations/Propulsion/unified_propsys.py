@@ -53,8 +53,14 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     propsys = vehicle.propulsors.unified_propsys
 
     # Create arrays of fL and fS to loop over
+    segments = ["Climb", "Cruise", "Descent"]
     fL_arr = np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent])
     fS_arr = np.array([vehicle.fS_climb, vehicle.fS_cruise, vehicle.fS_descent])
+
+    fL_max = np.amax(fL_arr)
+    fL_max_segment = segments[np.argmax(fL_arr)]
+    fS_max = np.amax(fS_arr)
+    fS_max_segment = segments[np.argmax(fS_arr)]
 
     # Create empty lists to store tentative component weights
 
@@ -192,18 +198,22 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
                 propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
                 mass_tms
 
-        propsys.info.m_core        = m_core
-        propsys.info.m_fanm        = m_fanm
-        propsys.info.m_fane        = m_fane
-        propsys.info.m_nacm        = m_nacm
-        propsys.info.m_nace        = m_nace
-        propsys.info.m_prop_mot    = m_prop_mot
-        propsys.info.m_pe_prop_mot = m_pe_prop_mot
-        propsys.info.m_gen         = m_gen
-        propsys.info.m_pe_link     = m_pe_link
-        propsys.info.mass_tms      = mass_tms
-        propsys.info.weight_factor = weight_factor
-        propsys.info.weight_total  = mprop * weight_factor
+        propsys.info.m_core         = m_core
+        propsys.info.m_fanm         = m_fanm
+        propsys.info.m_fane         = m_fane
+        propsys.info.m_nacm         = m_nacm
+        propsys.info.m_nace         = m_nace
+        propsys.info.m_prop_mot     = m_prop_mot
+        propsys.info.m_pe_prop_mot  = m_pe_prop_mot
+        propsys.info.m_gen          = m_gen
+        propsys.info.m_pe_link      = m_pe_link
+        propsys.info.mass_tms       = mass_tms
+        propsys.info.weight_factor  = weight_factor
+        propsys.info.weight_total   = mprop * weight_factor
+        propsys.info.fS_max         = fS_max
+        propsys.info.fL_max_segment = fL_max_segment
+        propsys.info.fL_max         = fL_max
+        propsys.info.fS_max_segment = fS_max_segment
 
         mass_propsys = mprop * weight_factor
 

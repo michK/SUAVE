@@ -116,7 +116,7 @@ def datta_discharge(battery,numerics):
     voltage_open_circuit = v_normalized * v_max
     
     # Voltage under load:
-    voltage_under_load   = voltage_open_circuit  - Ibat*R
+    voltage_under_load   = voltage_open_circuit - Ibat * R
         
     # Pack outputs
     battery.current_energy       = current_energy
