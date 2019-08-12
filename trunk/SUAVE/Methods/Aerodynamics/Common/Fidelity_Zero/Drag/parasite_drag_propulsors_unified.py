@@ -84,30 +84,30 @@ def parasite_drag_propulsors_unified(state, settings, geometry):
     re         = freestream.reynolds_number
 
     # mechanical propulsors
-    # reynolds number
-    Re_nacelle_mech = re*l_nacelle_mech
-
-    # skin friction coefficient
-    cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_nacelle_mech, Mc, Tc)
-
-    ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
-    k_prop = 1 + 0.35 / (float(l_nacelle_mech) / float(d_nacelle_mech))
-
-    # find the final result
-    parasite_drag_coefficient_mech = f_embed_mech * k_prop * cf_prop * Swet_mech / Sref_mech
+    try:
+        # Reynolds number
+        Re_nacelle_mech = re*l_nacelle_mech
+        # skin friction coefficient
+        cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_nacelle_mech, Mc, Tc)
+        # form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
+        k_prop = 1 + 0.35 / (float(l_nacelle_mech) / float(d_nacelle_mech))
+        parasite_drag_coefficient_mech = f_embed_mech * k_prop * cf_prop * Swet_mech / Sref_mech
+    except:
+        # parasite_drag_coefficient_mech = [np.zeros(np.shape(Mc)[0])]
+        parasite_drag_coefficient_mech = np.zeros_like(Mc)
 
     # electrical propulsors
-    # reynolds number
-    Re_nacelle_elec = re*l_nacelle_elec
-
-    # skin friction coefficient
-    cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_nacelle_elec, Mc, Tc)
-
-    ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
-    k_prop = 1 + 0.35 / (float(l_nacelle_elec) / float(d_nacelle_elec))
-
-    # find the final result
-    parasite_drag_coefficient_elec = f_embed_elec * k_prop * cf_prop * Swet_elec / Sref_elec
+    try:
+        # Reynolds number
+        Re_nacelle_elec = re*l_nacelle_elec
+        # skin friction coefficient
+        cf_prop, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_nacelle_elec, Mc, Tc)
+        ## form factor according to Raymer equation (pg 283 of Aircraft Design: A Conceptual Approach)
+        k_prop = 1 + 0.35 / (float(l_nacelle_elec) / float(d_nacelle_elec))
+        parasite_drag_coefficient_elec = f_embed_elec * k_prop * cf_prop * Swet_elec / Sref_elec
+    except:
+        # parasite_drag_coefficient_elec = [np.zeros(np.shape(Mc)[0])]
+        parasite_drag_coefficient_elec = np.zeros_like(Mc)
 
     # consolidate mech and elec propulsors
     # parasite_drag_coefficient = parasite_drag_coefficient_mech + parasite_drag_coefficient_elec
