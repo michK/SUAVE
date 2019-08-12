@@ -76,4 +76,4 @@ def unified_network_sizing(propsys, vehicle):
     propsys.info.fBLIe = propsys.fBLIe
     propsys.info.fBLIm = propsys.fBLIm
 
-    return
+    return propsys

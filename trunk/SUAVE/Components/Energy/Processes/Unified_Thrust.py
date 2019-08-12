@@ -98,8 +98,6 @@ class Unified_Thrust(Energy_Component):
         fBLIe         = self.inputs.fBLIe
         fBLIm         = self.inputs.fBLIm
         fsurf         = self.inputs.fsurf
-        nr_fans_mech  = self.inputs.nr_fans_mech
-        nr_fans_elec  = self.inputs.nr_fans_elec
         max_bat_power = self.inputs.max_bat_power
         Cp            = self.inputs.Cp
 

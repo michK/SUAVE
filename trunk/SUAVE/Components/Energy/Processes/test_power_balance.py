@@ -11,14 +11,14 @@ class TestPowerBalance(unittest.TestCase):
         thrust = SUAVE.Components.Energy.Processes.Unified_Thrust()
 
         # Inputs from higher level
-        thrust.inputs.vertical_velocity = np.array([0]) * Units['ft/min']
+        thrust.inputs.vertical_velocity = np.array([500]) * Units['ft/min']
         thrust.inputs.Vinf          = np.array([93.62888889])
         thrust.inputs.rho_inf       = np.array([0.771])
         thrust.inputs.Dp            = np.array([2351.26388961])
         thrust.inputs.Dpp_DP        = 0.77228994
         thrust.inputs.Dpar          = thrust.inputs.Dpp_DP * thrust.inputs.Dp
         thrust.inputs.nr_elements   = 1
-        thrust.inputs.fS            = 0.5
+        thrust.inputs.fS            = 0.0
         thrust.inputs.fL            = 0.5
         thrust.inputs.eta_propm     = 0.9
         thrust.inputs.eta_prope     = 0.9
@@ -40,20 +40,13 @@ class TestPowerBalance(unittest.TestCase):
         # Create custom conditions
         conditions = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
         conditions.weights.total_mass  = np.array([5000])
-        conditions.propulsion.throttle = np.array([0.5])  # Dummy variable (not used)
+        conditions.propulsion.throttle = np.array([1])  # Dummy variable (not used)
 
         thrust.compute(conditions)
 
         print(thrust.outputs)
 
-        # self.assertAlmostEqual(thrust.outputs.PKm_tot,   188712, places=0, msg="Should be about 188712")
-        # self.assertAlmostEqual(thrust.outputs.PKe_tot,   188712, places=0, msg="Should be about 188712")
-        # self.assertAlmostEqual(thrust.outputs.mdotm_tot, 114,    places=0, msg="Should be about 114")
-        # self.assertAlmostEqual(thrust.outputs.mdote_tot, 114,    places=0, msg="Should be about 114")
-        # self.assertAlmostEqual(thrust.outputs.Vjetm_tot, 94,     places=0, msg="Should be about 94")
-        # self.assertAlmostEqual(thrust.outputs.Vjete_tot, 94,     places=0, msg="Should be about 94")
-
-        # self.assertAlmostEqual(1, 1)
+        # self.assertAlmostEqual(variable, expected_value, places=0, msg="Should be about expected_value")
 
 if __name__ == '__main__':
     unittest.main()
