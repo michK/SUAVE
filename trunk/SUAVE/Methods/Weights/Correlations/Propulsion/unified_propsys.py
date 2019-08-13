@@ -35,9 +35,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             2018 Aviation Technology, Integration, and Operations Conference.
             2018.
 
-    Inputs:
-            mdotm - array of mechanical fan mass flows [kg/s]
-            mdote - array of electrical fan mass flows [kg/s]
+    Inputs:            
             PKtot - Total installed PK [W]
             fL    - Load electrification factor [-]
             fS    - Source electrification factor [-]
