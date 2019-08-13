@@ -180,6 +180,25 @@ class Unified_Thrust(Energy_Component):
                 print("Power balance system not converged")
                 [_, _, Vjetm, Vjete] = np.ones(4) * nan
 
+            # Catch negative params and set to zero
+            if power_balance.mdotm <= 0:
+                power_balance.mdotm = 0
+            
+            if power_balance.mdote <= 0:
+                power_balance.mdote = 0
+            
+            if power_balance.PKm <= 0:
+                power_balance.PKm = 0
+            
+            if power_balance.PKe <= 0:
+                power_balance.PKe = 0
+
+            if Vjetm <= Vinf[i]:
+                Vjetm = 0
+
+            if Vjete <= Vinf[i]:
+                Vjete = 0
+
             PKm_tot[i] = power_balance.PKm
             PKe_tot[i] = power_balance.PKe
             mdotm_tot[i] = power_balance.mdotm
@@ -210,7 +229,6 @@ class Unified_Thrust(Energy_Component):
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 
-        # print(PKm_tot[i-2] ,PKe_tot[i-2], mdotm_tot[i-2], mdote_tot[i-2], Vjetm_tot[i-2], Vjete_tot[i-2])
         # compute power
         power = thrust * Vinf
 
