@@ -177,11 +177,11 @@ class Unified_Thrust(Energy_Component):
             if power_balance.PKe <= 0:
                 power_balance.PKe = 0
 
-            if Vjetm <= Vinf[i]:
-                Vjetm = 0
+            # if Vjetm <= Vinf[i]:
+            #     Vjetm = 0
 
-            if Vjete <= Vinf[i]:
-                Vjete = 0
+            # if Vjete <= Vinf[i]:
+            #     Vjete = 0
 
             PKm_tot[i] = power_balance.PKm
             PKe_tot[i] = power_balance.PKe
@@ -194,6 +194,18 @@ class Unified_Thrust(Energy_Component):
 
             [PKe_i, PKm_i, PfanE_i, PfanM_i, Pmot_i, Pinv_i, Pbat_i, Pturb_i, Pmot_link_i, Pconv_i, Plink_i] = \
                 calculate_powers(PK_tot, fS, fL, eta_pe, eta_mot, eta_fan)
+
+            # print("PKe_i: {}".format(PKe_i))
+            # print("PKm_i: {}".format(PKm_i))
+            # print("PfanE_i: {}".format(PfanE_i))
+            # print("PfanM_i: {}".format(PfanM_i))
+            # print("Pmot_i: {}".format(Pmot_i))
+            # print("Pinv_i: {}".format(Pinv_i))
+            # print("Pbat_i: {}".format(Pbat_i))
+            # print("Pturb_i: {}".format(Pturb_i))
+            # print("Pmot_link_i: {}".format(Pmot_link_i))
+            # print("Pconv_i: {}".format(Pconv_i))
+            # print("Plink_i: {}".format(Plink_i))
 
             PKm = PKm_i
             PKe = PKe_i
@@ -227,6 +239,8 @@ class Unified_Thrust(Energy_Component):
         self.outputs.mdote_tot = mdote_tot
         self.outputs.Vjetm_tot = Vjetm_tot
         self.outputs.Vjete_tot = Vjete_tot
+
+        # print(self.outputs)
 
     __call__ = compute
 
