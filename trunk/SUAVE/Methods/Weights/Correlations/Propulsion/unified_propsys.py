@@ -55,9 +55,15 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     fL_arr = np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent])
     fS_arr = np.array([vehicle.fS_climb, vehicle.fS_cruise, vehicle.fS_descent])
 
-    fL_max = np.amax(fL_arr)
+    # NOTE These max statements might make design space non-smooth
+    # fL_max = np.amax(fL_arr)
+    # fL_max_segment = segments[np.argmax(fL_arr)]
+    # fS_max = np.amax(fS_arr)
+    # fS_max_segment = segments[np.argmax(fS_arr)]
+
+    fL_max = soft_max(np.sort(fL_arr)[-1], np.sort(fL_arr)[-2])
     fL_max_segment = segments[np.argmax(fL_arr)]
-    fS_max = np.amax(fS_arr)
+    fS_max = soft_max(np.sort(fS_arr)[-1], np.sort(fS_arr)[-2])
     fS_max_segment = segments[np.argmax(fS_arr)]
 
     # Create empty lists to store tentative component weights
