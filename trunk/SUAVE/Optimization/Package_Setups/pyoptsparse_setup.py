@@ -204,11 +204,11 @@ def PyOpt_Problem(problem,xdict):
     
     for key, val in xdict.items():
         x.append(float(val))
-        
-   
+
+
     obj   = problem.objective(x)
     const = problem.all_constraints(x).tolist()
-    fail  = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
+    fail = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
     
     funcs = {}
     
