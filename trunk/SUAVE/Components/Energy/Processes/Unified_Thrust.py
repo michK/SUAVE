@@ -125,22 +125,6 @@ class Unified_Thrust(Energy_Component):
                 """Function to calculate residuals of power balance equations"""
                 PK, mdot, Vjetm, Vjete = params
 
-                # Print out variable values:
-                # print("Vinf : {}".format(Vinf[i]))
-                # print("fL : {}".format(fL))
-                # print("fS : {}".format(fS))
-                # print("fsurf : {}".format(fsurf))
-                # print("Dpar : {}".format(Dpar[i]))
-                # print("eta_propm : {}".format(eta_propm))
-                # print("eta_prope : {}".format(eta_prope))
-                # print("hdot : {}".format(hdot[i]))
-                # print("W : {}".format(W[i]))
-                # print("deltaPhiSurf : {}".format(deltaPhiSurf))
-                # print("fBLIm : {}".format(fBLIm))
-                # print("fBLIe : {}".format(fBLIe))
-                # print("fBLIm : {}".format(fBLIm))
-                # print("fBLIe : {}".format(fBLIe))
-
                 # Derived quantities
                 PKm = (1 - fL) * PK
                 PKe = fL * PK
