@@ -71,6 +71,7 @@ def converge_root(segment):
             segment.state.numerics.converged = True
             unknowns = sol['x']
         else:
+            segment.state.numerics.converged = False
             print("Segment did not converge. Segment Tag: " + segment.tag)
             print("Error Message:\n" + sol['message'])    
 
