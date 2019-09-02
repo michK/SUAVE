@@ -11,15 +11,15 @@ class TestPowerBalance(unittest.TestCase):
         thrust = SUAVE.Components.Energy.Processes.Unified_Thrust()
 
         # Inputs from higher level
-        thrust.inputs.vertical_velocity = np.array([-2000]) * Units['ft/min']
+        thrust.inputs.vertical_velocity = np.array([0]) * Units['ft/min']
         thrust.inputs.Vinf          = np.array([93.62888889])
         thrust.inputs.rho_inf       = np.array([0.771])
         thrust.inputs.Dp            = np.array([2351.26388961])
         thrust.inputs.Dpp_DP        = 0.77228994
         thrust.inputs.Dpar          = thrust.inputs.Dpp_DP * thrust.inputs.Dp
         thrust.inputs.nr_elements   = 1
-        thrust.inputs.fS            = 0.0
-        thrust.inputs.fL            = 1.0
+        thrust.inputs.fS            = 0.5
+        thrust.inputs.fL            = 0.5
         thrust.inputs.eta_propm     = 0.9
         thrust.inputs.eta_prope     = 0.9
         thrust.inputs.eta_th        = 0.5
