@@ -18,8 +18,6 @@ from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
-nan = float('nan')
-
 # ----------------------------------------------------------------------
 #  Thrust Process
 # ----------------------------------------------------------------------
@@ -58,7 +56,7 @@ class Unified_Thrust(Energy_Component):
         self.outputs.power = 0.0
         self.nexus = None
 
-    def compute(self, conditions):
+    def compute(self, conditions, numerics):
         """Computes thrust and other properties as below.
 
         Assumptions:
@@ -140,6 +138,7 @@ class Unified_Thrust(Energy_Component):
                 res3 = phi_jet_e - PKe * (1 - eta_prope)
                 res4 = Dp[i] - (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + \
                     hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i]
+
                 power_balance.PKm = PKm
                 power_balance.PKe = PKe
                 power_balance.mdotm = mdotm
@@ -157,9 +156,10 @@ class Unified_Thrust(Energy_Component):
                 [PK, mdot, Vjetm, Vjete] = sol['x']
             else:
                 print("Power balance system not converged")
-                [PK, mdot, Vjetm, Vjete] = np.ones(4) * nan
+                numerics.converged = False
+                [PK, mdot, Vjetm, Vjete] = sol['x']
 
-            # Catch negative parameters and set to zero
+            # Catch non-physical parameters and set manually
             if power_balance.mdotm <= 0:
                 power_balance.mdotm = 0
             

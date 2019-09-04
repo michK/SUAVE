@@ -180,7 +180,7 @@ class Unified_Network(Propulsor):
         thrust.inputs.Cp                = Cp
 
         #compute the thrust
-        thrust(conditions)
+        thrust(conditions, numerics)
 
         # Set battery power and current
         battery.inputs.current  = thrust.outputs.Pbat / battery.max_voltage
