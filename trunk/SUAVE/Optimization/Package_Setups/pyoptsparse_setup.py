@@ -109,6 +109,7 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
         opt.setOption('Central difference interval', CD_step)
         opt.setOption('Central difference interval', CD_step)
         opt.setOption('Major optimality tolerance', sense_step)
+        opt.setOption('Minor feasibility tolerance', sense_step)
         
     elif solver == 'SLSQP':
         opt = pyOpt.SLSQP()
