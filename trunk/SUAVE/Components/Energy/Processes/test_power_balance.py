@@ -2,16 +2,18 @@ import unittest
 import numpy as np
 
 import SUAVE
-from SUAVE.Core import Units
+from SUAVE.Core import Units, Data
 
 class TestPowerBalance(unittest.TestCase):
 
     def test_power_balance(self):
 
         thrust = SUAVE.Components.Energy.Processes.Unified_Thrust()
+        numerics = Data()
 
         # Inputs from higher level
         thrust.inputs.vertical_velocity = np.array([0]) * Units['ft/min']
+        # thrust.inputs.Vinf          = np.array([182.0 * Units.knot])
         thrust.inputs.Vinf          = np.array([182.0 * Units.knot])
         thrust.inputs.rho_inf       = np.array([0.771])
         thrust.inputs.Dp            = np.array([2351.26388961])
@@ -26,8 +28,8 @@ class TestPowerBalance(unittest.TestCase):
         thrust.inputs.eta_pe        = 0.98
         thrust.inputs.eta_mot       = 0.95
         thrust.inputs.eta_fan       = 0.9
-        thrust.inputs.fBLIe         = 0.2
-        thrust.inputs.fBLIm         = 0.2
+        thrust.inputs.fBLIe         = 0.0
+        thrust.inputs.fBLIm         = 0.0
         thrust.inputs.fsurf         = 0.9
         thrust.inputs.nr_fans_elec  = 2
         thrust.inputs.nr_fans_mech  = 2
@@ -42,7 +44,7 @@ class TestPowerBalance(unittest.TestCase):
         conditions.weights.total_mass  = np.array([5000])
         conditions.propulsion.throttle = np.array([1])
 
-        thrust.compute(conditions)
+        thrust.compute(conditions, numerics)
 
         print(thrust.outputs)
 
