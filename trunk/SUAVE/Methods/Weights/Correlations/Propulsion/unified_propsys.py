@@ -181,39 +181,39 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             m_pe_link_store.append(m_pe_link)
             m_tms_store.append(mass_tms)
 
-        # Find max values of component masses
-        m_fanm        = soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
-        m_nacm        = soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
-        m_fane        = soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
-        m_nace        = soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
-        m_core        = soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
-        m_prop_mot    = soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
-        m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
-        m_gen         = soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
-        m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
-        m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
+    # Find max values of component masses
+    m_fanm        = soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
+    m_nacm        = soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
+    m_fane        = soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
+    m_nace        = soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
+    m_core        = soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
+    m_prop_mot    = soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
+    m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
+    m_gen         = soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
+    m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
+    m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
 
-        mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
-                propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
-                mass_tms
+    mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
+            propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
+            mass_tms
 
-        propsys.info.m_core         = m_core
-        propsys.info.m_fanm         = m_fanm
-        propsys.info.m_fane         = m_fane
-        propsys.info.m_nacm         = m_nacm
-        propsys.info.m_nace         = m_nace
-        propsys.info.m_prop_mot     = m_prop_mot
-        propsys.info.m_pe_prop_mot  = m_pe_prop_mot
-        propsys.info.m_gen          = m_gen
-        propsys.info.m_pe_link      = m_pe_link
-        propsys.info.mass_tms       = mass_tms
-        propsys.info.weight_factor  = weight_factor
-        propsys.info.weight_total   = mprop * weight_factor
-        propsys.info.fS_max         = fS_max
-        propsys.info.fL_max_segment = fL_max_segment
-        propsys.info.fL_max         = fL_max
-        propsys.info.fS_max_segment = fS_max_segment
+    propsys.info.m_core         = m_core
+    propsys.info.m_fanm         = m_fanm
+    propsys.info.m_fane         = m_fane
+    propsys.info.m_nacm         = m_nacm
+    propsys.info.m_nace         = m_nace
+    propsys.info.m_prop_mot     = m_prop_mot
+    propsys.info.m_pe_prop_mot  = m_pe_prop_mot
+    propsys.info.m_gen          = m_gen
+    propsys.info.m_pe_link      = m_pe_link
+    propsys.info.mass_tms       = mass_tms
+    propsys.info.weight_factor  = weight_factor
+    propsys.info.weight_total   = mprop * weight_factor
+    propsys.info.fS_max         = fS_max
+    propsys.info.fL_max_segment = fL_max_segment
+    propsys.info.fL_max         = fL_max
+    propsys.info.fS_max_segment = fS_max_segment
 
-        mass_propsys = mprop * weight_factor
+    mass_propsys = mprop * weight_factor
 
     return mass_propsys
