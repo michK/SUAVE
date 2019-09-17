@@ -93,8 +93,10 @@ class Unified_Thrust(Energy_Component):
         Dp            = self.inputs.Dp
         Dpar          = self.inputs.Dpar
         Dpp_DP        = self.inputs.Dpp_DP
-        fBLIe         = self.inputs.fBLIe
-        fBLIm         = self.inputs.fBLIm
+        # fBLIe         = self.inputs.fBLIe
+        # fBLIm         = self.inputs.fBLIm
+        fBLIe         = 0.0  # FIXME Restore after fixing model
+        fBLIm         = 0.0  # FIXME Restore after fixing model
         fsurf         = self.inputs.fsurf
         max_bat_power = self.inputs.max_bat_power
         Cp            = self.inputs.Cp

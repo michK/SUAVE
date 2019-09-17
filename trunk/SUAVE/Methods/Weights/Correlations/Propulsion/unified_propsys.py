@@ -41,7 +41,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             fS    - Source electrification factor [-]
 
     Outputs:
-            weight - weight of the full propulsion system [kg]
+            mass - mass of the full propulsion system [kg]
 
     Properties Used:
             N/A
@@ -51,14 +51,21 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     propsys = vehicle.propulsors.unified_propsys
 
     # Create arrays of fL and fS to loop over
-    segments = ["Climb", "Cruise", "Descent"]
-    fL_arr = np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent])
-    fS_arr = np.array([vehicle.fS_climb, vehicle.fS_cruise, vehicle.fS_descent])
+    # segments = ["Climb", "Cruise", "Descent"]
+    segments = ["Cruise"]
+    # fL_arr = np.unique(np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent]))
+    # fS_arr = np.unique(np.array([vehicle.fS_climb, vehicle.fS_cruise, vehicle.fS_descent]))
+    fL_arr = np.unique(np.array([vehicle.fL_cruise]))
+    fS_arr = np.unique(np.array([vehicle.fS_cruise]))
 
     # Find segment electrifications for result reporting
-    fL_max = np.amax(fL_arr)
+    # fL_max = np.amax(np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent]))
+    # fL_max_segment = segments[np.argmax(fL_arr)]
+    # fS_max = np.amax(np.array([vehicle.fS_climb, vehicle.fS_cruise, vehicle.fS_descent]))
+    # fS_max_segment = segments[np.argmax(fS_arr)]
+    fL_max = np.amax(np.array([vehicle.fL_cruise]))
     fL_max_segment = segments[np.argmax(fL_arr)]
-    fS_max = np.amax(fS_arr)
+    fS_max = np.amax(np.array([vehicle.fS_cruise]))
     fS_max_segment = segments[np.argmax(fS_arr)]
 
     # Create empty lists to store tentative component weights
@@ -73,7 +80,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     m_gen_store         = []
     m_pe_link_store     = []
     m_tms_store         = []
-    
+
     for fL in fL_arr:
         for fS in fS_arr:
 
@@ -138,7 +145,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             Nz   = vehicle.envelope.ultimate_load
             Weng = m_core / Units.lbs
             Kp   = 1.0  # Propeller/fan book-kept separately
-            Ktr  = 1.18  # With thrust reverser, 1.0 without
+            Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
             Wec  = 2.331 * Weng**0.901 * Kp * Ktr
             Nen  = propsys.number_of_engines_mech
             Sn   = propsys.areas_wetted_mech / Units['ft^2']
@@ -151,7 +158,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             Nz   = vehicle.envelope.ultimate_load
             Weng = m_prop_mot / Units.lbs
             Kp   = 1.0  # Propeller/fan book-kept separately
-            Ktr  = 1.0  # With thrust reverser, 1.0 without
+            Ktr  = 1.0  # 1.18 with thrust reverser, 1.0 without
             Wec  = 2.331 * Weng**0.901 * Kp * Ktr
             Nen  = propsys.number_of_engines_elec
             Sn   = propsys.areas_wetted_elec / Units['ft^2']
@@ -182,16 +189,19 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             m_tms_store.append(mass_tms)
 
     # Find max values of component masses
-    m_fanm        = soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
-    m_nacm        = soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
-    m_fane        = soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
-    m_nace        = soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
-    m_core        = soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
-    m_prop_mot    = soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
-    m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
-    m_gen         = soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
-    m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
-    m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
+    if (np.shape(fL_arr)[0] > 1) or (np.shape(fS_arr)[0] > 1):
+        m_fanm        = soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
+        m_nacm        = soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
+        m_fane        = soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
+        m_nace        = soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
+        m_core        = soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
+        m_prop_mot    = soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
+        m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
+        m_gen         = soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
+        m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
+        m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
+    else:
+        pass  # Values stay as calculated
 
     mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
             propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
@@ -215,5 +225,6 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     propsys.info.fS_max_segment = fS_max_segment
 
     mass_propsys = mprop * weight_factor
+    # mass_propsys = 0.1 * vehicle.mass_properties.max_takeoff
 
     return mass_propsys
