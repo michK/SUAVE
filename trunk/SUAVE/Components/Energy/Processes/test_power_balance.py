@@ -13,7 +13,6 @@ class TestPowerBalance(unittest.TestCase):
 
         # Inputs from higher level
         thrust.inputs.vertical_velocity = np.array([0]) * Units['ft/min']
-        # thrust.inputs.Vinf          = np.array([182.0 * Units.knot])
         thrust.inputs.Vinf          = np.array([182.0 * Units.knot])
         thrust.inputs.rho_inf       = np.array([0.771])
         thrust.inputs.Dp            = np.array([2351.26388961])
