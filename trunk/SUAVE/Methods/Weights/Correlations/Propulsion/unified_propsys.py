@@ -98,8 +98,19 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             eta_pe  = 0.98  # Power electronics
             eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5
 
-            [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgenmot, Pconv, Plink] = \
+            # [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgenmot, Pconv, Plink] = \
+            # calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+
+            [PKm, PKe, Pturb, Pbat, PfanM, PfanE, Pmot, Pinv, Plink] = \
             calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+
+            # Check if serial or parallel  NOTE Perhaps this can be implemented directly in model?
+            if Plink >=0:  # Parallel
+                Pconv = Plink
+                Pgenmot = Pconv * eta_pe
+            else:  # Series
+                Pgenmot = Plink
+                Pconv = Plink * eta_mot
 
             # Split power between different components for proper sizing
             PfanM   = PfanM / propsys.number_of_engines_mech
@@ -225,6 +236,5 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     propsys.info.fS_max_segment = fS_max_segment
 
     mass_propsys = mprop * weight_factor
-    # mass_propsys = 0.1 * vehicle.mass_properties.max_takeoff
 
     return mass_propsys
