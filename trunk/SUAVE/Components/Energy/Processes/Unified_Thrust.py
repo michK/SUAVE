@@ -189,7 +189,7 @@ class Unified_Thrust(Energy_Component):
 
             PK_tot = power_balance.PKm + power_balance.PKe
 
-            [PKe_i, PKm_i, PfanE_i, PfanM_i, Pmot_i, Pinv_i, Pbat_i, Pturb_i, Pmot_link_i, Pconv_i, Plink_i] = \
+            [PKm_i, PKe_i, Pturb_i, Pbat_i, PfanM_i, PfanE_i, Pmot_i, Pinv_i, Plink] = \
                 calculate_powers(PK_tot, fS, fL, eta_pe, eta_mot, eta_fan)
 
             PKm = PKm_i

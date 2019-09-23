@@ -29,75 +29,32 @@ def remove_negatives(data_in):
 
 
 def calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan):
-    # Determine link properties - generator or motor
-    if ((1 - fS) * fL) > (eta_pe * eta_mot * fS * (1 - fL)):  # Series - Link is generator        
-        A = np.array((
-                     [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          -1/eta_mot, 0, 1,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, -1/eta_pe, 1, 0,       0, 0, 0,          0],
-                     [0,          -1/eta_fan, 0,          1, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 0, 1,          -1],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 1, -1/eta_mot, 0],
-                     [0,          0,          0,          0, 0,         1, -1,      0, 0, 0,          -1],
-                     [0,          0,          0,          1, 0,         0, 0,      -1, 1, 0,          0],
-                     [0,          0,          0,          0, 0,         0, (fS-1), fS, 0, 0, 0],
-                     [(fL-1),     fL,         0,          0, 0,         0, 0,       0, 0, 0, 0]
-                    ))
 
-        b = np.array((
-                     [PKtot],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                    ))
+    A = np.array((
+                 [1,          0,          0,            0,            0,          0,           0,          0,             0],
+                 [0,          1,          0,            0,            0,          0,           0,          0,             0],
+                 [-1/eta_fan, 0,          0,            0,            1,          0,           0,          0,             0],
+                 [0,          -1/eta_fan, 0,            0,            0,          1,           0,          0,             0],
+                 [0,          0,          0,            0,            0,          -1/eta_mot,  1,          0,             0],
+                 [0,          0,          0,            0,            0,          0,           -1/eta_pe,  1,             0],
+                 [0,          0,          -1,           0,            1,          0,           0,          0,             -1],
+                 [0,          0,          0,            -1,           0,          0,           0,          1,             1],
+                 [0,          0,          -(fS/(1-fS)), 1,            0,          0,           0,          0,             0],
+                ))
 
-        # Solve system
-        # Solution vars (in order):
-        # PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgen, Pconv, Plink
-        sol = np.linalg.solve(A, b)
+    b = np.array((
+                 [(1-fL)*PKtot],
+                 [fL*PKtot],
+                 [0],
+                 [0],
+                 [0],
+                 [0],
+                 [0],
+                 [0],
+                 [0],
+                ))
 
-        return remove_negatives(sol)
+    # PKm, PKe, Pturb, Pbat, PfanM, PfanE, Pmot, Pinv, Plink
+    sol = np.linalg.solve(A, b)
 
-    else: # Parallel - Link is motor
-        A = np.array((
-                     [1,          1,          0,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [-1/eta_fan, 0,          1,          0, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          -1/eta_mot, 0, 1,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, -1/eta_pe, 1, 0,       0, 0, 0,          0],
-                     [0,          -1/eta_fan, 0,          1, 0,         0, 0,       0, 0, 0,          0],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 0, 1,          -1/eta_pe],
-                     [0,          0,          0,          0, 0,         0, 0,       0, 1, -eta_mot,   0],
-                     [0,          0,          0,          0, 0,         1, -1,      0, 0, 0,          1],
-                     [0,          0,          0,          1, 0,         0, 0,       -1,-1, 0,         0],
-                     [0,          0,          0,          0,  0,        0, (fS-1), fS, 0, 0, 0],
-                     [(fL-1),     fL,         0,          0,  0,        0, 0,       0, 0, 0, 0]
-                    ))
-
-        b = np.array((
-                     [PKtot],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                     [0],
-                    ))
-
-        # Solve system
-        # Solution vars (in order):
-        # PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pmot_link, Pconv, Plink
-        sol = np.linalg.solve(A, b)
-
-        return remove_negatives(sol)
+    return sol
