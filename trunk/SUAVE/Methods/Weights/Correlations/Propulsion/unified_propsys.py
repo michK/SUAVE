@@ -193,19 +193,16 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             m_tms_store.append(mass_tms)
 
     # Find max values of component masses
-    if (np.shape(fL_arr)[0] > 1) or (np.shape(fS_arr)[0] > 1):
-        m_fanm        = soft_max(np.sort(m_fanm_store)[-1], np.sort(m_fanm_store)[-2])
-        m_nacm        = soft_max(np.sort(m_nacm_store)[-1], np.sort(m_nacm_store)[-2])
-        m_fane        = soft_max(np.sort(m_fane_store)[-1], np.sort(m_fane_store)[-2])
-        m_nace        = soft_max(np.sort(m_nace_store)[-1], np.sort(m_nace_store)[-2])
-        m_core        = soft_max(np.sort(m_core_store)[-1], np.sort(m_core_store)[-2])
-        m_prop_mot    = soft_max(np.sort(m_prop_mot_store)[-1], np.sort(m_prop_mot_store)[-2])
-        m_pe_prop_mot = soft_max(np.sort(m_pe_prop_mot_store)[-1], np.sort(m_pe_prop_mot_store)[-2])
-        m_gen         = soft_max(np.sort(m_gen_store)[-1], np.sort(m_gen_store)[-2])
-        m_pe_link     = soft_max(np.sort(m_pe_link_store)[-1], np.sort(m_pe_link_store)[-2])
-        m_tms         = soft_max(np.sort(m_tms_store)[-1], np.sort(m_tms_store)[-2])
-    else:
-        pass  # Values stay as calculated
+    m_fanm        = np.amax(np.atleast_1d(m_fanm_store))
+    m_nacm        = np.amax(np.atleast_1d(m_nacm_store))
+    m_fane        = np.amax(np.atleast_1d(m_fane_store))
+    m_nace        = np.amax(np.atleast_1d(m_nace_store))
+    m_core        = np.amax(np.atleast_1d(m_core_store))
+    m_prop_mot    = np.amax(np.atleast_1d(m_prop_mot_store))
+    m_pe_prop_mot = np.amax(np.atleast_1d(m_pe_prop_mot_store))
+    m_gen         = np.amax(np.atleast_1d(m_gen_store))
+    m_pe_link     = np.amax(np.atleast_1d(m_pe_link_store))
+    m_tms         = np.amax(np.atleast_1d(m_tms_store))
 
     mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
             propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
