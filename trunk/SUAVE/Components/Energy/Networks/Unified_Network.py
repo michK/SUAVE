@@ -56,35 +56,7 @@ class Unified_Network(Propulsor):
         """
 
         self.tag = 'Network'
-
         self.info = Data()
-
-        # Propulsor areas
-        self.mech_fan_dia = 1.0 * Units.m
-        self.elec_fan_dia = 1.0 * Units.m
-        self.mech_nac_dia = 1.0 * Units.m
-        self.elec_nac_dia = 1.0 * Units.m
-
-        self.nacelle_length_mech = 1.0 * Units.m
-        self.nacelle_length_elec = 1.0 * Units.m
-
-        # areas needed for drag; not in there yet
-        self.areas             = Data()
-        self.areas.wetted      = 0.0
-        self.areas_wetted_mech = 1.0 * Units['m^2']
-        self.areas_wetted_elec = 1.0 * Units['m^2']
-
-        # BLI and parameters required for BLI estimation
-        self.fBLIm = 0.0
-        self.fBLIe = 0.0
-        self.wingspan_projected = 1.0 * Units.m
-        self.fuselage_effective_diameter = 1.0 * Units.m
-
-        # max power tracker
-        self.max_power = 0.01
-        self.max_bat_power = 0.01
-
-        self.thrust_angle = 0
 
     # manage process with a driver function
     def evaluate_thrust(self, state):
@@ -121,9 +93,9 @@ class Unified_Network(Propulsor):
 
         # Unpack inputs
         nr_fans_mech  = self.number_of_engines_mech
-        mech_nac_dia  = self.mech_nac_dia
+        # mech_nac_dia  = self.mech_nac_dia
         nr_fans_elec  = self.number_of_engines_elec
-        elec_nac_dia  = self.elec_nac_dia
+        # elec_nac_dia  = self.elec_nac_dia
         fL            = self.fL
         fS            = self.fS
         fBLIe         = self.fBLIe
