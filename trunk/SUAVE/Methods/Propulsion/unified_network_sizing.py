@@ -17,10 +17,8 @@ def unified_network_sizing(propsys, vehicle):
     Method for fan and nacelle sizing from Raymer
     """
 
-    # propsys = vehicle.propulsors.unified_propsys
-
-    nr_fans_mech = propsys.number_of_engines_mech
-    nr_fans_elec = propsys.number_of_engines_elec
+    nr_fans_mech = propsys.number_of_engines_mech = vehicle.nr_engines_mech
+    nr_fans_elec = propsys.number_of_engines_elec = vehicle.nr_engines_elec
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
 
