@@ -52,7 +52,7 @@ def unified_network_sizing(propsys, vehicle):
     propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
 
     # Nacelle diameters and lengths
-    propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # RaymerChapter 10.3.4 for M <= 0.8
+    propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
     propsys.elec_nac_dia = Dnace = Dfane / 0.8
     propsys.nacelle_length_mech = 1.5 * Dnacm
     propsys.nacelle_length_elec = 1.5 * Dnace
