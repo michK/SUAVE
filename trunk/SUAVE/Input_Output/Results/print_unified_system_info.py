@@ -69,17 +69,17 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     fid.write(' PROPULSOR COUNT, DIAMETERS AND WETTED AREAS \n')
     fid.write(' Number of mechanical fans................. : ' + str( '%8.0F' % propsys.number_of_engines_mech)        + '\n')
     fid.write(' Number of electrical fans................. : ' + str( '%8.0F' % propsys.number_of_engines_elec)        + '\n')
-    fid.write(' Mechanical fan diameters.................. : ' + str( '%8.1F' % propsys_info.mech_fan_dia)             + ' m\n')
-    fid.write(' Electrical fan diameters.................. : ' + str( '%8.1F' % propsys_info.elec_fan_dia)             + ' m\n')
-    fid.write(' Mechanical nacelle wetted areas (total)... : ' + str( '%8.1F' % propsys_info.areas_wetted_mech_tot)    + ' m^2\n')
-    fid.write(' Electrical nacelle wetted areas (total)... : ' + str( '%8.1F' % propsys_info.areas_wetted_elec_tot)    + ' m^2\n')
-    fid.write(' Mechanical pylons wetted areas (total).... : ' + str( '%8.1F' % propsys_info.areas_wetted_mech_pylons) + ' m^2\n')
-    fid.write(' Electrical pylons wetted areas (total).... : ' + str( '%8.1F' % propsys_info.areas_wetted_elec_pylons) + ' m^2\n')
+    fid.write(' Mechanical fan diameters.................. : ' + str( '%8.3F' % propsys_info.mech_fan_dia)             + ' m\n')
+    fid.write(' Electrical fan diameters.................. : ' + str( '%8.3F' % propsys_info.elec_fan_dia)             + ' m\n')
+    fid.write(' Mechanical nacelle wetted areas (total)... : ' + str( '%8.3F' % propsys_info.areas_wetted_mech_tot)    + ' m^2\n')
+    fid.write(' Electrical nacelle wetted areas (total)... : ' + str( '%8.3F' % propsys_info.areas_wetted_elec_tot)    + ' m^2\n')
+    fid.write(' Mechanical pylons wetted areas (total).... : ' + str( '%8.3F' % propsys_info.areas_wetted_mech_pylons) + ' m^2\n')
+    fid.write(' Electrical pylons wetted areas (total).... : ' + str( '%8.3F' % propsys_info.areas_wetted_elec_pylons) + ' m^2\n')
 
     # Print timestamp
     fid.write('\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
     # done
-    fid.close    
+    fid.close
 
 # ----------------------------------------------------------------------
 #   Module Test
