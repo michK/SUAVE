@@ -91,9 +91,6 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             eta_pe  = 0.98  # Power electronics
             eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5
 
-            # [PKe, PKm, PfanE, PfanM, Pmot, Pinv, Pbat, Pturb, Pgenmot, Pconv, Plink] = \
-            # calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
-
             [PKm, PKe, Pturb, Pbat, PfanM, PfanE, Pmot, Pinv, Plink] = \
             calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
