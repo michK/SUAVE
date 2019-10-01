@@ -9,12 +9,17 @@
 import numpy as np
 
 
-def unified_network_sizing(propsys, vehicle):
+def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     """
     This function takes the total mass flow through all propulsors
     and sizes the fans appropriately, based on the number of propulsors
 
     Method for fan and nacelle sizing from Raymer
+
+    Inputs:
+        propsys - Propulsion system model
+        vehicle - Vehicle model
+        f_KED_wing - Fraction of wing kinetic energy defect relative to full aircraft
     """
 
     nr_fans_mech = propsys.number_of_engines_mech = vehicle.nr_engines_mech
@@ -22,13 +27,27 @@ def unified_network_sizing(propsys, vehicle):
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
 
+    # Check for edge cases where components should 'disappear'
+    if fL <= 0.02:  # Propulsion only from mechanical side
+        nr_fans_elec = 0
+    elif fL >= 0.98:  # Propulsion only from electrical side
+        nr_fans_mech = 0
+
     propsys.mdot_cruise = vehicle.mdottot_cruise
    
     mdotm_tot = (1 - fL) * propsys.mdot_cruise
     mdote_tot = fL * propsys.mdot_cruise
 
-    mdotm = mdotm_tot / nr_fans_mech
-    mdote = mdote_tot / nr_fans_elec
+    try:
+        mdotm = mdotm_tot / nr_fans_mech
+    except ZeroDivisionError:
+        mdotm = 0
+
+    try:
+        mdote = mdote_tot / nr_fans_elec
+    except ZeroDivisionError:
+        mdote = 0
+    
 
     Acapm = 0.00515 * mdotm  # Raymer Chapter 10.3.4 for M <= 0.8
     Acape = 0.00515 * mdote
@@ -62,7 +81,7 @@ def unified_network_sizing(propsys, vehicle):
     # Update BLI amounts
     wingspan_projected = vehicle.wings.main_wing.spans.projected
     fuselage_effective_diameter = vehicle.fuselages.fuselage.effective_diameter
-    propsys.fBLIe = (nr_fans_elec * Dnace) / (wingspan_projected - fuselage_effective_diameter)
+    propsys.fBLIe = f_KED_wing * (nr_fans_elec * Dnace) / (wingspan_projected - fuselage_effective_diameter)
 
     # Set summary information
     propsys.info.mech_fan_dia = Dfanm
