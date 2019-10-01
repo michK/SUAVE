@@ -18,7 +18,6 @@ from SUAVE.Components.Propulsors.Propulsor import Propulsor
 #  Network
 # ----------------------------------------------------------------------
 
-
 ## @ingroup Components-Energy-Networks
 class Unified_Network(Propulsor):
     """ Network that can model various combinations of components
