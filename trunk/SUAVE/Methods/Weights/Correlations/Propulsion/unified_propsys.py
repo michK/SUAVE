@@ -96,11 +96,11 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
 
             # Check if serial or parallel  NOTE Perhaps this can be implemented directly in model?
             if Plink >=0:  # Parallel
-                Pconv = Plink
-                Pgenmot = Pconv * eta_pe
+                Pconv = Plink * eta_pe
+                Pgenmot = Plink * eta_pe * eta_mot
             else:  # Series
-                Pgenmot = Plink
-                Pconv = Plink * eta_mot
+                Pgenmot = abs(Plink) / eta_mot / eta_pe
+                Pconv = abs(Plink) / eta_mot
 
             # Split power between different components for proper sizing
             PfanM   = PfanM / propsys.number_of_engines_mech

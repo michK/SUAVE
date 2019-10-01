@@ -1,7 +1,7 @@
 ## @ingroup Methods-Performance
-# estimate_wing_fuel_vol.py
+# wing_loading_stall.py
 #
-# Created: June 2019, M. Kruger
+# Created: Oct 2019, M. Kruger
 # Modified: 
 
 # ----------------------------------------------------------------------
@@ -20,15 +20,11 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Performance
-def wing_loading_approach(vehicle, analyses, airport, m_fuel):
-    """ Estimate wing loading constraint for given approach speed
+def wing_loading_stall(vehicle, analyses, airport):
+    """ Estimate stall speed
 
     Source:
-    Torenbeek, E.,
-    2013.
-    Advanced aircraft design: conceptual design,
-    analysis and optimization of subsonic civil airplanes.
-    John Wiley & Sons.
+    Raymer
 
     Inputs:
     # vehicle
@@ -94,9 +90,8 @@ def wing_loading_approach(vehicle, analyses, airport, m_fuel):
     # ==============================================
     # Computing speeds (Vs, Vapp)
     # ==============================================
-    Vstall = (2.0 * (mass_to - m_fuel) * sea_level_gravity / (rho * Sw * maximum_lift_coefficient)) ** 0.5
-    Vapp = 1.22 * Vstall
+    Vstall = (2.0 * mass_to * sea_level_gravity / (rho * Sw * maximum_lift_coefficient)) ** 0.5
 
-    wing_loading_approach = 0.335 * rho * Vapp**2 * maximum_lift_coefficient
+    wing_loading_stall = 0.5 * rho * Vstall**2 * maximum_lift_coefficient
     
-    return wing_loading_approach
+    return wing_loading_stall
