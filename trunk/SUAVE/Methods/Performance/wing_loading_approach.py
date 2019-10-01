@@ -20,7 +20,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Performance
-def wing_loading_approach(vehicle, analyses, airport):
+def wing_loading_approach(vehicle, analyses, airport, m_fuel):
     """ Estimate wing loading constraint for given approach speed
 
     Source:
@@ -94,8 +94,7 @@ def wing_loading_approach(vehicle, analyses, airport):
     # ==============================================
     # Computing speeds (Vs, Vapp)
     # ==============================================
-    Vstall = (2.0 * mass_to * sea_level_gravity / (rho * Sw * maximum_lift_coefficient)) ** 0.5
-    Vstall = 65 * Units.kts
+    Vstall = (2.0 * (mass_to - m_fuel) * sea_level_gravity / (rho * Sw * maximum_lift_coefficient)) ** 0.5
     Vapp = 1.22 * Vstall
 
     wing_loading_approach = 0.335 * rho * Vapp**2 * maximum_lift_coefficient
