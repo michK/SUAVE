@@ -27,13 +27,27 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
 
+    # Check for edge cases where components should 'disappear'
+    if fL <= 0.02:  # Propulsion only from mechanical side
+        nr_fans_elec = 0
+    elif fL >= 0.98:  # Propulsion only from electrical side
+        nr_fans_mech = 0
+
     propsys.mdot_cruise = vehicle.mdottot_cruise
    
     mdotm_tot = (1 - fL) * propsys.mdot_cruise
     mdote_tot = fL * propsys.mdot_cruise
 
-    mdotm = mdotm_tot / nr_fans_mech
-    mdote = mdote_tot / nr_fans_elec
+    try:
+        mdotm = mdotm_tot / nr_fans_mech
+    except ZeroDivisionError:
+        mdotm = 0
+
+    try:
+        mdote = mdote_tot / nr_fans_elec
+    except ZeroDivisionError:
+        mdote = 0
+    
 
     Acapm = 0.00515 * mdotm  # Raymer Chapter 10.3.4 for M <= 0.8
     Acape = 0.00515 * mdote

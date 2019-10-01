@@ -102,12 +102,24 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
                 Pgenmot = abs(Plink) / eta_mot / eta_pe
                 Pconv = abs(Plink) / eta_mot
 
-            # Split power between different components for proper sizing
-            PfanM   = PfanM / propsys.number_of_engines_mech
-            PfanE   = PfanE / propsys.number_of_engines_elec
-            Pmot    = Pmot  / propsys.number_of_engines_elec
-            Pinv    = Pinv  / propsys.number_of_engines_elec
-            Pturb   = Pturb / propsys.number_of_engines_mech
+            # Split power between different components for proper sizing, catching missing propulsors
+            try:
+                PfanM  = PfanM / propsys.number_of_engines_mech
+                Pturb  = Pturb / propsys.number_of_engines_mech
+            except ZeroDivisionError:
+                PfanM  = 0.0
+                Pturb  = 0.0
+
+            try:
+                PfanE  = PfanE / propsys.number_of_engines_elec
+                Pmot   = Pmot  / propsys.number_of_engines_elec
+                Pinv   = Pinv  / propsys.number_of_engines_elec
+            except ZeroDivisionError:
+                PfanE  = 0.0
+                Pmot   = 0.0
+                Pinv   = 0.0
+
+            # These remain unchanged since there is only one of each
             Pbat    = Pbat
             Pgenmot = Pgenmot
             Pconv   = Pconv
