@@ -14,5 +14,6 @@ from .estimate_landing_field_length_unified import estimate_landing_field_length
 from .estimate_wing_fuel_vol import estimate_wing_fuel_vol
 from .estimate_fuse_bat_vol import estimate_fuse_bat_vol
 from .wing_loading_approach import wing_loading_approach
+from .wing_loading_stall import wing_loading_stall
 from .V_n_diagram import V_n_diagram
 
