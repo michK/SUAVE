@@ -170,17 +170,16 @@ def empty(vehicle):
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     mto         = vehicle.mass_properties.max_takeoff
-    m_zf        = mto  # For weight calculation purpose
     num_pax     = vehicle.passengers
     wt_cargo    = vehicle.mass_properties.cargo
-    fuel.mass_properties.mass = 200
+    fuel.mass_properties.mass = vehicle.mass_fuel
     fuel.density = 810 * Units['kg/m^3']
     fuel.internal_volume = fuel.mass_properties.mass / fuel.density
-
+    m_zf        = mto - fuel.mass_properties.mass
     q_c         = vehicle.design_dynamic_pressure
     mach_number = vehicle.design_mach_number
 
-    propulsor_name = list(vehicle.propulsors.keys())[0] #obtain the key for the propulsor for assignment purposes
+    propulsor_name = list(vehicle.propulsors.keys())[0] # Obtain the key for the propulsor for assignment purposes
     propulsors     = vehicle.propulsors[propulsor_name]   
 
     if propulsor_name == 'turbofan':
@@ -201,14 +200,14 @@ def empty(vehicle):
         # Unpack inputs
         num_eng = propulsors.number_of_engines_mech        
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
-        weight_factor = 2.15  # TODO Check this
+        weight_factor = 2.15  # FIXME Shouldn't need this
         wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)        
         propulsors.mass_properties.mass = wt_propulsion
 
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
-        wt_propulsion                    = propulsors.mass_properties.mass
+        wt_propulsion = propulsors.mass_properties.mass
         num_eng = propulsors.number_of_engines
-        if wt_propulsion==0:
+        if wt_propulsion == 0:
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)
     #find fuel volume
     if 'fuel' not in vehicle:
