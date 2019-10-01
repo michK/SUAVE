@@ -20,7 +20,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Performance
-def estimate_landing_field_length_unified(vehicle, analyses, results, airport, obst_height=15.2, lmf=1.0):
+def estimate_landing_field_length_unified(vehicle, analyses, results, airport, mass_fuel, obst_height=15.2):
     """ Estimate landing field length for unified propsys energy network
         Some parts based on estimate_takeoff_field_length_unified
 
@@ -73,29 +73,16 @@ def estimate_landing_field_length_unified(vehicle, analyses, results, airport, o
     # Determining vehicle maximum lift coefficient
     # ==============================================
     try:   # aircraft maximum lift informed by user
-        maximum_lift_coefficient = vehicle.maximum_lift_coefficient
+        maximum_lift_coefficient = vehicle.maximum_lift_coefficient_landing
     except:
-        # Using semi-empirical method for maximum lift coefficient calculation
-        from SUAVE.Methods.Aerodynamics.Fidelity_Zero.Lift import compute_max_lift_coeff
-
-        # Condition to CLmax calculation: 65KTAS @ 0ft, ISA
-        conditions  = atmo.compute_values(0 * Units.ft)
-        conditions.freestream=Data()
-        conditions.freestream.density   = conditions.density
-        conditions.freestream.dynamic_viscosity = conditions.dynamic_viscosity
-        conditions.freestream.velocity  = 65 * Units.knots
-        try:
-            maximum_lift_coefficient, induced_drag_high_lift = compute_max_lift_coeff(vehicle, conditions)
-            vehicle.maximum_lift_coefficient = maximum_lift_coefficient
-        except:
-            raise ValueError("Maximum lift coefficient calculation error. Please, check inputs")
+        raise ValueError("Maximum lift coefficient calculation error. Please, check inputs")
 
     # ==============================================
     # Computing stall speed
     # ==============================================
     Vstall = (2.0 * mass_to * sea_level_gravity / (rho * reference_area * maximum_lift_coefficient)) ** 0.5
 
-    mass_land = lmf * mass_to
+    mass_land = mass_to - mass_fuel
 
     # Approach
     Vf = 1.23 * Vstall
