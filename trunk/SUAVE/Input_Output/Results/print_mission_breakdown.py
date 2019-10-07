@@ -18,7 +18,7 @@ import datetime                 # importing library
 #  Methods
 # ----------------------------------------------------------------------
 ## @ingroup Input_Output-Results
-def print_mission_breakdown(results,filename='mission_breakdown.dat', units="imperial"):
+def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', units="imperial"):
     """This creates a file showing mission information.
 
     Assumptions:
@@ -155,11 +155,12 @@ def print_mission_breakdown(results,filename='mission_breakdown.dat', units="imp
 
     fid.write(2*'\n')
     if imperial:
-        fid.write(' Total Range (nm) ........... '+ str('%9.0f'   % TotalRange)+'\n')
+        fid.write(' Total Range (nm) ........... '+ str('%7.0f'   % TotalRange)+'\n')
     elif SI:
-        fid.write(' Total Range (km) ........... ' + str('%9.0f' % TotalRange) + '\n')
-    fid.write(' Total Fuel  (kg) ........... '+ str('%9.0f'   % TotalFuel)+'\n')
-    fid.write(' Mission Fuel  (kg) ........... '+ str('%7.0f'   % MissionFuel) + ' (only meaningful if there are 3 reserve segments)' + '\n')
+        fid.write(' Total Range (km) ........... ' + str('%7.0f' % TotalRange) + '\n')
+    fid.write(' Total Fuel  (kg) ........... '+ str('%7.0f'   % TotalFuel)+'\n')
+    fid.write(' Mission Fuel  (kg) ......... '+ str('%7.0f'   % MissionFuel) + ' (only meaningful if there are 3 reserve segments)' + '\n')
+    fid.write(' PSEC  (kJ/kg/km) ........... '+ str('%7.3f'   % PSEC) + '\n')
     fid.write(' Total Time  (hh:mm) ........ '+ time.strftime('    %H:%M', time.gmtime(TotalTime))+'\n')
     # Print timestamp
     fid.write(2*'\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
