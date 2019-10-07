@@ -84,6 +84,8 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     propsys.fBLIe = f_KED_wing * (nr_fans_elec * Dnace) / (wingspan_projected - fuselage_effective_diameter)
 
     # Set summary information
+    propsys.info.nr_fans_mech = nr_fans_mech
+    propsys.info.nr_fans_elec = nr_fans_elec
     propsys.info.mech_fan_dia = Dfanm
     propsys.info.elec_fan_dia = Dfane
     propsys.info.areas_wetted_mech_tot = vehicle.propulsors.unified_propsys.areas_wetted_mech * nr_fans_mech
