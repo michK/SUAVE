@@ -22,10 +22,10 @@ import progressbar
 # ----------------------------------------------------------------------
 
 
-def pareto_sweep(problem, number_of_points, sweep_index):
+def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index):
     """
-    Takes in an optimization problem and runs a Pareto sweep of the first  variable of sweep index
-    sweep_index. i.e. sweep_index=0 means you want to sweep the first variable, sweep_index = 4 is the 5th variable)
+    Takes in an optimization problem and runs a Pareto sweep of the sweep index sweep_index.
+    i.e. sweep_index=0 means you want to sweep the first variable, sweep_index = 4 is the 5th variable)
     This function is based largely on a simplified version of the line_plot function,
     with the added functionality that it runs the optimization problem for every point in the sweep,
     not just evaluate the objective function with other design variables fixed at their initial values,
@@ -67,35 +67,34 @@ def pareto_sweep(problem, number_of_points, sweep_index):
     #define inputs, output, and constraints for sweep
     inputs = np.zeros([2,number_of_points])
     obj    = np.zeros([number_of_points])
+    PSEC   = np.zeros([number_of_points])
 
     #create inputs matrix
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
 
-    bar = progressbar.ProgressBar(maxval=number_of_points, \
-        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-
     print("Performing variable sweep:")
-    bar.start()
     #inputs defined; now run sweep
     for i in range(0, number_of_points):        
         opt_prob.inputs[:,1][idx0]= inputs[0,i]
 
-        # obj[i] = problem.objective() * obj_scaling
+
         opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
         problem.optimization_problem = opt_prob
         sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', sense_step=1e-06)
         obj[i] = sol.fStar * obj_scaling
-
-        bar.update(i)
-
-    bar.finish()
+        PSEC[i] = problem.summary.PSEC
 
     # Create plot
     fig, ax = plt.subplots()
 
-    ax.plot(inputs[0,:], obj, lw = 2)
-    ax.set_xlabel(names[idx0])
-    ax.set_ylabel(obj_name)
+    if print_PSEC:        
+        ax.plot(inputs[0,:], PSEC, lw = 2)
+        ax.set_xlabel(names[idx0])
+        ax.set_ylabel('PSEC [kJ/kg/km]')
+    else:
+        ax.plot(inputs[0,:], obj, lw = 2)
+        ax.set_xlabel(names[idx0])
+        ax.set_ylabel(obj_name)
 
     plt.show()
 

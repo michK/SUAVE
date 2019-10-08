@@ -138,15 +138,11 @@ def empty(vehicle,settings=None):
 
     elif propulsor_name=='unified_propsys':
         # Unpack inputs
-        mdotm = results_power_balance.mdotm
-        mdote = results_power_balance.mdote
-        PKtot = results_power_balance.PKtot
-        fL    = vehicle.fL
-        fS    = vehicle.fS
-        Ebat  = vehicle.Ebat
-        Pbat_max = vehicle.Pbat_max
-        wt_propulsion                    = Propulsion.unified_propsys(mdotm, mdote, PKtot, Ebat, Pbat_max, fL, fS)
-        propulsors.mass_properties.mass  = wt_propulsion
+        num_eng = propulsors.number_of_engines_mech
+        fuel.number_of_tanks = propulsors.nr_fuel_tanks
+        weight_factor = 2.15  # TODO Check this
+        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
+        propulsors.mass_properties.mass = wt_propulsion
 
     else: #propulsor used is not a turbo_fan; assume mass_properties defined outside model
         wt_propulsion                   = propulsors.mass_properties.mass
@@ -223,7 +219,6 @@ def empty(vehicle,settings=None):
     wt_empty           = (wt_wing + wt_fuselage + wt_landing_gear + wt_propulsion + output_2.wt_systems + \
                           wt_tail_horizontal + wt_vtail_tot) 
     vehicle.fuselages['fuselage'].mass_properties.mass = wt_fuselage
-
 
 
     # packup outputs

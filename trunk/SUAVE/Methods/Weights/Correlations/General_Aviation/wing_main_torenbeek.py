@@ -17,7 +17,7 @@ import numpy as np
 ## @ingroup Methods-Weights-Correlations-General_Aviation
 def wing_main_torenbeek(b_wing, S_wing, m_to, m_zf):
     """
-        Calculate the weight of the main wing of an aircraft
+        Calculate the mass of the main wing of an aircraft
 
         Source:
             Torenbeek, E., 2013.
@@ -28,7 +28,7 @@ def wing_main_torenbeek(b_wing, S_wing, m_to, m_zf):
             b_wing- wing span            [m]
             S_wing - Wing planform area  [m**2]
             m_to - takeoff mass          [kg]
-            m_zf - zero fuel mass        [radians]            
+            m_zf - zero fuel mass        [kg]
 
         Outputs:
             wt_main_wing  [kg]
@@ -37,4 +37,5 @@ def wing_main_torenbeek(b_wing, S_wing, m_to, m_zf):
     W_to = 9.81 * m_to
     W_zf = 9.81 * m_zf
     weight = 0.86 *  b_wing * (S_wing * W_zf * W_to)**0.25
-    return weight / 9.81
+    mass = weight / 9.81
+    return mass

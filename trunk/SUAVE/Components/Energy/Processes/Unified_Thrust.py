@@ -18,8 +18,6 @@ from SUAVE.Core import Units
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
-nan = float('nan')
-
 # ----------------------------------------------------------------------
 #  Thrust Process
 # ----------------------------------------------------------------------
@@ -58,7 +56,7 @@ class Unified_Thrust(Energy_Component):
         self.outputs.power = 0.0
         self.nexus = None
 
-    def compute(self, conditions):
+    def compute(self, conditions, numerics):
         """Computes thrust and other properties as below.
 
         Assumptions:
@@ -96,10 +94,8 @@ class Unified_Thrust(Energy_Component):
         Dpar          = self.inputs.Dpar
         Dpp_DP        = self.inputs.Dpp_DP
         fBLIe         = self.inputs.fBLIe
-        fBLIm         = self.inputs.fBLIm
+        fBLIm         = self.inputs.fBLIm        
         fsurf         = self.inputs.fsurf
-        nr_fans_mech  = self.inputs.nr_fans_mech
-        nr_fans_elec  = self.inputs.nr_fans_elec
         max_bat_power = self.inputs.max_bat_power
         Cp            = self.inputs.Cp
 
@@ -127,22 +123,6 @@ class Unified_Thrust(Energy_Component):
                 """Function to calculate residuals of power balance equations"""
                 PK, mdot, Vjetm, Vjete = params
 
-                # Print out variable values:
-                # print("Vinf : {}".format(Vinf[i]))
-                # print("fL : {}".format(fL))
-                # print("fS : {}".format(fS))
-                # print("fsurf : {}".format(fsurf))
-                # print("Dpar : {}".format(Dpar[i]))
-                # print("eta_propm : {}".format(eta_propm))
-                # print("eta_prope : {}".format(eta_prope))
-                # print("hdot : {}".format(hdot[i]))
-                # print("W : {}".format(W[i]))
-                # print("deltaPhiSurf : {}".format(deltaPhiSurf))
-                # print("fBLIm : {}".format(fBLIm))
-                # print("fBLIe : {}".format(fBLIe))
-                # print("fBLIm : {}".format(fBLIm))
-                # print("fBLIe : {}".format(fBLIe))
-
                 # Derived quantities
                 PKm = (1 - fL) * PK
                 PKe = fL * PK
@@ -164,23 +144,39 @@ class Unified_Thrust(Energy_Component):
                 power_balance.mdotm = mdotm
                 power_balance.mdote = mdote
 
-                power_balance.res1 = res1
-                power_balance.res2 = res2
-                power_balance.res3 = res3
-                power_balance.res4 = res4
-
                 residuals = [res1, res2, res3, res4]
+                power_balance.residuals = residuals
 
-                return np.array(residuals).reshape(4,)
+                return np.array(residuals, dtype=float).reshape(4,)
             
-            args_init = [100000.0, 500.0, 100.0, 100.0]
+            args_init = [500e3, 250, 100, 100]
             sol = root(power_balance, args_init, method='hybr')
 
             if sol['success'] == True:
-                [_, _, Vjetm, Vjete] = sol['x']
+                [PK, mdot, Vjetm, Vjete] = sol['x']
             else:
                 print("Power balance system not converged")
-                [_, _, Vjetm, Vjete] = np.ones(4) * nan
+                numerics.converged = False
+                [PK, mdot, Vjetm, Vjete] = sol['x']
+
+            # Catch non-physical parameters and set manually
+            if power_balance.mdotm <= 0:
+                power_balance.mdotm = 0
+            
+            if power_balance.mdote <= 0:
+                power_balance.mdote = 0
+            
+            if power_balance.PKm <= 0:
+                power_balance.PKm = 0
+            
+            if power_balance.PKe <= 0:
+                power_balance.PKe = 0
+
+            if Vjetm <= Vinf[i]:
+                Vjetm = Vinf[i]
+
+            if Vjete <= Vinf[i]:
+                Vjete = Vinf[i]
 
             PKm_tot[i] = power_balance.PKm
             PKe_tot[i] = power_balance.PKe
@@ -191,7 +187,7 @@ class Unified_Thrust(Energy_Component):
 
             PK_tot = power_balance.PKm + power_balance.PKe
 
-            [PKe_i, PKm_i, PfanE_i, PfanM_i, Pmot_i, Pinv_i, Pbat_i, Pturb_i, Pmot_link_i, Pconv_i, Plink_i] = \
+            [PKm_i, PKe_i, Pturb_i, Pbat_i, PfanM_i, PfanE_i, Pmot_i, Pinv_i, Plink] = \
                 calculate_powers(PK_tot, fS, fL, eta_pe, eta_mot, eta_fan)
 
             PKm = PKm_i
@@ -212,7 +208,6 @@ class Unified_Thrust(Energy_Component):
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 
-        # print(PKm_tot[i-2] ,PKe_tot[i-2], mdotm_tot[i-2], mdote_tot[i-2], Vjetm_tot[i-2], Vjete_tot[i-2])
         # compute power
         power = thrust * Vinf
 
