@@ -184,7 +184,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             q_conv = (1.0 - eta_pe)  * Pconv
             q_inv  = (1.0 - eta_pe)  * Pinv
             q_mot  = (1.0 - eta_mot) * Pmot
-            
+
             q_tot  = q_bat + q_gen + q_conv + q_inv + q_mot
 
             mass_tms = q_tot / pm_tms
