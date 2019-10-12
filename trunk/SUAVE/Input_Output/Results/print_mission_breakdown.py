@@ -64,6 +64,7 @@ def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', uni
     k2 = 0.2857142857                               # constant to airspeed conversion
 
     TotalRange = 0
+    MissionRange = 0
     i = 0
     for key in results.segments.keys():        #loop for all segments
         segment = results.segments[key]
@@ -88,6 +89,9 @@ def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', uni
                     segment.conditions.frames.inertial.position_vector[0, 0]) / Units.km  # Distance [km]
 
         TotalRange = TotalRange + Dist
+
+        if i <= 2:
+            MissionRange = MissionRange + Dist
 
         Mf = segment.conditions.freestream.mach_number[-1]          # Final segment mach number
         Mi = segment.conditions.freestream.mach_number[0]           # Initial segment mach number
@@ -150,18 +154,20 @@ def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', uni
 
     #Summary of results [nm]
     TotalFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[-1].conditions.weights.total_mass[-1]   #[kg]
-    MissionFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[-4].conditions.weights.total_mass[-1]   #[kg]
+    MissionFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[2].conditions.weights.total_mass[-1]   #[kg]
     TotalTime = (results.segments[-1].conditions.frames.inertial.time[-1] - results.segments[0].conditions.frames.inertial.time[0])  #[min]
 
     fid.write(2*'\n')
     if imperial:
-        fid.write(' Total Range (nm) ........... '+ str('%7.0f'   % TotalRange)+'\n')
+        fid.write(' Total Range (nm) .......... '+ str('%-5.0f'   % TotalRange)+'\n')
+        fid.write(' Mission Range (nm) ........ '+ str('%-5.0f'   % MissionRange) + ' (first 3 segments - climb, cruise, descent)' + '\n')
     elif SI:
-        fid.write(' Total Range (km) ........... ' + str('%7.0f' % TotalRange) + '\n')
-    fid.write(' Total Fuel  (kg) ........... '+ str('%7.0f'   % TotalFuel)+'\n')
-    fid.write(' Mission Fuel  (kg) ......... '+ str('%7.0f'   % MissionFuel) + ' (only meaningful if there are 3 reserve segments)' + '\n')
-    fid.write(' PSEC  (kJ/kg/km) ........... '+ str('%7.3f'   % PSEC) + '\n')
-    fid.write(' Total Time  (hh:mm) ........ '+ time.strftime('    %H:%M', time.gmtime(TotalTime))+'\n')
+        fid.write(' Total Range (km) ........... ' + str('%-7.0f' % TotalRange) + '\n')
+        fid.write(' Mission Range (km) ......... '+ str('%-7.0f'   % MissionRange) + ' (first 3 segments - climb, cruise, descent)' +'\n')
+    fid.write(' Total Fuel (kg) ........... '+ str('%-5.0f'   % TotalFuel)+'\n')
+    fid.write(' Mission Fuel (kg) ......... '+ str('%-5.0f'   % MissionFuel) + ' (first 3 segments - climb, cruise, descent)' + '\n')
+    fid.write(' PSEC (kJ/kg/km) ........... '+ str('%-8.3f'   % PSEC) + '\n')
+    fid.write(' Total Time (hh:mm) ........ '+ time.strftime('%H:%M', time.gmtime(TotalTime))+'\n')
     # Print timestamp
     fid.write(2*'\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
     
