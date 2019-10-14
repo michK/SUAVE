@@ -107,10 +107,9 @@ class Unified_Network(Propulsor):
         eta_propm = 0.9
         eta_prope = 0.9
         # Component efficiencies
-        eta_pe  = 0.98
-        eta_mot = 0.95
-        eta_fan = 0.9
-
+        eta_pe  = self.eta_pe
+        eta_mot = self.eta_mot
+        eta_fan = self.eta_fan
 
         CD_par = conditions.aerodynamics.drag_breakdown.parasite.total
         CD_tot = conditions.aerodynamics.drag_breakdown.total
