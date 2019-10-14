@@ -8,6 +8,7 @@
 # ----------------------------------------------------------------------
 import numpy as np
 
+from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
 def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     """
@@ -22,10 +23,12 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
         f_KED_wing - Fraction of wing kinetic energy defect relative to full aircraft
     """
 
+
     nr_fans_mech = propsys.number_of_engines_mech = vehicle.nr_engines_mech
     nr_fans_elec = propsys.number_of_engines_elec = vehicle.nr_engines_elec
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
+    fS = vehicle.fS_cruise  # Size propulsors for cruise
 
     # Check for edge cases where components should 'disappear'
     if fL <= 0.02:  # Propulsion only from mechanical side
@@ -33,21 +36,33 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     elif fL >= 0.98:  # Propulsion only from electrical side
         nr_fans_mech = 0
 
+    # Run unified model
+    eta_pe = propsys.eta_pe
+    eta_mot = propsys.eta_mot
+    eta_fan = propsys.eta_fan
+    unified_propsys_outputs = calculate_powers(vehicle.PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
+    Pturb = unified_propsys_outputs[2]
+
     propsys.mdot_cruise = vehicle.mdottot_cruise
    
     mdotm_tot = (1 - fL) * propsys.mdot_cruise
     mdote_tot = fL * propsys.mdot_cruise
 
+    # These have to be separate since they are not mutually dependent
     try:
-        propsys.mdotm_cruise = mdotm = mdotm_tot / nr_fans_mech
+        mdotm = mdotm_tot / nr_fans_mech
     except ZeroDivisionError:
-        propsys.mdotm_cruise = mdotm = 0
+        mdotm = 0
 
     try:
-        propsys.mdote_cruise = mdote = mdote_tot / nr_fans_elec
+        mdote = mdote_tot / nr_fans_elec
     except ZeroDivisionError:
-        propsys.mdote_cruise = mdote = 0
-    
+        mdote = 0
+
+    try:
+        Pturb = Pturb / nr_fans_mech
+    except ZeroDivisionError:
+        Pturb = 0
 
     Acapm = 0.00515 * mdotm  # Raymer Chapter 10.3.4 for M <= 0.8
     Acape = 0.00515 * mdote
@@ -68,26 +83,33 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
     propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
 
+    #########################
+    # Mechanical propulsors #
+    #########################
     # Nacelle diameters and lengths
     if propsys.is_turboprop:
-        propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
-        propsys.elec_nac_dia = Dnace = Dfane / 0.8
-        propsys.nacelle_length_mech = 1.5 * Dnacm
-        propsys.nacelle_length_elec = 1.5 * Dnace
+        engine_dia = 0.25 * (Pturb / 1000)**0.120  # Raymer - p.323 (5th Ed.)
+        engine_len = 0.12 * (Pturb / 1000)**0.373  # Raymer - p.323 (5th Ed.)
+        propsys.mech_nac_dia = 1.2 * engine_dia
+        propsys.nacelle_length_mech = 1.2 * engine_len
     else:
-        propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
-        propsys.elec_nac_dia = Dnace = Dfane / 0.8
-        propsys.nacelle_length_mech = 1.5 * Dnacm
-        propsys.nacelle_length_elec = 1.5 * Dnace
+        propsys.mech_nac_dia = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
+        propsys.nacelle_length_mech = 1.5 * propsys.mech_nac_dia
+
+    #########################
+    # Electrical propulsors #
+    #########################
+    propsys.elec_nac_dia = Dfane / 0.8
+    propsys.nacelle_length_elec = 1.5 * propsys.elec_nac_dia
 
     # Wetted areas
-    propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * Dnacm
-    propsys.areas_wetted_elec = 1.1 * 0.5 * propsys.nacelle_length_elec * np.pi * Dnace
+    propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
+    propsys.areas_wetted_elec = 1.1 * 0.5 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
 
     # Update BLI amounts
     wingspan_projected = vehicle.wings.main_wing.spans.projected
     fuselage_effective_diameter = vehicle.fuselages.fuselage.effective_diameter
-    propsys.fBLIe = f_KED_wing * (nr_fans_elec * Dnace) / (wingspan_projected - fuselage_effective_diameter)
+    propsys.fBLIe = f_KED_wing * (nr_fans_elec * propsys.elec_nac_dia) / (wingspan_projected - fuselage_effective_diameter)
 
     # Set summary information
     propsys.info.nr_fans_mech = nr_fans_mech
