@@ -39,14 +39,14 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     mdote_tot = fL * propsys.mdot_cruise
 
     try:
-        mdotm = mdotm_tot / nr_fans_mech
+        propsys.mdotm_cruise = mdotm = mdotm_tot / nr_fans_mech
     except ZeroDivisionError:
-        mdotm = 0
+        propsys.mdotm_cruise = mdotm = 0
 
     try:
-        mdote = mdote_tot / nr_fans_elec
+        propsys.mdote_cruise = mdote = mdote_tot / nr_fans_elec
     except ZeroDivisionError:
-        mdote = 0
+        propsys.mdote_cruise = mdote = 0
     
 
     Acapm = 0.00515 * mdotm  # Raymer Chapter 10.3.4 for M <= 0.8
@@ -69,10 +69,16 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
 
     # Nacelle diameters and lengths
-    propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
-    propsys.elec_nac_dia = Dnace = Dfane / 0.8
-    propsys.nacelle_length_mech = 1.5 * Dnacm
-    propsys.nacelle_length_elec = 1.5 * Dnace
+    if propsys.is_turboprop:
+        propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
+        propsys.elec_nac_dia = Dnace = Dfane / 0.8
+        propsys.nacelle_length_mech = 1.5 * Dnacm
+        propsys.nacelle_length_elec = 1.5 * Dnace
+    else:
+        propsys.mech_nac_dia = Dnacm = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
+        propsys.elec_nac_dia = Dnace = Dfane / 0.8
+        propsys.nacelle_length_mech = 1.5 * Dnacm
+        propsys.nacelle_length_elec = 1.5 * Dnace
 
     # Wetted areas
     propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * Dnacm
