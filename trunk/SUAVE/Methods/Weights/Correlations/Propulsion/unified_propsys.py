@@ -23,7 +23,7 @@ import numpy as np
 # @ingroup Methods-Weights-Correlations-Propulsion
 
 
-def unified_propsys(vehicle, PKtot, weight_factor=1.0):
+def unified_propsys(vehicle, weight_factor=1.0):
     """ Calculate the weight of the entire propulsion system
 
     Assumptions:
@@ -49,6 +49,8 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
 
     # unpack
     propsys = vehicle.propulsors.unified_propsys
+    PKtot = vehicle.PKtot
+    mdottot = vehicle.mdottot
 
     # Create arrays of fL and fS to loop over
     segments = ["Climb", "Cruise", "Descent"]
@@ -79,6 +81,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
 
             # Sizing constants from LEARN.
             Kcore  = 45.605
+            Kfan = 1.3
             c_core = 400.0 * Units['kJ/kg']
             pm_mot = 8.0 * Units['hp/lb']
             pm_pe  = 10.0 * Units['hp/lb']
@@ -86,10 +89,13 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
 
             # Constants
             # Assumed efficiencies
-            eta_fan = 0.9  # Fan
-            eta_mot = 0.95  # Motor
-            eta_pe  = 0.98  # Power electronics
-            eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5
+            eta_fan = propsys.eta_fan
+            eta_mot = propsys.eta_mot
+            eta_pe  = propsys.eta_pe
+            eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5  FIXME This isn't always true
+
+            # Find mass flows
+            mdote = fS * mdottot
 
             [PKm, PKe, Pturb, Pbat, PfanM, PfanE, Pmot, Pinv, Plink] = \
             calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
@@ -133,38 +139,54 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             m_gen         = Pgenmot / pm_mot
             m_pe_link     = Pconv / pm_pe
 
+            #########################
+            # Mechanical propulsors #
+            #########################
+            if propsys.is_turboprop: # Turboprop mechanical propulsors
+                # Fan/propeller weights
+                kp  = 0.108
+                Np  = 1  # nr of propellers in single propulsor unit
+                Dp  = propsys.mech_fan_dia / Units.ft
+                # Dp  = 2.6 / Units.ft
+                Pto = PfanM / Units.hp
+                Bp  = 3  # Number of blades
+                m_fanm = (kp * Np * (Dp * Pto * np.sqrt(Bp))**0.78174).sum() * Units.lbs
+                # Nacelle weights
+                Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
+                NLt  = propsys.nacelle_length_mech / Units.ft
+                Nw   = propsys.mech_nac_dia / Units.ft
+                Nz   = vehicle.envelope.ultimate_load
+                Weng = m_core / Units.lbs
+                Kp   = 1.0  # Propeller/fan book-kept separately
+                Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
+                Wec  = 2.331 * Weng**0.901 * Kp * Ktr
+                Nen  = propsys.number_of_engines_mech
+                Sn   = propsys.areas_wetted_mech / Units['ft^2']
+                m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                    Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+            else: # Turbofan mechanical propulsors
+                # Fan weights
+                m_fanm = Kfan * propsys.mdotm_cruise**1.2
+                # Nacelle weights
+                Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
+                NLt  = propsys.nacelle_length_mech / Units.ft
+                Nw   = propsys.mech_nac_dia / Units.ft
+                Nz   = vehicle.envelope.ultimate_load
+                Weng = m_core / Units.lbs
+                Kp   = 1.0  # Propeller/fan book-kept separately
+                Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
+                Wec  = 2.331 * Weng**0.901 * Kp * Ktr
+                Nen  = propsys.number_of_engines_mech
+                Sn   = propsys.areas_wetted_mech / Units['ft^2']
+                m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                    Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+
+            #######################################
+            # Electrical propulsors - Podded fans #
+            #######################################
             # Fan weights
-            # Mechanical
-            kp  = 0.108
-            Np  = 1  # nr of propellers in single propulsor unit
-            Dp  = propsys.mech_fan_dia / Units.ft
-            Pto = PfanM / Units.hp
-            Bp  = 10  # Number of blades
-            m_fanm = (kp * Np * (Dp * Pto * np.sqrt(Bp))**0.78174).sum() * Units.lbs
-
-            # Electrical
-            kp  = 0.108
-            Np  = 1  # nr of propellers in single propulsor unit
-            Dp  = propsys.elec_fan_dia / Units.ft
-            Pto = PfanE / Units.hp
-            Bp  = 10  # Number of blades
-            m_fane = (kp * Np * (Dp * Pto * np.sqrt(Bp))**0.78174).sum() * Units.lbs
-
-            # Nacelle weights
-            # Mechanical
-            Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
-            NLt  = propsys.nacelle_length_mech / Units.ft
-            Nw   = propsys.mech_nac_dia / Units.ft
-            Nz   = vehicle.envelope.ultimate_load
-            Weng = m_core / Units.lbs
-            Kp   = 1.0  # Propeller/fan book-kept separately
-            Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
-            Wec  = 2.331 * Weng**0.901 * Kp * Ktr
-            Nen  = propsys.number_of_engines_mech
-            Sn   = propsys.areas_wetted_mech / Units['ft^2']
-            m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
-                Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs
-            # Electrical
+            m_fane = Kfan * mdote**1.2
+            # Nacelle weights            
             Kng  = 1.0  # For non-pylon mounted nacelle (i.e. electrical in this framework)
             NLt  = propsys.nacelle_length_elec / Units.ft
             Nw   = propsys.elec_nac_dia / Units.ft
@@ -176,7 +198,7 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
             Nen  = propsys.number_of_engines_elec
             Sn   = propsys.areas_wetted_elec / Units['ft^2']
             m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
-                Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs
+                Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
 
             # Thermal management system
             q_bat  = (1.0 - eta_bat) * Pbat
@@ -213,9 +235,9 @@ def unified_propsys(vehicle, PKtot, weight_factor=1.0):
     m_pe_link     = np.amax(np.atleast_1d(m_pe_link_store))
     m_tms         = np.amax(np.atleast_1d(m_tms_store))
 
-    mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
-            propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
-            mass_tms
+    mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm) + \
+            propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane) + \
+            m_nacm + m_nace + mass_tms
 
     propsys.info.m_core         = m_core
     propsys.info.m_fanm         = m_fanm
