@@ -95,13 +95,14 @@ def unified_propsys(vehicle, weight_factor=1.0):
             eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5  FIXME This isn't always true
 
             # Find mass flows
-            mdote = fS * mdottot
+            mdotm = (1 - fL) * mdottot
+            mdote = fL * mdottot
 
             [PKm, PKe, Pturb, Pbat, PfanM, PfanE, Pmot, Pinv, Plink] = \
             calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
             # Check if serial or parallel  NOTE Perhaps this can be implemented directly in model?
-            if Plink >=0:  # Parallel
+            if Plink >= 0:  # Parallel
                 Pconv = Plink * eta_pe
                 Pgenmot = Plink * eta_pe * eta_mot
             else:  # Series
@@ -124,6 +125,16 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 PfanE  = 0.0
                 Pmot   = 0.0
                 Pinv   = 0.0
+
+            try:
+                mdotm = mdotm / propsys.number_of_engines_mech
+            except ZeroDivisionError:
+                mdotm = 0.0
+
+            try:
+                mdote = mdote / propsys.number_of_engines_elec
+            except ZeroDivisionError:
+                mdote = 0.0
 
             # These remain unchanged since there is only one of each
             Pbat    = Pbat
@@ -166,7 +177,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
                     Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
             else: # Turbofan mechanical propulsors
                 # Fan weights
-                m_fanm = Kfan * propsys.mdotm_cruise**1.2
+                m_fanm = 0.1902 * (mdotm / Units['lbs/s'])**1.143 * (1351/1000)**2 * (1 - 0.406**2) * Units.lbs  # From waters - 1997
                 # Nacelle weights
                 Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
                 NLt  = propsys.nacelle_length_mech / Units.ft
@@ -185,7 +196,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             # Electrical propulsors - Podded fans #
             #######################################
             # Fan weights
-            m_fane = Kfan * mdote**1.2
+            m_fane = 0.1902 * (mdote / Units['lbs/s'])**1.143 * (1351/1000)**2 * (1 - 0.406**2) * Units.lbs  # From waters - 1997
             # Nacelle weights            
             Kng  = 1.0  # For non-pylon mounted nacelle (i.e. electrical in this framework)
             NLt  = propsys.nacelle_length_elec / Units.ft
