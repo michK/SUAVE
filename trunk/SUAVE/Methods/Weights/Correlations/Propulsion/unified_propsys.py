@@ -111,28 +111,28 @@ def unified_propsys(vehicle, weight_factor=1.0):
 
             # Split power between different components for proper sizing, catching missing propulsors
             try:
-                PfanM  = PfanM / propsys.number_of_engines_mech
-                Pturb  = Pturb / propsys.number_of_engines_mech
+                PfanM  = PfanM / propsys.nr_engines_mech
+                Pturb  = Pturb / propsys.nr_engines_mech
             except ZeroDivisionError:
                 PfanM  = 0.0
                 Pturb  = 0.0
 
             try:
-                PfanE  = PfanE / propsys.number_of_engines_elec
-                Pmot   = Pmot  / propsys.number_of_engines_elec
-                Pinv   = Pinv  / propsys.number_of_engines_elec
+                PfanE  = PfanE / propsys.nr_engines_elec
+                Pmot   = Pmot  / propsys.nr_engines_elec
+                Pinv   = Pinv  / propsys.nr_engines_elec
             except ZeroDivisionError:
                 PfanE  = 0.0
                 Pmot   = 0.0
                 Pinv   = 0.0
 
             try:
-                mdotm = mdotm / propsys.number_of_engines_mech
+                mdotm = mdotm / propsys.nr_engines_mech
             except ZeroDivisionError:
                 mdotm = 0.0
 
             try:
-                mdote = mdote / propsys.number_of_engines_elec
+                mdote = mdote / propsys.nr_engines_elec
             except ZeroDivisionError:
                 mdote = 0.0
 
@@ -171,7 +171,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Kp   = 1.0  # Propeller/fan book-kept separately
                 Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
                 Wec  = 2.331 * Weng**0.901 * Kp * Ktr
-                Nen  = propsys.number_of_engines_mech
+                Nen  = propsys.nr_engines_mech
                 Sn   = propsys.areas_wetted_mech / Units['ft^2']
                 m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
                     Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
@@ -187,7 +187,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Kp   = 1.0  # Propeller/fan book-kept separately
                 Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
                 Wec  = 2.331 * Weng**0.901 * Kp * Ktr
-                Nen  = propsys.number_of_engines_mech
+                Nen  = propsys.nr_engines_mech
                 Sn   = propsys.areas_wetted_mech / Units['ft^2']
                 m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
                     Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
@@ -206,7 +206,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             Kp   = 1.0  # Propeller/fan book-kept separately
             Ktr  = 1.0  # 1.18 with thrust reverser, 1.0 without
             Wec  = 2.331 * Weng**0.901 * Kp * Ktr
-            Nen  = propsys.number_of_engines_elec
+            Nen  = propsys.nr_engines_elec
             Sn   = propsys.areas_wetted_elec / Units['ft^2']
             m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
                 Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
@@ -246,8 +246,8 @@ def unified_propsys(vehicle, weight_factor=1.0):
     m_pe_link     = np.amax(np.atleast_1d(m_pe_link_store))
     m_tms         = np.amax(np.atleast_1d(m_tms_store))
 
-    mprop = propsys.number_of_engines_mech * (m_gen + m_pe_link + m_core + m_fanm) + \
-            propsys.number_of_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane) + \
+    mprop = propsys.nr_engines_mech * (m_gen + m_pe_link + m_core + m_fanm) + \
+            propsys.nr_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane) + \
             m_nacm + m_nace + mass_tms
 
     propsys.info.m_core         = m_core

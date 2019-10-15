@@ -60,10 +60,10 @@ def parasite_drag_pylon_unified(state, settings, vehicle):
     # Estimating pylon drag
     ref_area_mech            = np.pi / 4.0 * propulsor.mech_nac_dia**2.0
     ref_area_elec            = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
-    pylon_parasite_drag_mech = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * ref_area_mech / vehicle.reference_area * propulsor.number_of_engines_mech
-    pylon_parasite_drag_elec = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec * ref_area_elec / vehicle.reference_area * propulsor.number_of_engines_elec
-    pylon_wetted_area_mech   = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.number_of_engines_mech
-    pylon_wetted_area_elec   = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_elec * propulsor.number_of_engines_elec
+    pylon_parasite_drag_mech = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * ref_area_mech / vehicle.reference_area * propulsor.nr_engines_mech
+    pylon_parasite_drag_elec = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec * ref_area_elec / vehicle.reference_area * propulsor.nr_engines_elec
+    pylon_wetted_area_mech   = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.nr_engines_mech
+    pylon_wetted_area_elec   = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_elec * propulsor.nr_engines_elec
     pylon_cf                 = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].skin_friction_coefficient
     pylon_compr_fact         = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].compressibility_factor
     pylon_rey_fact           = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].reynolds_factor

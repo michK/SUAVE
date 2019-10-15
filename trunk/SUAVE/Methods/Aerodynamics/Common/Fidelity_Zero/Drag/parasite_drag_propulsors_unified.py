@@ -66,7 +66,7 @@ def parasite_drag_propulsors_unified(state, settings, geometry):
     # print("Drag: {}".format(propsys.mech_fan_dia))
     l_nacelle_mech = propsys.nacelle_length_mech
     d_nacelle_mech = propsys.mech_nac_dia
-    nr_fans_mech   = propsys.number_of_engines_mech
+    nr_fans_mech   = propsys.nr_engines_mech
     f_embed_mech   = 1.0
 
     # electrical propulsors
@@ -74,7 +74,7 @@ def parasite_drag_propulsors_unified(state, settings, geometry):
     Swet_elec      = propsys.areas_wetted_elec
     l_nacelle_elec = propsys.nacelle_length_elec
     d_nacelle_elec = propsys.elec_nac_dia
-    nr_fans_elec   = propsys.number_of_engines_elec
+    nr_fans_elec   = propsys.nr_engines_elec
     f_embed_elec   = 1.0
 
     # conditions
