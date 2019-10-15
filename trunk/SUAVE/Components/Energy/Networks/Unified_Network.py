@@ -91,10 +91,8 @@ class Unified_Network(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        nr_fans_mech  = self.number_of_engines_mech
-        # mech_nac_dia  = self.mech_nac_dia
-        nr_fans_elec  = self.number_of_engines_elec
-        # elec_nac_dia  = self.elec_nac_dia
+        nr_fans_mech  = self.nr_engines_mech
+        nr_fans_elec  = self.nr_engines_elec
         fL            = self.fL
         fS            = self.fS
         fBLIe         = self.fBLIe

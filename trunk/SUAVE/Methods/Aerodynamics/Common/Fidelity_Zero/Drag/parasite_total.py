@@ -81,8 +81,8 @@ def parasite_total(state,settings,geometry):
             ref_area_elec = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
             parasite_drag_mech = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech
             parasite_drag_elec = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec
-            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech = parasite_drag_mech_tot = parasite_drag_mech * ref_area_mech / vehicle_reference_area * propulsor.number_of_engines_mech
-            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec = parasite_drag_elec_tot = parasite_drag_elec * ref_area_elec / vehicle_reference_area * propulsor.number_of_engines_elec
+            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech = parasite_drag_mech_tot = parasite_drag_mech * ref_area_mech / vehicle_reference_area * propulsor.nr_engines_mech
+            conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec = parasite_drag_elec_tot = parasite_drag_elec * ref_area_elec / vehicle_reference_area * propulsor.nr_engines_elec
             conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient = parasite_drag_mech_tot + parasite_drag_elec_tot
             total_parasite_drag += conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient
     else:

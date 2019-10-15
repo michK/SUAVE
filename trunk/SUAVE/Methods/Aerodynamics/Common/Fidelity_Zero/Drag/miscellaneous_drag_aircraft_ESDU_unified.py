@@ -57,8 +57,8 @@ def miscellaneous_drag_aircraft_ESDU_unified(state,settings,geometry):
 
     for propulsor in geometry.propulsors:
         # swet_tot += propulsor.areas.wetted * propulsor.number_of_engines
-        swet_tot += propulsor.areas_wetted_mech * propulsor.number_of_engines_mech + \
-            propulsor.areas_wetted_elec * propulsor.number_of_engines_elec
+        swet_tot += propulsor.areas_wetted_mech * propulsor.nr_engines_mech + \
+            propulsor.areas_wetted_elec * propulsor.nr_engines_elec
 
     swet_tot *= 1.10
 

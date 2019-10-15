@@ -198,7 +198,7 @@ def empty(vehicle):
 
     elif propulsor_name == 'unified_propsys':
         # Unpack inputs
-        num_eng = propulsors.number_of_engines_mech        
+        num_eng = propulsors.nr_engines_mech
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
         weight_factor = propulsors.propsys_weight_factor
         wt_propulsion = Propulsion.unified_propsys(vehicle, weight_factor)
