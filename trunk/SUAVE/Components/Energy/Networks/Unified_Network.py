@@ -102,8 +102,8 @@ class Unified_Network(Propulsor):
 
         # Efficiencies
         # Propulsive efficiencies
-        eta_propm = 0.9
-        eta_prope = 0.9
+        eta_propm = self.eta_propm
+        eta_prope = self.eta_prope
         # Component efficiencies
         eta_pe  = self.eta_pe
         eta_mot = self.eta_mot
