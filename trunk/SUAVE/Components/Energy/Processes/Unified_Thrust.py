@@ -205,7 +205,6 @@ class Unified_Thrust(Energy_Component):
 
             # Calculate fuel flow through turbine
             mdot_fuel[i] = Cp * Pturb_i
-            # mdot_fuel[i] = 1164 / 694 * Cp * Pturb_i
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 

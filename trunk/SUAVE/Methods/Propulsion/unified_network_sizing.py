@@ -24,8 +24,8 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     """
 
 
-    nr_fans_mech = propsys.nr_engines_mech
-    nr_fans_elec = propsys.nr_engines_elec
+    nr_fans_mech = vehicle.nr_engines_mech
+    nr_fans_elec = vehicle.nr_engines_elec
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
     fS = vehicle.fS_cruise  # Size propulsors for cruise
@@ -79,8 +79,13 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
         Afanm = Acapm / (A_Astar_inlet / A_Astar_face)
         Afane = Acape / (A_Astar_inlet / A_Astar_face)
 
-    # Fan diameters
-    propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
+    # Mechanical fan diameters
+    if propsys.is_turboprop:
+        propsys.mech_fan_dia = Dfanm = propsys.prop_diameter
+    else:
+        propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
+
+    # Electrical fan diameters
     propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
 
     #########################
