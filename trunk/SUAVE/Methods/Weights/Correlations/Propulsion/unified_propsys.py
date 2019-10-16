@@ -144,6 +144,9 @@ def unified_propsys(vehicle, weight_factor=1.0):
 
             mdot_core = Pturb / c_core
 
+            # m_core        = Kcore * mdot_core**1.2
+            mdotm_core = mdotm / (1 + propsys.BPR)  # From Waters, 1997
+            m_core = (propsys.n_stg * 0.383 * (mdotm / Units['lbs/s'])**1.117) * Units.lbs
             m_core        = Kcore * mdot_core**1.2
             m_prop_mot    = Pmot / pm_mot
             m_pe_prop_mot = Pinv / pm_pe
