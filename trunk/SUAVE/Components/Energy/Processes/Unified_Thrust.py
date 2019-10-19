@@ -98,6 +98,7 @@ class Unified_Thrust(Energy_Component):
         fsurf         = self.inputs.fsurf
         max_bat_power = self.inputs.max_bat_power
         Cp            = self.inputs.Cp
+        Cp_factor     = self.inputs.Cp_factor
 
         # Unpack from conditions
         throttle = conditions.propulsion.throttle
@@ -204,7 +205,7 @@ class Unified_Thrust(Energy_Component):
             Pturb[i] = Pturb_i
 
             # Calculate fuel flow through turbine
-            mdot_fuel[i] = Cp * Pturb_i
+            mdot_fuel[i] = Cp_factor * Cp * Pturb_i
 
         thrust = (PKm_tot + PKe_tot).reshape(nr_elements, 1) / Vinf * throttle
 
