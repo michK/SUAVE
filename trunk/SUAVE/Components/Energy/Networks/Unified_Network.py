@@ -99,6 +99,7 @@ class Unified_Network(Propulsor):
         fBLIm         = self.fBLIm
         max_bat_power = self.battery.max_power
         Cp            = self.Cp
+        Cp_factor     = self.Cp_factor
 
         # Efficiencies
         # Propulsive efficiencies
@@ -146,6 +147,7 @@ class Unified_Network(Propulsor):
         thrust.inputs.hfuel             = hfuel
         thrust.inputs.max_bat_power     = max_bat_power
         thrust.inputs.Cp                = Cp
+        thrust.inputs.Cp_factor         = Cp_factor
 
         #compute the thrust
         thrust(conditions, numerics)
