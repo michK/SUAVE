@@ -83,8 +83,8 @@ def unified_propsys(vehicle, weight_factor=1.0):
             Kcore  = 45.605
             Kfan = 1.3
             c_core = 400.0 * Units['kJ/kg']
-            pm_mot = 13.2  * Units['kW/kg']
-            pm_pe  = 16.4  * Units['kW/kg']
+            pm_mot = 16  * Units['kW/kg']
+            pm_pe  = 19  * Units['kW/kg']
             pm_tms = 13.2  * Units['kW/kg']
 
             # Constants
