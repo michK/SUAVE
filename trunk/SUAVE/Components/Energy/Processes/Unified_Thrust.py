@@ -78,27 +78,28 @@ class Unified_Thrust(Energy_Component):
         # Unpack the values
 
         # Unpack from inputs
-        hdot          = self.inputs.vertical_velocity
-        nr_elements   = self.inputs.nr_elements
-        fS            = self.inputs.fS
-        fL            = self.inputs.fL
-        eta_propm     = self.inputs.eta_propm
-        eta_prope     = self.inputs.eta_prope
-        eta_th        = self.inputs.eta_th
-        eta_pe        = self.inputs.eta_pe
-        eta_mot       = self.inputs.eta_mot
-        eta_fan       = self.inputs.eta_fan
-        Vinf          = self.inputs.Vinf
-        rho_inf       = self.inputs.rho_inf
-        Dp            = self.inputs.Dp
-        Dpar          = self.inputs.Dpar
-        Dpp_DP        = self.inputs.Dpp_DP
-        fBLIe         = self.inputs.fBLIe
-        fBLIm         = self.inputs.fBLIm        
-        fsurf         = self.inputs.fsurf
-        max_bat_power = self.inputs.max_bat_power
-        Cp            = self.inputs.Cp
-        Cp_factor     = self.inputs.Cp_factor
+        hdot           = self.inputs.vertical_velocity
+        nr_elements    = self.inputs.nr_elements
+        fS             = self.inputs.fS
+        fL             = self.inputs.fL
+        eta_propm      = self.inputs.eta_propm
+        eta_prope      = self.inputs.eta_prope
+        eta_th         = self.inputs.eta_th
+        eta_pe         = self.inputs.eta_pe
+        eta_mot        = self.inputs.eta_mot
+        eta_fan        = self.inputs.eta_fan
+        Vinf           = self.inputs.Vinf
+        rho_inf        = self.inputs.rho_inf
+        Dp             = self.inputs.Dp
+        Dpar           = self.inputs.Dpar
+        Dpp_DP         = self.inputs.Dpp_DP
+        fBLIe          = self.inputs.fBLIe
+        fBLIm          = self.inputs.fBLIm        
+        fsurf          = self.inputs.fsurf
+        max_bat_power  = self.inputs.max_bat_power
+        Cp             = self.inputs.Cp
+        Cp_factor      = self.inputs.Cp_factor
+        power_bal_init = self.inputs.power_bal_init
 
         # Unpack from conditions
         throttle = conditions.propulsion.throttle
@@ -150,7 +151,7 @@ class Unified_Thrust(Energy_Component):
 
                 return np.array(residuals, dtype=float).reshape(4,)
             
-            args_init = [500e3, 250, 100, 100]
+            args_init = power_bal_init
             sol = root(power_balance, args_init, method='hybr')
 
             if sol['success'] == True:

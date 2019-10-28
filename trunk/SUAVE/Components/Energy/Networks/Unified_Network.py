@@ -91,15 +91,16 @@ class Unified_Network(Propulsor):
         eta_th = 0.5
 
         # Unpack inputs
-        nr_fans_mech  = self.nr_engines_mech
-        nr_fans_elec  = self.nr_engines_elec
-        fL            = self.fL
-        fS            = self.fS
-        fBLIe         = self.fBLIe
-        fBLIm         = self.fBLIm
-        max_bat_power = self.battery.max_power
-        Cp            = self.Cp
-        Cp_factor     = self.Cp_factor
+        nr_fans_mech   = self.nr_engines_mech
+        nr_fans_elec   = self.nr_engines_elec
+        fL             = self.fL
+        fS             = self.fS
+        fBLIe          = self.fBLIe
+        fBLIm          = self.fBLIm
+        max_bat_power  = self.battery.max_power
+        Cp             = self.Cp
+        Cp_factor      = self.Cp_factor
+        power_bal_init = self.power_bal_init
 
         # Efficiencies
         # Propulsive efficiencies
@@ -148,6 +149,7 @@ class Unified_Network(Propulsor):
         thrust.inputs.max_bat_power     = max_bat_power
         thrust.inputs.Cp                = Cp
         thrust.inputs.Cp_factor         = Cp_factor
+        thrust.inputs.power_bal_init    = power_bal_init
 
         #compute the thrust
         thrust(conditions, numerics)
