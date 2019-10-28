@@ -12,34 +12,35 @@ class TestPowerBalance(unittest.TestCase):
         numerics = Data()
 
         # Inputs from higher level
-        thrust.inputs.vertical_velocity = np.array([500]) * Units['ft/min']
-        # thrust.inputs.Vinf          = np.array([182.0 * Units.knot])
-        thrust.inputs.Vinf          = np.array([90 * Units.knot])
-        thrust.inputs.rho_inf       = np.array([1.04976605])
-        thrust.inputs.Dp            = np.array([161974.27862346])
-        thrust.inputs.Dpar          = np.array([831.72393485])
-        thrust.inputs.Dpp_DP        = thrust.inputs.Dpar / thrust.inputs.Dp
-        thrust.inputs.nr_elements   = 1
-        thrust.inputs.fS            = 0.2
-        thrust.inputs.fL            = 0.5
-        thrust.inputs.eta_propm     = 0.9
-        thrust.inputs.eta_prope     = 0.9
-        thrust.inputs.eta_th        = 0.5
-        thrust.inputs.eta_pe        = 0.98
-        thrust.inputs.eta_mot       = 0.95
-        thrust.inputs.eta_fan       = 0.9
-        thrust.inputs.fBLIe         = 0.06869489976100596
-        thrust.inputs.fBLIm         = 0.0
-        thrust.inputs.fsurf         = 0.9
-        thrust.inputs.nr_fans_elec  = 4
-        thrust.inputs.nr_fans_mech  = 2
-        thrust.inputs.hfuel         = 43 * Units['MJ/kg']
-        thrust.inputs.max_bat_power = 1.350 * Units.MW
-        thrust.inputs.Cp            = 289 * Units['g/kW/hr']
+        thrust.inputs.vertical_velocity = np.array([2000]) * Units['ft/min']
+        thrust.inputs.Vinf           = np.array([243.2236 * Units['m/s']])
+        thrust.inputs.rho_inf        = np.array([0.38046])
+        thrust.inputs.Dp             = np.array([30535])
+        thrust.inputs.Dpar           = np.array([26068])
+        thrust.inputs.Dpp_DP         = thrust.inputs.Dpar / thrust.inputs.Dp
+        thrust.inputs.nr_elements    = 1
+        thrust.inputs.fS             = 0.001
+        thrust.inputs.fL             = 0.001
+        thrust.inputs.eta_propm      = 0.9
+        thrust.inputs.eta_prope      = 0.9
+        thrust.inputs.eta_th         = 0.5
+        thrust.inputs.eta_pe         = 0.98
+        thrust.inputs.eta_mot        = 0.95
+        thrust.inputs.eta_fan        = 0.9
+        thrust.inputs.fBLIe          = 0.0
+        thrust.inputs.fBLIm          = 0.0
+        thrust.inputs.fsurf          = 0.9
+        thrust.inputs.nr_fans_elec   = 0.001
+        thrust.inputs.nr_fans_mech   = 2
+        thrust.inputs.hfuel          = 43 * Units['MJ/kg']
+        thrust.inputs.max_bat_power  = 1.350 * Units.MW
+        thrust.inputs.Cp             = 0.256 * Units['kg/hr/kW']
+        thrust.inputs.Cp_factor      = 1
+        thrust.inputs.power_bal_init = [10e6, 1000, 250, 250]
 
         # Create custom conditions
         conditions = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
-        conditions.weights.total_mass  = np.array([5000])
+        conditions.weights.total_mass  = np.array([40000])
         conditions.propulsion.throttle = np.array([1])
 
         thrust.compute(conditions, numerics)
