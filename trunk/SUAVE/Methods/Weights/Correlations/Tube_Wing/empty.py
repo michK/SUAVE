@@ -111,7 +111,11 @@ def empty(vehicle,settings=None):
     wt_cargo   = vehicle.mass_properties.cargo
     num_seats  = vehicle.fuselages['fuselage'].number_coach_seats
     ctrl_type  = vehicle.systems.control
-    ac_type    = vehicle.systems.accessories    
+    ac_type    = vehicle.systems.accessories
+    fuel        = vehicle.fuel
+    fuel.mass_properties.mass = vehicle.mass_fuel
+    fuel.density = 810 * Units['kg/m^3']
+    fuel.internal_volume = fuel.mass_properties.mass / fuel.density
     
     if settings == None:
         wt_factors = Data()
@@ -136,18 +140,18 @@ def empty(vehicle,settings=None):
         wt_propulsion                    = Propulsion.integrated_propulsion(wt_engine_jet,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion
 
-    elif propulsor_name=='unified_propsys':
+    elif propulsor_name == 'unified_propsys':
         # Unpack inputs
-        num_eng = propulsors.number_of_engines_mech
+        num_eng = propulsors.nr_engines_mech
         fuel.number_of_tanks = propulsors.nr_fuel_tanks
-        weight_factor = 2.15  # TODO Check this
-        wt_propulsion = Propulsion.unified_propsys(vehicle, vehicle.PKtot, weight_factor)
+        weight_factor = propulsors.propsys_weight_factor
+        wt_propulsion = Propulsion.unified_propsys(vehicle, weight_factor)
         propulsors.mass_properties.mass = wt_propulsion
 
     else: #propulsor used is not a turbo_fan; assume mass_properties defined outside model
-        wt_propulsion                   = propulsors.mass_properties.mass
+        wt_propulsion = propulsors.mass_properties.mass
 
-        if wt_propulsion==0:
+        if wt_propulsion == 0:
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)
 
     S_gross_w  = vehicle.reference_area

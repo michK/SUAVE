@@ -166,12 +166,12 @@ def empty(vehicle):
 
     # Unpack inputs
     S_gross_w   = vehicle.reference_area
-    fuel        = vehicle.fuel
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     mto         = vehicle.mass_properties.max_takeoff
     num_pax     = vehicle.passengers
     wt_cargo    = vehicle.mass_properties.cargo
+    fuel        = vehicle.fuel
     fuel.mass_properties.mass = vehicle.mass_fuel
     fuel.density = 810 * Units['kg/m^3']
     fuel.internal_volume = fuel.mass_properties.mass / fuel.density
