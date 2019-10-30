@@ -78,6 +78,10 @@ class Unified_Thrust(Energy_Component):
         # Unpack the values
 
         # Unpack from inputs
+        nr_prop_m      = self.inputs.nr_prop_m
+        nr_prop_e      = self.inputs.nr_prop_e
+        Dfan_m         = self.inputs.Dfan_m
+        Dfan_e         = self.inputs.Dfan_e
         hdot           = self.inputs.vertical_velocity
         nr_elements    = self.inputs.nr_elements
         fS             = self.inputs.fS
@@ -113,81 +117,70 @@ class Unified_Thrust(Energy_Component):
         mdote_tot = np.zeros(nr_elements)
         Vjetm_tot = np.zeros(nr_elements)
         Vjete_tot = np.zeros(nr_elements)
+        eta_p_tot = np.zeros(nr_elements)
         mdot_fuel = np.zeros(nr_elements)
         Pbat = np.zeros(nr_elements)
         Pturb = np.zeros(nr_elements)
 
         # Tentatively assume phi_surf is unaffected
         deltaPhiSurf = 0
+        fBLI = fBLIm + fBLIe
+        Ajet_m = 0.8 * nr_prop_m * np.pi / 4 * Dfan_m**2
+        Ajet_e = 0.8 * nr_prop_e * np.pi / 4 * Dfan_e**2
+        Ajet = Ajet_m + Ajet_e
 
         for i in range(nr_elements):
             def power_balance(params):
                 """Function to calculate residuals of power balance equations"""
-                PK, mdot, Vjetm, Vjete = params
-
-                # Derived quantities
-                PKm = (1 - fL) * PK
-                PKe = fL * PK
-                mdotm = (1 - fL) * mdot
-                mdote = fL * mdot
-                phi_jet_m = 0.5 * (Vjetm - Vinf[i])**2 * mdotm
-                phi_jet_e = 0.5 * (Vjete - Vinf[i])**2 * mdote
+                PK_tot, mdot_tot, Vjet, eta_p, phi_jet = params
 
                 # Residuals
-                res1 = PK - 0.5 * mdotm * (Vjetm**2.0 - Vinf[i]**2.0) - fBLIm * fsurf * Dpar[i] * Vinf[i] - \
-                    0.5 * mdote * (Vjete**2.0 - Vinf[i]**2.0) - fBLIe * fsurf * Dpar[i] * Vinf[i]
-                res2 = phi_jet_m - PKm * (1 - eta_propm)
-                res3 = phi_jet_e - PKe * (1 - eta_prope)
-                res4 = Dp[i] - (Vjetm - Vinf[i]) * mdotm - (Vjete - Vinf[i]) * mdote + \
-                    hdot[i] * W[i] / Vinf[i] - fBLIm * Dpar[i] - fBLIe * Dpar[i] - deltaPhiSurf / Vinf[i]
+                res1 = PK_tot - 0.5 * mdot_tot * (Vjet**2.0 - Vinf[i]**2.0) - fBLI * fsurf * Dpar[i] * Vinf[i]                    
+                res2 = Dp[i] - (Vjet - Vinf[i]) * mdot_tot + hdot[i] * W[i] / Vinf[i] - fBLI * Dpar[i] - deltaPhiSurf / Vinf[i]
+                res3 = eta_p - (PK_tot - phi_jet) / PK_tot
+                res4 = phi_jet - 0.5 * (Vjet - Vinf[i])**2 * mdot_tot
+                res5 = mdot_tot - (rho_inf[i] * Vjet * Ajet)
 
-                power_balance.PKm = PKm
-                power_balance.PKe = PKe
-                power_balance.mdotm = mdotm
-                power_balance.mdote = mdote
+                power_balance.PK = PK_tot
+                power_balance.mdot = mdot_tot
+                power_balance.Vjet = Vjet
+                power_balance.eta_p = eta_p
 
-                residuals = [res1, res2, res3, res4]
+                residuals = [res1, res2, res3, res4, res5]
                 power_balance.residuals = residuals
 
-                return np.array(residuals, dtype=float).reshape(4,)
+                return np.array(residuals, dtype=float).reshape(5,)
             
             args_init = power_bal_init
             sol = root(power_balance, args_init, method='hybr')
 
             if sol['success'] == True:
-                [PK, mdot, Vjetm, Vjete] = sol['x']
+                [PK, mdot, Vjet, eta_p, phi_jet] = sol['x']
             else:
                 print("Power balance system not converged")
                 numerics.converged = False
-                [PK, mdot, Vjetm, Vjete] = sol['x']
+                [PK, mdot, Vjet, eta_p, phi_jet] = sol['x']
 
             # Catch non-physical parameters and set manually
-            if power_balance.mdotm <= 0:
+            if power_balance.mdot <= 0:
                 power_balance.mdotm = 0
             
-            if power_balance.mdote <= 0:
-                power_balance.mdote = 0
+            if power_balance.PK <= 0:
+                power_balance.PK = 0
             
-            if power_balance.PKm <= 0:
-                power_balance.PKm = 0
-            
-            if power_balance.PKe <= 0:
-                power_balance.PKe = 0
+            if Vjet <= Vinf[i]:
+                Vjet = Vinf[i]
 
-            if Vjetm <= Vinf[i]:
-                Vjetm = Vinf[i]
+            PKm_tot[i] = (1 - fL) * power_balance.PK
+            PKe_tot[i] = fL * power_balance.PK
+            mdotm_tot[i] = (1 - fL) * power_balance.mdot
+            mdote_tot[i] = fL * power_balance.mdot
+            Vjetm_tot[i] = power_balance.Vjet
+            Vjete_tot[i] = power_balance.Vjet
+            eta_p_tot[i] = power_balance.eta_p
 
-            if Vjete <= Vinf[i]:
-                Vjete = Vinf[i]
-
-            PKm_tot[i] = power_balance.PKm
-            PKe_tot[i] = power_balance.PKe
-            mdotm_tot[i] = power_balance.mdotm
-            mdote_tot[i] = power_balance.mdote
-            Vjetm_tot[i] = Vjetm
-            Vjete_tot[i] = Vjete
-
-            PK_tot = power_balance.PKm + power_balance.PKe
+            # PK_tot = power_balance.PKm + power_balance.PKe
+            PK_tot = power_balance.PK
 
             [PKm_i, PKe_i, Pturb_i, Pbat_i, PfanM_i, PfanE_i, Pmot_i, Pinv_i, Plink] = \
                 calculate_powers(PK_tot, fS, fL, eta_pe, eta_mot, eta_fan)
@@ -224,6 +217,7 @@ class Unified_Thrust(Energy_Component):
         self.outputs.mdote_tot = mdote_tot
         self.outputs.Vjetm_tot = Vjetm_tot
         self.outputs.Vjete_tot = Vjete_tot
+        self.outputs.eta_p_tot = eta_p_tot
 
     __call__ = compute
 
