@@ -76,6 +76,12 @@ def unified_propsys(vehicle, weight_factor=1.0):
     m_pe_link_store     = []
     m_tms_store         = []
 
+    m_acc_store         = []
+    m_air_store         = []
+    m_exhaust_store     = []
+    m_oilsys_store      = []
+    m_thrust_rev_store  = []
+
     for fL in fL_arr:
         for fS in fS_arr:
 
@@ -218,8 +224,25 @@ def unified_propsys(vehicle, weight_factor=1.0):
             q_mot  = (1.0 - eta_mot) * Pmot
 
             q_tot  = q_bat + q_gen + q_conv + q_inv + q_mot
+            if (fS <= 0.01) and (fL <= 0.01):  # i.e. if conventional
+                q_tot = 0
 
             mass_tms = q_tot / pm_tms
+
+            if propsys.is_turboprop:
+                m_acc = 0.181 * propsys.nr_engines_mech * (Pturb / 1000)**0.8
+                m_air = 0  # Included in nacelle
+                m_exhaust = 0.1 * propsys.areas_wetted_mech * 14.63  # Assuming exhaust is 10% of nacelle area
+                m_oilsys = 0.07 * propsys.nr_engines_mech * m_core
+                m_thrust_rev = 0
+
+            else:
+                mdot_fuel = vehicle.Cp * Pturb
+                m_acc = 36 * propsys.nr_engines_mech * mdot_fuel
+                m_air = 0  # Included in nacelle for podded propulsors
+                m_exhaust = 0.1 * propsys.areas_wetted_mech * 14.63  # Assuming exhaust is 10% of nacelle area
+                m_oilsys = 0.07 * propsys.nr_engines_mech * m_core
+                m_thrust_rev = 0.18 * propsys.nr_engines_mech * m_core
 
             # Add calculated mass to storage lists
             m_fanm_store.append(m_fanm)
@@ -232,6 +255,11 @@ def unified_propsys(vehicle, weight_factor=1.0):
             m_gen_store.append(m_gen)
             m_pe_link_store.append(m_pe_link)
             m_tms_store.append(mass_tms)
+            m_acc_store.append(m_acc)
+            m_air_store.append(m_air)
+            m_exhaust_store.append(m_exhaust)
+            m_oilsys_store.append(m_oilsys)
+            m_thrust_rev_store.append(m_thrust_rev)
 
     # Find max values of component masses
     m_fanm        = np.amax(np.atleast_1d(m_fanm_store))
@@ -244,10 +272,19 @@ def unified_propsys(vehicle, weight_factor=1.0):
     m_gen         = np.amax(np.atleast_1d(m_gen_store))
     m_pe_link     = np.amax(np.atleast_1d(m_pe_link_store))
     m_tms         = np.amax(np.atleast_1d(m_tms_store))
+    m_acc         = np.amax(np.atleast_1d(m_acc_store))
+    m_air         = np.amax(np.atleast_1d(m_air_store))
+    m_exhaust     = np.amax(np.atleast_1d(m_exhaust_store))
+    m_oilsys      = np.amax(np.atleast_1d(m_oilsys_store))
+    m_thrust_rev  = np.amax(np.atleast_1d(m_thrust_rev_store))
 
-    mprop = propsys.nr_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
-            propsys.nr_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
-            mass_tms
+    m_bare = propsys.nr_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
+             propsys.nr_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
+             mass_tms
+
+    m_add = m_acc + m_air + m_exhaust + m_oilsys + m_thrust_rev
+
+    mprop = m_bare + m_add
 
     propsys.info.m_core         = m_core
     propsys.info.m_fanm         = m_fanm
@@ -259,6 +296,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
     propsys.info.m_gen          = m_gen
     propsys.info.m_pe_link      = m_pe_link
     propsys.info.mass_tms       = mass_tms
+    propsys.info.m_add          = m_add
     propsys.info.weight_factor  = weight_factor
     propsys.info.weight_total   = mprop * weight_factor
     propsys.info.fS_max         = fS_max
