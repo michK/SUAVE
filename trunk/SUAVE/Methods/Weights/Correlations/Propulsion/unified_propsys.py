@@ -142,8 +142,8 @@ def unified_propsys(vehicle, weight_factor=1.0):
             Pconv   = Pconv
             Plink   = Plink
 
-            mdotm_core = mdotm / (1 + propsys.BPR)  # From Waters, 1997
-            m_core = propsys.core_weight_factor * propsys.n_core_stgs * (0.383 * (mdotm_core / Units['lb/s'])**1.117) * Units.lb  # From Waters, 1997            
+            m_core = (1.67 * (Pturb / Units.hp)**0.803) * Units.lbs  # Raymer - p.323 (5th Ed.)
+
             m_prop_mot    = Pmot / pm_mot
             m_pe_prop_mot = Pinv / pm_pe
             m_gen         = Pgenmot / pm_mot
