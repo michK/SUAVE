@@ -166,7 +166,7 @@ def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', uni
         fid.write(' Mission Range (km) ......... '+ str('%-7.0f'   % MissionRange) + ' (first 3 segments - climb, cruise, descent)' +'\n')
     fid.write(' Total Fuel (kg) ........... '+ str('%-5.0f'   % TotalFuel)+'\n')
     fid.write(' Mission Fuel (kg) ......... '+ str('%-5.0f'   % MissionFuel) + ' (first 3 segments - climb, cruise, descent)' + '\n')
-    fid.write(' PSEC (kJ/kg/km) ........... '+ str('%-8.3f'   % PSEC) + '\n')
+    fid.write(' PSEC ...................... '+ str('%-8.3f'   % PSEC) + '\n')
     fid.write(' Total Time (hh:mm) ........ '+ time.strftime('%H:%M', time.gmtime(TotalTime))+'\n')
     # Print timestamp
     fid.write(2*'\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
