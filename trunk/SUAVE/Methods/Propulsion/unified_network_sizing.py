@@ -31,9 +31,9 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     fS = vehicle.fS_cruise  # Size propulsors for cruise
 
     # Check for edge cases where components should 'disappear'
-    if fL <= 0.02:  # Propulsion only from mechanical side
+    if fL <= 0.01:  # Propulsion only from mechanical side
         nr_fans_elec = 0
-    elif fL >= 0.98:  # Propulsion only from electrical side
+    elif fL >= 0.99:  # Propulsion only from electrical side
         nr_fans_mech = 0
 
     # Run unified model
