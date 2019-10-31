@@ -284,7 +284,9 @@ def unified_propsys(vehicle, weight_factor=1.0):
 
     m_add = m_acc + m_air + m_exhaust + m_oilsys + m_thrust_rev
 
-    mprop = m_bare + m_add
+    m_trans = 0.2 * (m_gen + m_pe_link + m_prop_mot + m_pe_prop_mot)
+
+    mprop = m_bare + m_add + m_trans
 
     propsys.info.m_core         = m_core
     propsys.info.m_fanm         = m_fanm
@@ -297,6 +299,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
     propsys.info.m_pe_link      = m_pe_link
     propsys.info.mass_tms       = mass_tms
     propsys.info.m_add          = m_add
+    propsys.info.m_trans        = m_trans
     propsys.info.weight_factor  = weight_factor
     propsys.info.weight_total   = mprop * weight_factor
     propsys.info.fS_max         = fS_max

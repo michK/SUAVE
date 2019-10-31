@@ -63,6 +63,7 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     fid.write(' Electrical propulsor power electronics ......... : ' + str( '%8.2F' % (nr_fans_elec * propsys_info.m_pe_prop_mot)) + ' kg\n')
     fid.write(' Thermal management system ...................... : ' + str( '%8.2F' % propsys_info.mass_tms)                       + ' kg\n')
     fid.write(' Additional system items ........................ : ' + str( '%8.2F' % propsys_info.m_add)                          + ' kg\n')
+    fid.write(' Transmission lines ............................. : ' + str( '%8.2F' % propsys_info.m_trans)                        + ' kg\n')
     fid.write('\n')
     fid.write(' System weight factor............................ : ' + str( '%8.2F' % propsys_info.weight_factor) + ' \n')
     fid.write('\n')
