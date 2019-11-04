@@ -125,8 +125,8 @@ class Unified_Thrust(Energy_Component):
         # Tentatively assume phi_surf is unaffected
         deltaPhiSurf = 0
         fBLI = fBLIm + fBLIe
-        Ajet_m = 0.8 * nr_prop_m * np.pi / 4 * Dfan_m**2
-        Ajet_e = 0.8 * nr_prop_e * np.pi / 4 * Dfan_e**2
+        Ajet_m = 0.6 * nr_prop_m * np.pi / 4 * Dfan_m**2
+        Ajet_e = 0.6 * nr_prop_e * np.pi / 4 * Dfan_e**2
         Ajet = Ajet_m + Ajet_e
 
         for i in range(nr_elements):
