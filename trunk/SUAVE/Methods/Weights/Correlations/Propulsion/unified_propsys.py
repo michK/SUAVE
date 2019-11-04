@@ -227,8 +227,8 @@ def unified_propsys(vehicle, weight_factor=1.0):
             q_mot  = (1.0 - eta_mot) * Pmot
 
             q_tot  = q_bat + q_gen + q_conv + q_inv + q_mot
-            if (fS <= 0.01) and (fL <= 0.01):  # i.e. if conventional
-                q_tot = 0
+            # if (fS <= 0.01) and (fL <= 0.01):  # i.e. if conventional
+                # q_tot = 0
 
             mass_tms = q_tot / pm_tms
 
