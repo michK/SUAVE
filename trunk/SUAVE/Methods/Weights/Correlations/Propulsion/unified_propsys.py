@@ -107,7 +107,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             [PKm, PKe, Pturb, Pbat, PfanM, PfanE, Pmot, Pinv, Plink] = \
             calculate_powers(PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
 
-            # Check if serial or parallel  NOTE Perhaps this can be implemented directly in model?
+            # Check if serial or parallel
             if Plink >= 0:  # Parallel
                 Pconv = Plink * eta_pe
                 Pgenmot = Plink * eta_pe * eta_mot
@@ -118,9 +118,12 @@ def unified_propsys(vehicle, weight_factor=1.0):
             # Split power between different components for proper sizing, catching missing propulsors
             try:
                 PfanM  = PfanM / propsys.nr_engines_mech
-                Pturb  = Pturb / propsys.nr_engines_mech
             except ZeroDivisionError:
                 PfanM  = 0.0
+
+            try:
+                Pturb  = Pturb / propsys.nr_turbines
+            except ZeroDivisionError:
                 Pturb  = 0.0
 
             try:
@@ -278,13 +281,14 @@ def unified_propsys(vehicle, weight_factor=1.0):
     m_oilsys      = np.amax(np.atleast_1d(m_oilsys_store))
     m_thrust_rev  = np.amax(np.atleast_1d(m_thrust_rev_store))
 
-    m_bare = propsys.nr_engines_mech * (m_gen + m_pe_link + m_core + m_fanm + m_nacm) + \
+    m_bare = propsys.nr_engines_mech * (m_fanm + m_nacm) + \
              propsys.nr_engines_elec * (m_prop_mot + m_pe_prop_mot + m_fane + m_nace) + \
+             propsys.nr_turbines * (m_core + m_gen + m_pe_link) + \
              mass_tms
 
     m_add = m_acc + m_air + m_exhaust + m_oilsys + m_thrust_rev
 
-    m_trans = 0.2 * (m_gen + m_pe_link + m_prop_mot + m_pe_prop_mot)
+    m_trans = 0.2 * (propsys.nr_turbines * (m_gen + m_pe_link) + propsys.nr_engines_elec * (m_prop_mot + m_pe_prop_mot))
 
     mprop = m_bare + m_add + m_trans
 

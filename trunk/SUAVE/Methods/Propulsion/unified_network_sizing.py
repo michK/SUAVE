@@ -23,9 +23,9 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
         f_KED_wing - Fraction of wing kinetic energy defect relative to full aircraft
     """
 
-
     nr_fans_mech = vehicle.nr_engines_mech
     nr_fans_elec = vehicle.nr_engines_elec
+    nr_turbines = vehicle.nr_turbines
 
     fL = vehicle.fL_cruise  # Size propulsors for cruise
     fS = vehicle.fS_cruise  # Size propulsors for cruise
@@ -60,7 +60,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
         mdote = 0
 
     try:
-        Pturb = Pturb / nr_fans_mech
+        Pturb = Pturb / nr_turbines
     except ZeroDivisionError:
         Pturb = 0
 

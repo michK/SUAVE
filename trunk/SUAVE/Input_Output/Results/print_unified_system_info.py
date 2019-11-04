@@ -40,8 +40,8 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     propsys_info = vehicle.propulsors.unified_propsys.info
     nr_fans_mech = propsys_info.nr_fans_mech
     nr_fans_elec = propsys_info.nr_fans_elec
+    nr_turbines = propsys.nr_turbines
 
-    
     # start printing
     fid = open(filename,'w')   # Open output file
     fid.write('Output file with unified propulsion system information\n\n') #Start output printing
@@ -52,11 +52,11 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     fid.write(' Max fL segment = {}\n'.format(propsys.info.fL_max_segment))
     fid.write(' ARCHITECTURE:................................... :{}\n\n'.format(identify_arch(propsys)))
     fid.write(' COMPONENT WEIGHTS \n')
-    fid.write(' Core ........................................... : ' + str( '%8.2F' % (nr_fans_mech * propsys_info.m_core))        + ' kg\n')
+    fid.write(' Core ........................................... : ' + str( '%8.2F' % (nr_turbines * propsys_info.m_core))         + ' kg\n')
     fid.write(' Mechanical fans ................................ : ' + str( '%8.2F' % (nr_fans_mech * propsys_info.m_fanm))        + ' kg\n')
     fid.write(' Mechanical nacelles ............................ : ' + str( '%8.2F' % (nr_fans_mech * propsys_info.m_nacm))        + ' kg\n')
-    fid.write(' Link electrical machine ........................ : ' + str( '%8.2F' % (nr_fans_mech * propsys_info.m_gen))         + ' kg\n')
-    fid.write(' Link power electronics ......................... : ' + str( '%8.2F' % (nr_fans_mech * propsys_info.m_pe_link))     + ' kg\n')
+    fid.write(' Link electrical machine ........................ : ' + str( '%8.2F' % (nr_turbines * propsys_info.m_gen))          + ' kg\n')
+    fid.write(' Link power electronics ......................... : ' + str( '%8.2F' % (nr_turbines * propsys_info.m_pe_link))      + ' kg\n')
     fid.write(' Electrical fans ................................ : ' + str( '%8.2F' % (nr_fans_elec * propsys_info.m_fane))        + ' kg\n')
     fid.write(' Electrical nacelles ............................ : ' + str( '%8.2F' % (nr_fans_elec * propsys_info.m_nace))        + ' kg\n')
     fid.write(' Electrical propulsor motors .................... : ' + str( '%8.2F' % (nr_fans_elec * propsys_info.m_prop_mot))    + ' kg\n')
