@@ -166,10 +166,8 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 kp  = 0.108
                 Np  = 1  # nr of propellers in single propulsor unit
                 Dp  = propsys.mech_fan_dia / Units.ft
-                # Dp  = 2.6 / Units.ft
                 Pto = PfanM / Units.hp
-                Bp  = 3  # Number of blades
-                m_fanm = (kp * Np * (Dp * Pto * np.sqrt(Bp))**0.78174).sum() * Units.lbs
+                m_fanm = (kp * Np * (Dp * Pto * np.sqrt(vehicle.prop_nr_blades))**0.78174).sum() * Units.lbs
                 # Nacelle weights
                 Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
                 NLt  = propsys.nacelle_length_mech / Units.ft

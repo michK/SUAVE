@@ -42,6 +42,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     eta_fan = propsys.eta_fan
     unified_propsys_outputs = calculate_powers(vehicle.PKtot, fS, fL, eta_pe, eta_mot, eta_fan)
     Pturb = unified_propsys_outputs[2]
+    PMfan = unified_propsys_outputs[4]
 
     propsys.mdot_cruise = vehicle.mdottot_cruise
    
@@ -51,8 +52,10 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     # These have to be separate since they are not mutually dependent
     try:
         mdotm = mdotm_tot / nr_fans_mech
+        PMfan = PMfan / nr_fans_mech
     except ZeroDivisionError:
         mdotm = 0
+        PMfan = 0
 
     try:
         mdote = mdote_tot / nr_fans_elec
@@ -81,7 +84,14 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
 
     # Mechanical fan diameters
     if propsys.is_turboprop:
-        propsys.mech_fan_dia = Dfanm = propsys.prop_diameter
+        if vehicle.prop_nr_blades == 2:
+            Kp_prop = 0.56
+        elif vehicle.prop_nr_blades == 3:
+            Kp_prop = 0.52
+        elif vehicle.prop_nr_blades >= 4:
+            Kp_prop = 0.49
+        vehicle.prop_diameter = Kp_prop * (PMfan/1000)**(1/4)  # Raymer - p.315 (5th Ed.)
+        propsys.prop_diameter = propsys.mech_fan_dia = Dfanm = vehicle.prop_diameter
     else:
         propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
 
@@ -100,6 +110,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     #########################
     # Nacelle diameters and lengths
     if propsys.is_turboprop:
+        Pturb = (1 - fL) * Pturb  # NOTE Scale turbine so that nacelles disappear when fans disappear
         engine_dia = 0.25 * (Pturb / 1000)**0.120  # Raymer - p.323 (5th Ed.)
         engine_len = 0.12 * (Pturb / 1000)**0.373  # Raymer - p.323 (5th Ed.)
         propsys.mech_nac_dia = 1.2 * engine_dia
