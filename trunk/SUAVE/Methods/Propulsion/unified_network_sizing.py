@@ -97,11 +97,12 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     #########################
     # Nacelle diameters and lengths
     if propsys.is_turboprop:
-        Pturb = (1 - fL) * Pturb  # NOTE Scale turbine so that nacelles disappear when fans disappear
         engine_dia = 0.25 * (Pturb / 1000)**0.120  # Raymer - p.323 (5th Ed.)
         engine_len = 0.12 * (Pturb / 1000)**0.373  # Raymer - p.323 (5th Ed.)
         propsys.mech_nac_dia = 1.2 * engine_dia
         propsys.nacelle_length_mech = 1.2 * engine_len
+        # Scale wetted area so that nacelles disappear when fans disappear
+        propsys.areas_wetted_mech = (1 - fL) * 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
     else:
         propsys.mech_nac_dia = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
         propsys.nacelle_length_mech = 1.5 * propsys.mech_nac_dia
@@ -113,7 +114,6 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     propsys.nacelle_length_elec = 1.5 * propsys.elec_nac_dia
 
     # Wetted areas
-    propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
     propsys.areas_wetted_elec = 1.1 * 0.5 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
 
     # Update BLI amounts
