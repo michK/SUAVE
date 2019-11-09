@@ -18,7 +18,7 @@ import datetime                 # importing library
 #  Methods
 # ----------------------------------------------------------------------
 ## @ingroup Input_Output-Results
-def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', units="imperial"):
+def print_mission_breakdown(results, vehicle, PSEC, filename='mission_breakdown.dat', units="imperial"):
     """This creates a file showing mission information.
 
     Assumptions:
@@ -153,7 +153,7 @@ def print_mission_breakdown(results, PSEC, filename='mission_breakdown.dat', uni
         i = i+1
 
     #Summary of results [nm]
-    TotalFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[-1].conditions.weights.total_mass[-1]   #[kg]
+    TotalFuel = vehicle.mass_fuel
     MissionFuel = results.segments[0].conditions.weights.total_mass[0] - results.segments[2].conditions.weights.total_mass[-1]   #[kg]
     TotalTime = (results.segments[-1].conditions.frames.inertial.time[-1] - results.segments[0].conditions.frames.inertial.time[0])  #[min]
 
