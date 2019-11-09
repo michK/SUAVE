@@ -104,9 +104,9 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
     if solver == 'SNOPT':
         opt = pyOpt.SNOPT()
         CD_step = (sense_step**2.)**(1./3.)  # based on SNOPT Manual Recommendations
-        func_prec = 1e-6
+        func_prec = 1e-5
+        opt.setOption('Major optimality tolerance', sense_step*10)
         opt.setOption('Major feasibility tolerance', sense_step)
-        opt.setOption('Major optimality tolerance', sense_step)
         opt.setOption('Minor feasibility tolerance', sense_step)
         # opt.setOption('Function precision', sense_step)
         opt.setOption('Function precision', func_prec)
