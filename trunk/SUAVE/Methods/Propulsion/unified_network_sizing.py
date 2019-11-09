@@ -106,6 +106,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     else:
         propsys.mech_nac_dia = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
         propsys.nacelle_length_mech = 1.5 * propsys.mech_nac_dia
+        propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
 
     #########################
     # Electrical propulsors #
