@@ -30,12 +30,6 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     fL = vehicle.fL_cruise  # Size propulsors for cruise
     fS = vehicle.fS_cruise  # Size propulsors for cruise
 
-    # Check for edge cases where components should 'disappear'
-    # if fL <= 0.01:  # Propulsion only from mechanical side
-    #     nr_fans_elec = 0
-    # elif fL >= 0.99:  # Propulsion only from electrical side
-    #     nr_fans_mech = 0
-
     # Run unified model
     eta_pe = propsys.eta_pe
     eta_mot = propsys.eta_mot
@@ -97,13 +91,6 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
 
     # Electrical fan diameters
     propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
-
-    # Set diameters to zero in the case of configurations where they 'disappear'
-    # if fL <= 0.01:  # Propulsion only from mechanical side
-    #     propsys.elec_fan_dia = Dfane = 0
-    # elif fL >= 0.99:  # Propulsion only from electrical side
-    #     propsys.mech_fan_dia = Dfanm = 0
-
 
     #########################
     # Mechanical propulsors #
