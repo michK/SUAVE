@@ -74,7 +74,7 @@ def wing_loading_approach(vehicle, analyses, airport, m_fuel):
     # Determining vehicle maximum lift coefficient
     # ==============================================
     try:   # aircraft maximum lift informed by user
-        maximum_lift_coefficient = vehicle.maximum_lift_coefficient
+        maximum_lift_coefficient = vehicle.maximum_lift_coefficient_landing
     except:
         # Using semi-empirical method for maximum lift coefficient calculation
         from SUAVE.Methods.Aerodynamics.Fidelity_Zero.Lift import compute_max_lift_coeff
