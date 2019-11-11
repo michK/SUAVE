@@ -161,7 +161,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             #########################
             # Mechanical propulsors #
             #########################
-            if propsys.is_turboprop: # Turboprop mechanical propulsors
+            if vehicle.is_turboprop: # Turboprop mechanical propulsors
                 # Fan/propeller weights
                 kp  = 0.108
                 Np  = 1  # nr of propellers in single propulsor unit
@@ -185,7 +185,10 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 # Fan weights
                 m_fanm = 0.1902 * (mdotm / Units['lbs/s'])**1.143 * (1351/1000)**2 * (1 - 0.406**2) * Units.lbs  # From Waters, 1997
                 # Nacelle weights
-                Kng  = 1.017  # For pylon mounted nacelle (i.e. mechanical in this framework)
+                if vehicle.has_mech_pylons:
+                    Kng = 1.017  # For pylon mounted nacelle
+                else:
+                    Kng = 1.0  # For non-pylon mounted nacelle
                 NLt  = propsys.nacelle_length_mech / Units.ft
                 Nw   = propsys.mech_nac_dia / Units.ft
                 Nz   = vehicle.envelope.ultimate_load
@@ -204,7 +207,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             # Fan weights
             m_fane = 0.1902 * (mdote / Units['lbs/s'])**1.143 * (1351/1000)**2 * (1 - 0.406**2) * Units.lbs  # From waters - 1997
             # Nacelle weights            
-            Kng  = 1.0  # For non-pylon mounted nacelle (i.e. electrical in this framework)
+            Kng  = 1.0  # For non-pylon mounted nacelle
             NLt  = propsys.nacelle_length_elec / Units.ft
             Nw   = propsys.elec_nac_dia / Units.ft
             Nz   = vehicle.envelope.ultimate_load
@@ -230,7 +233,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
 
             mass_tms = q_tot / pm_tms
 
-            if propsys.is_turboprop:
+            if vehicle.is_turboprop:
                 m_acc = 0.181 * propsys.nr_engines_mech * (Pturb / 1000)**0.8
                 m_air = 0  # Included in nacelle
                 m_exhaust = 0.1 * propsys.areas_wetted_mech * 14.63  # Assuming exhaust is 10% of nacelle area

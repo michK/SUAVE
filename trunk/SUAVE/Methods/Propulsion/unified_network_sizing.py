@@ -76,41 +76,47 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
         Afanm = Acapm / (A_Astar_inlet / A_Astar_face)
         Afane = Acape / (A_Astar_inlet / A_Astar_face)
 
-    # Mechanical fan diameters
-    if propsys.is_turboprop:
+    #########################
+    # Mechanical propulsors #
+    #########################
+    # Mechanical fan
+    if vehicle.is_turboprop:
         if vehicle.prop_nr_blades == 2:
             Kp_prop = 0.56
         elif vehicle.prop_nr_blades == 3:
             Kp_prop = 0.52
         elif vehicle.prop_nr_blades >= 4:
             Kp_prop = 0.49
-        vehicle.prop_diameter = Kp_prop * (PMfan/1000)**(1/4)  # Raymer - p.315 (5th Ed.)
+        vehicle.prop_diameter = Kp_prop * (PMfan / 1000)**(1/4)  # Raymer - p.315 (5th Ed.)
         propsys.prop_diameter = propsys.mech_fan_dia = Dfanm = vehicle.prop_diameter
     else:
         propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
 
-    # Electrical fan diameters
-    propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
-
-    #########################
-    # Mechanical propulsors #
-    #########################
-    # Nacelle diameters and lengths
-    if propsys.is_turboprop:
+    # Mechanical nacelle
+    if vehicle.is_turboprop:
         engine_dia = 0.25 * (Pturb / 1000)**0.120  # Raymer - p.323 (5th Ed.)
         engine_len = 0.12 * (Pturb / 1000)**0.373  # Raymer - p.323 (5th Ed.)
         propsys.mech_nac_dia = 1.2 * engine_dia
         propsys.nacelle_length_mech = 1.2 * engine_len
-        # Scale wetted area so that nacelles disappear when fans disappear
-        propsys.areas_wetted_mech = (1 - fL) * 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
+        if vehicle.external_turb:
+            propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
+        else:
+            propsys.areas_wetted_mech = 0
     else:
         propsys.mech_nac_dia = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
         propsys.nacelle_length_mech = 1.5 * propsys.mech_nac_dia
-        propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
+        if vehicle.external_turb:
+            propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
+        else:
+            propsys.areas_wetted_mech = 0
 
     #########################
     # Electrical propulsors #
     #########################
+    # Electrical fan
+    propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
+
+    # Electrical nacelle
     propsys.elec_nac_dia = Dfane / 0.8
     propsys.nacelle_length_elec = 1.5 * propsys.elec_nac_dia
 
@@ -129,7 +135,10 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     propsys.info.elec_fan_dia = Dfane
     propsys.info.areas_wetted_mech_tot = vehicle.propulsors.unified_propsys.areas_wetted_mech * nr_fans_mech
     propsys.info.areas_wetted_elec_tot = vehicle.propulsors.unified_propsys.areas_wetted_elec * nr_fans_elec
-    propsys.info.areas_wetted_mech_pylons = propsys.info.areas_wetted_mech_tot * 0.2
+    if vehicle.has_mech_pylons:
+        propsys.info.areas_wetted_mech_pylons = propsys.info.areas_wetted_mech_tot * 0.2
+    else:
+        propsys.info.areas_wetted_mech_pylons = np.zeros_like(propsys.info.areas_wetted_mech_tot)
     propsys.info.areas_wetted_elec_pylons = 0
     propsys.info.fBLIe = propsys.fBLIe
     propsys.info.fBLIm = propsys.fBLIm

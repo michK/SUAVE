@@ -53,16 +53,20 @@ def parasite_drag_pylon_unified(state, settings, vehicle):
     conditions = state.conditions
     propulsor = vehicle.propulsors.unified_propsys
 
-    pylon_factor_mech        =  0.2 # 20% of propulsor drag
-    pylon_factor_elec        =  0.1 # No pylons but still installation effects
+    pylon_factor_mech        =  0.2 # 20% of propulsor drag/wetted area
+    pylon_factor_elec        =  0.1 # No pylons, but still installation effects
     n_propulsors             =  len(vehicle.propulsors)  # number of propulsive system in vehicle (NOT # of ENGINES)
 
     # Estimating pylon drag
     ref_area_mech            = np.pi / 4.0 * propulsor.mech_nac_dia**2.0
     ref_area_elec            = np.pi / 4.0 * propulsor.elec_nac_dia**2.0
-    pylon_parasite_drag_mech = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * ref_area_mech / vehicle.reference_area * propulsor.nr_engines_mech
+    if vehicle.has_mech_pylons:
+        pylon_parasite_drag_mech = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech * ref_area_mech / vehicle.reference_area * propulsor.nr_engines_mech
+        pylon_wetted_area_mech   = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.nr_engines_mech
+    else:
+        pylon_parasite_drag_mech = np.zeros_like(conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech)
+        pylon_wetted_area_mech = np.zeros_like(conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_mech)
     pylon_parasite_drag_elec = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].parasite_drag_coefficient_elec * ref_area_elec / vehicle.reference_area * propulsor.nr_engines_elec
-    pylon_wetted_area_mech   = pylon_factor_mech * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_mech * propulsor.nr_engines_mech
     pylon_wetted_area_elec   = pylon_factor_elec * conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].wetted_area_elec * propulsor.nr_engines_elec
     pylon_cf                 = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].skin_friction_coefficient
     pylon_compr_fact         = conditions.aerodynamics.drag_breakdown.parasite[propulsor.tag].compressibility_factor
