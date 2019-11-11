@@ -93,7 +93,6 @@ def parasite_drag_propulsors_unified(state, settings, geometry):
         k_prop = 1 + 0.35 / (float(l_nacelle_mech) / float(d_nacelle_mech))
         parasite_drag_coefficient_mech = f_embed_mech * k_prop * cf_prop * Swet_mech / Sref_mech
     except:
-        # parasite_drag_coefficient_mech = [np.zeros(np.shape(Mc)[0])]
         parasite_drag_coefficient_mech = np.zeros_like(Mc)
 
     # electrical propulsors
@@ -106,7 +105,6 @@ def parasite_drag_propulsors_unified(state, settings, geometry):
         k_prop = 1 + 0.35 / (float(l_nacelle_elec) / float(d_nacelle_elec))
         parasite_drag_coefficient_elec = f_embed_elec * k_prop * cf_prop * Swet_elec / Sref_elec
     except:
-        # parasite_drag_coefficient_elec = [np.zeros(np.shape(Mc)[0])]
         parasite_drag_coefficient_elec = np.zeros_like(Mc)
 
     # consolidate mech and elec propulsors
