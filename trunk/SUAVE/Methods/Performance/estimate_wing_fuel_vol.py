@@ -2,7 +2,7 @@
 # estimate_wing_fuel_vol.py
 #
 # Created: June 2019, M. Kruger
-# Modified: 
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -39,7 +39,7 @@ def estimate_wing_fuel_vol(vehicle, fuel_fraction=0.5):
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -52,5 +52,5 @@ def estimate_wing_fuel_vol(vehicle, fuel_fraction=0.5):
     kQ = 0.95
 
     wing_fuel_vol = fuel_fraction * kQ * t_c / np.sqrt(1 + lambda_w) * Sw * np.sqrt(Sw / AR)
-    
+
     return wing_fuel_vol

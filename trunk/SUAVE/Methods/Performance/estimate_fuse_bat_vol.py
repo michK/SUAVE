@@ -2,7 +2,7 @@
 # estimate_wing_fuel_vol.py
 #
 # Created: June 2019, M. Kruger
-# Modified: 
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -39,7 +39,7 @@ def estimate_fuse_bat_vol(vehicle, vol_frac=0.05):
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -51,5 +51,5 @@ def estimate_fuse_bat_vol(vehicle, vol_frac=0.05):
     vol_fuse = area_front * (length - 2 * width)
 
     fuse_bat_vol = vol_frac * vol_fuse
-    
+
     return fuse_bat_vol
