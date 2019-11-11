@@ -105,14 +105,12 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
         opt = pyOpt.SNOPT()
         CD_step = (sense_step**2.)**(1./3.)  # based on SNOPT Manual Recommendations
         func_prec = 1e-6
-        opt.setOption('Major optimality tolerance', sense_step)
-        opt.setOption('Major feasibility tolerance', sense_step)
-        opt.setOption('Minor feasibility tolerance', sense_step)
-        # opt.setOption('Function precision', sense_step)
+        opt.setOption('Problem Type', 'Minimize')  # 'Minimize' or 'Maximize', or 'Feasible point'
+        opt.setOption('Major optimality tolerance', 1e-3)
+        opt.setOption('Major feasibility tolerance', func_prec)
+        opt.setOption('Minor feasibility tolerance', func_prec)
         opt.setOption('Function precision', func_prec)
-        # opt.setOption('Difference interval', sense_step)
         opt.setOption('Difference interval', func_prec**(1/2))
-        # opt.setOption('Central difference interval', CD_step)
         opt.setOption('Central difference interval', func_prec**(1/3))
         opt.setOption('Penalty parameter', 10.0)
         opt.setOption('Print frequency', 10)
