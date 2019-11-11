@@ -39,7 +39,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     PMfan = unified_propsys_outputs[4]
 
     propsys.mdot_cruise = vehicle.mdottot_cruise
-   
+
     mdotm_tot = (1 - fL) * propsys.mdot_cruise
     mdote_tot = fL * propsys.mdot_cruise
 

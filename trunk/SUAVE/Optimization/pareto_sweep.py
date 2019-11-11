@@ -74,9 +74,8 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index):
 
     print("Performing variable sweep:")
     #inputs defined; now run sweep
-    for i in range(0, number_of_points):        
+    for i in range(0, number_of_points):
         opt_prob.inputs[:,1][idx0]= inputs[0,i]
-
 
         opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
         problem.optimization_problem = opt_prob
@@ -87,7 +86,7 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index):
     # Create plot
     fig, ax = plt.subplots()
 
-    if print_PSEC:        
+    if print_PSEC:
         ax.plot(inputs[0,:], PSEC, lw = 2)
         ax.set_xlabel(names[idx0])
         ax.set_ylabel('PSEC [kJ/kg/km]')

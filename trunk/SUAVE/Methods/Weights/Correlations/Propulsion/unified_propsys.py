@@ -35,7 +35,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             2018 Aviation Technology, Integration, and Operations Conference.
             2018.
 
-    Inputs:            
+    Inputs:
             PKtot - Total installed PK [W]
             fL    - Load electrification factor [-]
             fS    - Source electrification factor [-]
@@ -56,7 +56,6 @@ def unified_propsys(vehicle, weight_factor=1.0):
     segments = ["Climb", "Cruise", "Descent"]
     fL_arr = np.unique(np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent]))
     fS_arr = np.unique(np.array([vehicle.fS_climb, vehicle.fS_cruise, vehicle.fS_descent]))
-
     # Find segment electrifications for result reporting
     fL_max = np.amax(np.array([vehicle.fL_climb, vehicle.fL_cruise, vehicle.fL_descent]))
     fL_max_segment = segments[np.argmax(fL_arr)]
@@ -206,7 +205,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             #######################################
             # Fan weights
             m_fane = 0.1902 * (mdote / Units['lbs/s'])**1.143 * (1351/1000)**2 * (1 - 0.406**2) * Units.lbs  # From waters - 1997
-            # Nacelle weights            
+            # Nacelle weights
             Kng  = 1.0  # For non-pylon mounted nacelle
             NLt  = propsys.nacelle_length_elec / Units.ft
             Nw   = propsys.elec_nac_dia / Units.ft
