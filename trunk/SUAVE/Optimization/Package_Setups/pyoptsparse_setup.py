@@ -101,6 +101,7 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
     # Finalize problem statement and run
     print(opt_prob)
 
+    # Set optimizer and settings
     if solver == 'SNOPT':
         opt = pyOpt.SNOPT()
         CD_step = (sense_step**2.)**(1./3.)  # based on SNOPT Manual Recommendations
@@ -153,11 +154,15 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
 
     if nonderivative_line_search==True:
         opt.setOption('Nonderivative linesearch')
-    if FD == 'parallel':
+
+    # Set output
+    if (solver == 'SNOPT') and (FD == 'parallel'):
+        outputs = opt(opt_prob, sens='FD', sensMode='pgc', sensStep = sense_step, storeHistory='snopt.hist')
+
+    elif FD == 'parallel':
         outputs = opt(opt_prob, sens='FD',sensMode='pgc')
 
     elif solver == 'SNOPT':
-        # outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist', hotStart='ALPSO.hist')
         outputs = opt(opt_prob, sens='FD', sensStep = sense_step, storeHistory='snopt.hist')
 
     elif solver == 'SLSQP':
