@@ -101,7 +101,6 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
     # Finalize problem statement and run
     print(opt_prob)
 
-
     # Set optimizer and settings
     if solver == 'SNOPT':
         opt = pyOpt.SNOPT()
