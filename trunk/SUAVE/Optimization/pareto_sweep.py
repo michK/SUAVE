@@ -11,18 +11,19 @@
 import SUAVE
 from SUAVE.Core import Data
 from .Package_Setups import pyoptsparse_setup
+from SUAVE.Input_Output.Results import print_SNOPT_summary
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-import progressbar
+import os
 
 # ----------------------------------------------------------------------
 #  pareto_sweep
 # ----------------------------------------------------------------------
 
 
-def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index):
+def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='data.out'):
     """
     Takes in an optimization problem and runs a Pareto sweep of the sweep index sweep_index.
     i.e. sweep_index=0 means you want to sweep the first variable, sweep_index = 4 is the 5th variable)
@@ -72,29 +73,39 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index):
     #create inputs matrix
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
 
-    print("Performing variable sweep:")
-    #inputs defined; now run sweep
-    for i in range(0, number_of_points):
-        opt_prob.inputs[:,1][idx0]= inputs[0,i]
+    # Create file to write results into
+    data_path = os.path.join(os.path.expanduser('.'), 'Data',datafile)
+    with open(data_path, "w+") as f:
+        f.write("Data file for sweep of PSEC vs fL\n")
+        #inputs defined; now run sweep
+        for i in range(0, number_of_points):
+            opt_prob.inputs[:,1][idx0]= inputs[0,i]
 
-        opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
-        problem.optimization_problem = opt_prob
-        sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', sense_step=1e-06)
-        obj[i] = sol.fStar * obj_scaling
-        PSEC[i] = problem.summary.PSEC
+            opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
+            problem.optimization_problem = opt_prob
+            sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', FD='parallel', sense_step=1e-06)
+            obj[i] = sol.fStar * obj_scaling
+            PSEC[i] = problem.summary.PSEC
+
+            if print_SNOPT_summary('/home/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):
+                converged = 1
+            else:
+                converged = 0
+
+            f.write("{}, {}, {}\n".format(inputs[0,i], PSEC[i], converged))
 
     # Create plot
-    fig, ax = plt.subplots()
+    # fig, ax = plt.subplots()
 
-    if print_PSEC:
-        ax.plot(inputs[0,:], PSEC, lw = 2)
-        ax.set_xlabel(names[idx0])
-        ax.set_ylabel('PSEC [kJ/kg/km]')
-    else:
-        ax.plot(inputs[0,:], obj, lw = 2)
-        ax.set_xlabel(names[idx0])
-        ax.set_ylabel(obj_name)
+    # if print_PSEC:
+    #     ax.plot(inputs[0,:], PSEC, lw = 2)
+    #     ax.set_xlabel(names[idx0])
+    #     ax.set_ylabel('PSEC [kJ/kg/km]')
+    # else:
+    #     ax.plot(inputs[0,:], obj, lw = 2)
+    #     ax.set_xlabel(names[idx0])
+    #     ax.set_ylabel(obj_name)
 
-    plt.show()
+    # plt.show()
 
     return
