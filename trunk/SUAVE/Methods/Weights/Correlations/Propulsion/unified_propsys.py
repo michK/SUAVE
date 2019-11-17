@@ -195,7 +195,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Kp   = 1.0  # Propeller/fan book-kept separately
                 Ktr  = 1.18  # 1.18 with thrust reverser, 1.0 without
                 Wec  = 2.331 * Weng**0.901 * Kp * Ktr
-                Nen  = 1
+                Nen  = 1  # Weight per engine
                 Sn   = propsys.areas_wetted_mech / Units['ft^2']
                 m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
                     Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
@@ -214,7 +214,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             Kp   = 1.0  # Propeller/fan book-kept separately
             Ktr  = 1.0  # 1.18 with thrust reverser, 1.0 without
             Wec  = 2.331 * Weng**0.901 * Kp * Ktr
-            Nen  = propsys.nr_engines_elec
+            Nen  = 1  # Weight per engine
             Sn   = propsys.areas_wetted_elec / Units['ft^2']
             m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
                 Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
