@@ -34,7 +34,7 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
 
     Properties Used:
     N/A
-    """     
+    """
     #unpack
     propsys = vehicle.propulsors.unified_propsys
     propsys_info = vehicle.propulsors.unified_propsys.info
@@ -70,7 +70,7 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     fid.write(' Total propulsion system weight.................. : ' + str( '%8.2F' % propsys_info.weight_total)  + ' kg\n')
 
     fid.write(' \n')
-    fid.write(' PROPULSOR COUNT, DIAMETERS AND WETTED AREAS \n')
+    fid.write(' PROPULSOR COUNT, DIAMETERS, WETTED AREAS AND BLI \n')
     fid.write(' Number of mechanical fans................. : ' + str( '%8.0F' % propsys_info.nr_fans_mech)             + '\n')
     fid.write(' Number of electrical fans................. : ' + str( '%8.0F' % propsys_info.nr_fans_elec)             + '\n')
     fid.write(' Mechanical fan diameters.................. : ' + str( '%8.3F' % propsys_info.mech_fan_dia)             + ' m\n')
@@ -79,6 +79,8 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
     fid.write(' Electrical nacelle wetted areas (total)... : ' + str( '%8.3F' % propsys_info.areas_wetted_elec_tot)    + ' m^2\n')
     fid.write(' Mechanical pylons wetted areas (total).... : ' + str( '%8.3F' % propsys_info.areas_wetted_mech_pylons) + ' m^2\n')
     fid.write(' Electrical pylons wetted areas (total).... : ' + str( '%8.3F' % propsys_info.areas_wetted_elec_pylons) + ' m^2\n')
+    fid.write(' Mechanical Kinetic En. D. ingested (fBLIm) : ' + str( '%8.3F' % propsys_info.fBLIm) + ' \n')
+    fid.write(' Electrical Kinetic En. D. ingested (fBLIe) : ' + str( '%8.3F' % propsys_info.fBLIe) + ' \n')
 
     # Print timestamp
     fid.write('\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
