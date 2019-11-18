@@ -84,7 +84,7 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
             opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
             problem.optimization_problem = opt_prob
             sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', FD='parallel', sense_step=1e-06)
-            obj[i] = sol.fStar * obj_scaling
+            obj[i] = problem.objective() * obj_scaling
             PSEC[i] = problem.summary.PSEC
 
             if print_SNOPT_summary('/home/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):
@@ -92,20 +92,9 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
             else:
                 converged = 0
 
-            f.write("{}, {}, {}\n".format(inputs[0,i], PSEC[i], converged))
+            # Extract parameters from problem
+            mto = problem.vehicle_configurations.base.mass_properties.max_takeoff
 
-    # Create plot
-    # fig, ax = plt.subplots()
-
-    # if print_PSEC:
-    #     ax.plot(inputs[0,:], PSEC, lw = 2)
-    #     ax.set_xlabel(names[idx0])
-    #     ax.set_ylabel('PSEC [kJ/kg/km]')
-    # else:
-    #     ax.plot(inputs[0,:], obj, lw = 2)
-    #     ax.set_xlabel(names[idx0])
-    #     ax.set_ylabel(obj_name)
-
-    # plt.show()
+            f.write("{}, {}, {}, {}\n".format(inputs[0,i], PSEC[i], converged, mto))
 
     return
