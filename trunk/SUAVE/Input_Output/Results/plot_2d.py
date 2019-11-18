@@ -16,6 +16,7 @@ def plot_2d(ax, filename):
     x_data = []
     y_data = []
     conv = []
+    mto = []
     # Read data stored in file into Python
     with open(filename) as csvfile:
         readCSV = csv.reader(csvfile, delimiter=',')
@@ -25,6 +26,7 @@ def plot_2d(ax, filename):
                 x_data.append(float(row[0]))
                 y_data.append(float(row[1]))
                 conv.append(int(row[2]))
+                mto.append(float(row[3]))
 
     if 0 in conv:
         print("Warning: {} out of {} points in sweep did not converge".format(conv.count(0), len(conv)))
