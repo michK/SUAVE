@@ -34,7 +34,7 @@ def print_mission_breakdown(results, vehicle, PSEC, filename='mission_breakdown.
         inertial.time                [s]
       aerodynamics.lift_coefficient  [-]
       weights.total                  [kg]
-      freestream.  
+      freestream.
         mach_number                  [-]
         pressure                     [Pa]
     filename (optional)       <string> Determines the name of the saved file
@@ -45,7 +45,7 @@ def print_mission_breakdown(results, vehicle, PSEC, filename='mission_breakdown.
 
     Properties Used:
     N/A
-    """           
+    """
     imperial = False
     SI = False
 
@@ -133,8 +133,8 @@ def print_mission_breakdown(results, vehicle, PSEC, filename='mission_breakdown.
         KCASi_str = str('%7.1f'   % KCASi)    + '|'
         KCASf_str = str('%7.1f'   % KCASf)    + '|'
 
-        Segment_str = '%- 31s |' % key 
-        
+        Segment_str = '%- 31s |' % key
+
 
         if i == 0:  #Write header
             if imperial:
@@ -159,25 +159,25 @@ def print_mission_breakdown(results, vehicle, PSEC, filename='mission_breakdown.
 
     fid.write(2*'\n')
     if imperial:
-        fid.write(' Total Range (nm) .......... '+ str('%-5.0f'   % TotalRange)+'\n')
-        fid.write(' Mission Range (nm) ........ '+ str('%-5.0f'   % MissionRange) + ' (first 3 segments - climb, cruise, descent)' + '\n')
+        fid.write(' Total Range (nm) .......... '+ str('%-5.0f'% TotalRange)+'\n')
+        fid.write(' Mission Range (nm) ........ '+ str('%-5.0f'% MissionRange) + ' (first 3 segments - climb, cruise, descent)' + '\n')
     elif SI:
-        fid.write(' Total Range (km) ........... ' + str('%-7.0f' % TotalRange) + '\n')
-        fid.write(' Mission Range (km) ......... '+ str('%-7.0f'   % MissionRange) + ' (first 3 segments - climb, cruise, descent)' +'\n')
-    fid.write(' Total Fuel (kg) ........... '+ str('%-5.0f'   % TotalFuel)+'\n')
-    fid.write(' Mission Fuel (kg) ......... '+ str('%-5.0f'   % MissionFuel) + ' (first 3 segments - climb, cruise, descent)' + '\n')
-    fid.write(' PSEC ...................... '+ str('%-8.3f'   % PSEC) + '\n')
+        fid.write(' Total Range (km) ........... ' + str('%-7.0f'% TotalRange) + '\n')
+        fid.write(' Mission Range (km) ......... '+ str('%-7.0f'% MissionRange) + ' (first 3 segments - climb, cruise, descent)' +'\n')
+    fid.write(' Total Fuel (kg) ........... '+ str('%-5.0f'% TotalFuel)+'\n')
+    fid.write(' Mission Fuel (kg) ......... '+ str('%-5.0f'% MissionFuel) + ' (first 3 segments - climb, cruise, descent)' + '\n')
+    fid.write(' PSEC ...................... '+ str('%-8.3f'% PSEC) + '\n')
     fid.write(' Total Time (hh:mm) ........ '+ time.strftime('%H:%M', time.gmtime(TotalTime))+'\n')
     # Print timestamp
     fid.write(2*'\n'+ 43*'-'+ '\n' + datetime.datetime.now().strftime(" %A, %d. %B %Y %I:%M:%S %p"))
-    
+
     fid.close
 
-    #done! 
+    #done!
     return
 
 # ----------------------------------------------------------------------
 #   Module Test
 # ----------------------------------------------------------------------
 if __name__ == '__main__':
-    print(' Error: No test defined ! ')    
+    print(' Error: No test defined ! ')
