@@ -14,8 +14,7 @@ from .Package_Setups import pyoptsparse_setup
 from SUAVE.Input_Output.Results import print_SNOPT_summary
 
 import numpy as np
-import matplotlib.pyplot as plt
-
+import pickle
 import os
 
 # ----------------------------------------------------------------------
@@ -65,36 +64,48 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
     obj_scaling      = base_objective[0][1]
     base_constraints = opt_prob.constraints
 
-    #define inputs, output, and constraints for sweep
+    # Define and initialize inputs
     inputs = np.zeros([2,number_of_points])
-    obj    = np.zeros([number_of_points])
-    PSEC   = np.zeros([number_of_points])
+    # Define and initialize output
+    converged = np.zeros([number_of_points])
+    obj       = np.zeros([number_of_points])
+    PSEC      = np.zeros([number_of_points])
+    mto       = np.zeros([number_of_points])
 
-    #create inputs matrix
+    # Create inputs matrix
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
+
+    # Initialize results dictionary
+    res = dict()
 
     # Create file to write results into
     data_path = os.path.join(os.path.expanduser('.'), 'Data',datafile)
-    with open(data_path, "w+") as f:
-        f.write("Data file for sweep of PSEC vs fL\n")
-        #inputs defined; now run sweep
-        for i in range(0, number_of_points):
-            opt_prob.inputs[:,1][idx0]= inputs[0,i]
+    #inputs defined; now run sweep
+    for i in range(0, number_of_points):
+        opt_prob.inputs[:,1][idx0]= inputs[0,i]
 
-            opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
-            problem.optimization_problem = opt_prob
-            sol = pyoptsparse_setup.Pyoptsparse_Solve(problem, solver='SNOPT', FD='parallel', sense_step=1e-06)
-            obj[i] = problem.objective() * obj_scaling
-            PSEC[i] = problem.summary.PSEC
+        opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
+        problem.optimization_problem = opt_prob
+        sol = pyoptsparse_setup.Pyoptsparse_Solve(
+            problem, solver='SNOPT', FD='parallel', sense_step=1e-06)
+        obj[i] = problem.objective() * obj_scaling
+        PSEC[i] = problem.summary.PSEC
 
-            if print_SNOPT_summary('/home/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):
-                converged = 1
-            else:
-                converged = 0
+        if print_SNOPT_summary('/home/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):
+            converged[i] = 1
+        else:
+            converged[i] = 0
 
-            # Extract parameters from problem
-            mto = problem.vehicle_configurations.base.mass_properties.max_takeoff
+        # Extract parameters from problem
+        mto[i] = problem.vehicle_configurations.base.mass_properties.max_takeoff
 
-            f.write("{}, {}, {}, {}\n".format(inputs[0,i], PSEC[i], converged, mto))
+    # Populate results dictionary
+    res["Input"] = inputs[0,:]
+    res["Obj"] = obj
+    res["PSEC"] = PSEC
+    res["Converged"] = converged
+    res["Mto"] = mto
+    # Write results dictionary to file
+    pickle.dump(res, open(data_path, "wb"))
 
     return
