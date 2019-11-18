@@ -29,7 +29,7 @@ def plot_2d(ax, filename, plot_vars_left, plot_vars_right=None):
         if 0 in conv:
             print("Warning: {} out of {} points in sweep did not converge".format(conv.count(0), len(conv)))
 
-        ax.plot(x_data, y_data)
+        ax.plot(x_data, y_data, 'b')
 
     if plot_vars_right is not None:
         ax2 = ax.twinx()
@@ -37,4 +37,6 @@ def plot_2d(ax, filename, plot_vars_left, plot_vars_right=None):
             x_data = res[data[0]]
             y_data = res[data[1]]
 
-            ax2.plot(x_data, y_data)
+            ax2.plot(x_data, y_data, 'r')
+
+        return ax, ax2
