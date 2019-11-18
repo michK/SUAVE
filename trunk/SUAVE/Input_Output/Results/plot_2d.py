@@ -7,30 +7,34 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
-import csv
+import pickle
 
-def plot_2d(ax, filename):
-    """Create 2D plot of data stored in specified data file"""
+def plot_2d(ax, filename, plot_vars_left, plot_vars_right=None):
+    """
+    Create 2D plot of data stored in specified data file
 
-    # Initialize lists to store data
-    x_data = []
-    y_data = []
-    conv = []
-    mto = []
+    plot_vars_left and plot_vars_right are lists of plot variable pairs,
+    which enables various datasets to be plotted on both the (standard)
+    left y-axis and the right y-axis
+    """
+
     # Read data stored in file into Python
-    with open(filename) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        next(readCSV)
-        for row in readCSV:
-            if len(row) != 0:
-                x_data.append(float(row[0]))
-                y_data.append(float(row[1]))
-                conv.append(int(row[2]))
-                mto.append(float(row[3]))
+    res = pickle.load(open(filename, "rb"))
 
-    if 0 in conv:
-        print("Warning: {} out of {} points in sweep did not converge".format(conv.count(0), len(conv)))
+    for data in plot_vars_left:
+        x_data = res[data[0]]
+        y_data = res[data[1]]
+        conv   = res["Converged"]
 
-    ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    ax.plot(x_data, y_data)
+        if 0 in conv:
+            print("Warning: {} out of {} points in sweep did not converge".format(conv.count(0), len(conv)))
+
+        ax.plot(x_data, y_data)
+
+    if plot_vars_right is not None:
+        ax2 = ax.twinx()
+        for data in plot_vars_right:
+            x_data = res[data[0]]
+            y_data = res[data[1]]
+
+            ax2.plot(x_data, y_data)
