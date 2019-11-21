@@ -133,7 +133,6 @@ class Unified_Thrust(Energy_Component):
         # Ajet_m = 0.6 * nr_prop_m * Afanm
         # Ajet_e = 0.6 * nr_prop_e * Afane
         Ajet = Ajet_m + Ajet_e
-        print("Jet area :{}".format(Ajet))
 
         for i in range(nr_elements):
             def power_balance(params):
