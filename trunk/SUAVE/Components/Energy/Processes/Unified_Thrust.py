@@ -111,23 +111,29 @@ class Unified_Thrust(Energy_Component):
 
         # Set up system of equations to solve power balance
         # Initialize solution arrays
-        PKm_tot = np.zeros(nr_elements)
-        PKe_tot = np.zeros(nr_elements)
+        PKm_tot   = np.zeros(nr_elements)
+        PKe_tot   = np.zeros(nr_elements)
+        mdottot   = np.zeros(nr_elements)
         mdotm_tot = np.zeros(nr_elements)
         mdote_tot = np.zeros(nr_elements)
         Vjetm_tot = np.zeros(nr_elements)
         Vjete_tot = np.zeros(nr_elements)
         eta_p_tot = np.zeros(nr_elements)
         mdot_fuel = np.zeros(nr_elements)
-        Pbat = np.zeros(nr_elements)
-        Pturb = np.zeros(nr_elements)
+        Pbat      = np.zeros(nr_elements)
+        Pturb     = np.zeros(nr_elements)
 
         # Tentatively assume phi_surf is unaffected
         deltaPhiSurf = 0
+        # Compute overall fBLI
         fBLI = fBLIm + fBLIe
-        Ajet_m = 0.6 * nr_prop_m * np.pi / 4 * Dfan_m**2
-        Ajet_e = 0.6 * nr_prop_e * np.pi / 4 * Dfan_e**2
+        # Compute total jet area
+        Ajet_m = 0.6 * nr_prop_m * (np.pi / 4 * Dfan_m**2)
+        Ajet_e = 0.6 * nr_prop_e * (np.pi / 4 * Dfan_e**2)
+        # Ajet_m = 0.6 * nr_prop_m * Afanm
+        # Ajet_e = 0.6 * nr_prop_e * Afane
         Ajet = Ajet_m + Ajet_e
+        print("Jet area :{}".format(Ajet))
 
         for i in range(nr_elements):
             def power_balance(params):
@@ -135,13 +141,13 @@ class Unified_Thrust(Energy_Component):
                 PK_tot, mdot_tot, Vjet, eta_p, phi_jet = params
 
                 # Residuals
-                res1 = PK_tot - 0.5 * mdot_tot * (Vjet**2.0 - Vinf[i]**2.0) - fBLI * fsurf * Dpar[i] * Vinf[i]                    
+                res1 = PK_tot - 0.5 * mdot_tot * (Vjet**2.0 - Vinf[i]**2.0) - fBLI * fsurf * Dpar[i] * Vinf[i]
                 res2 = Dp[i] - (Vjet - Vinf[i]) * mdot_tot + hdot[i] * W[i] / Vinf[i] - fBLI * Dpar[i] - deltaPhiSurf / Vinf[i]
                 res3 = eta_p - (PK_tot - phi_jet) / PK_tot
                 res4 = phi_jet - 0.5 * (Vjet - Vinf[i])**2 * mdot_tot
                 res5 = mdot_tot - (rho_inf[i] * Vjet * Ajet)
 
-                power_balance.PK = PK_tot
+                power_balance.PK  = PK_tot
                 power_balance.mdot = mdot_tot
                 power_balance.Vjet = Vjet
                 power_balance.eta_p = eta_p
@@ -150,7 +156,7 @@ class Unified_Thrust(Energy_Component):
                 power_balance.residuals = residuals
 
                 return np.array(residuals, dtype=float).reshape(5,)
-            
+
             args_init = power_bal_init
             sol = root(power_balance, args_init, method='hybr')
 
@@ -164,15 +170,16 @@ class Unified_Thrust(Energy_Component):
             # Catch non-physical parameters and set manually
             if power_balance.mdot <= 0:
                 power_balance.mdotm = 0
-            
+
             if power_balance.PK <= 0:
                 power_balance.PK = 0
-            
+
             if Vjet <= Vinf[i]:
                 Vjet = Vinf[i]
 
             PKm_tot[i] = (1 - fL) * power_balance.PK
             PKe_tot[i] = fL * power_balance.PK
+            mdottot[i] = mdot
             mdotm_tot[i] = (1 - fL) * power_balance.mdot
             mdote_tot[i] = fL * power_balance.mdot
             Vjetm_tot[i] = power_balance.Vjet
@@ -207,12 +214,13 @@ class Unified_Thrust(Energy_Component):
         power = thrust * Vinf
 
         # pack outputs
-        self.outputs.thrust = thrust
-        self.outputs.power = PK_tot
-        self.outputs.mdot = mdot_fuel.reshape(nr_elements, 1)
-        self.outputs.Pbat = Pbat
-        self.outputs.PKm_tot = PKm_tot
-        self.outputs.PKe_tot = PKe_tot
+        self.outputs.thrust    = thrust
+        self.outputs.power     = PK_tot
+        self.outputs.mdot      = mdot_fuel.reshape(nr_elements, 1)
+        self.outputs.Pbat      = Pbat
+        self.outputs.PKm_tot   = PKm_tot
+        self.outputs.PKe_tot   = PKe_tot
+        self.outputs.mdottot   = mdottot
         self.outputs.mdotm_tot = mdotm_tot
         self.outputs.mdote_tot = mdote_tot
         self.outputs.Vjetm_tot = Vjetm_tot

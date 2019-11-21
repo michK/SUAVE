@@ -174,15 +174,16 @@ class Unified_Network(Propulsor):
         F            = F_vec
 
         #Pack the conditions for outputs
-        conditions.propulsion.PKm = thrust.outputs.PKm_tot
-        conditions.propulsion.PKe = thrust.outputs.PKe_tot
-        conditions.propulsion.mdotm = thrust.outputs.mdotm_tot
-        conditions.propulsion.mdote = thrust.outputs.mdote_tot
-        conditions.propulsion.Vjetm = thrust.outputs.Vjetm_tot
-        conditions.propulsion.Vjete = thrust.outputs.Vjete_tot
-        conditions.propulsion.eta_p = thrust.outputs.eta_p_tot
+        conditions.propulsion.PKm            = thrust.outputs.PKm_tot
+        conditions.propulsion.PKe            = thrust.outputs.PKe_tot
+        conditions.propulsion.mdottot        = thrust.outputs.mdottot
+        conditions.propulsion.mdotm          = thrust.outputs.mdotm_tot
+        conditions.propulsion.mdote          = thrust.outputs.mdote_tot
+        conditions.propulsion.Vjetm          = thrust.outputs.Vjetm_tot
+        conditions.propulsion.Vjete          = thrust.outputs.Vjete_tot
+        conditions.propulsion.eta_p          = thrust.outputs.eta_p_tot
         conditions.propulsion.battery_energy = battery.current_energy
-        conditions.propulsion.battery_draw = thrust.outputs.Pbat
+        conditions.propulsion.battery_draw   = thrust.outputs.Pbat
 
         results = Data()
         results.vehicle_mass_rate = mdot
