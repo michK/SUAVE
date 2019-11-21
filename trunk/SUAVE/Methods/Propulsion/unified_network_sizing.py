@@ -27,6 +27,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     nr_fans_elec = vehicle.nr_engines_elec
     nr_turbines = vehicle.nr_turbines
 
+    # FIXME Need to decide whether to use cruise/tot
     fL = vehicle.fL_cruise  # Size propulsors for cruise
     fS = vehicle.fS_cruise  # Size propulsors for cruise
 
@@ -38,7 +39,8 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     Pturb = unified_propsys_outputs[2]
     PMfan = unified_propsys_outputs[4]
 
-    propsys.mdot_cruise = vehicle.mdottot_cruise
+    # propsys.mdot_cruise = vehicle.mdottot_cruise
+    propsys.mdot_cruise = vehicle.mdottot  # FIXME Need to decide which one to use
 
     mdotm_tot = (1 - fL) * propsys.mdot_cruise
     mdote_tot = fL * propsys.mdot_cruise
@@ -46,15 +48,18 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
     # These have to be separate since they are not mutually dependent
     try:
         mdotm = mdotm_tot / nr_fans_mech
-        PMfan = PMfan / nr_fans_mech
     except ZeroDivisionError:
         mdotm = 0
-        PMfan = 0
 
     try:
         mdote = mdote_tot / nr_fans_elec
     except ZeroDivisionError:
         mdote = 0
+
+    try:
+        PMfan = PMfan / nr_fans_mech
+    except ZeroDivisionError:
+        PMfan = 0
 
     try:
         Pturb = Pturb / nr_turbines

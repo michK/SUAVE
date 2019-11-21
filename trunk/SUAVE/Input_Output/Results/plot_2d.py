@@ -27,7 +27,7 @@ def plot_2d(ax, filename, plot_vars_left, plot_vars_right=None):
         conv   = res["Converged"]
 
         if 0 in conv:
-            print("Warning: {} out of {} points in sweep did not converge".format(conv.count(0), len(conv)))
+            print("Warning: {} out of {} points in sweep did not converge".format(conv.tolist().count(0), len(conv.tolist())))
 
         ax.plot(x_data, y_data, 'b')
 

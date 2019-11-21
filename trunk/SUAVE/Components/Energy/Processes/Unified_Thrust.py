@@ -98,7 +98,7 @@ class Unified_Thrust(Energy_Component):
         Dpar           = self.inputs.Dpar
         Dpp_DP         = self.inputs.Dpp_DP
         fBLIe          = self.inputs.fBLIe
-        fBLIm          = self.inputs.fBLIm        
+        fBLIm          = self.inputs.fBLIm
         fsurf          = self.inputs.fsurf
         max_bat_power  = self.inputs.max_bat_power
         Cp             = self.inputs.Cp
