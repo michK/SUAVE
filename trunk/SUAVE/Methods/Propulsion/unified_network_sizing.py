@@ -71,7 +71,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
 
     if vehicle.cruise_mach <= 0.4:
         Afanm = Acapm
-        Afane = Acape
+        Afane = 1.5 * Acape
     else:
         mach_inlet = 0.4 + (vehicle.cruise_mach - 0.4) / 2
 
