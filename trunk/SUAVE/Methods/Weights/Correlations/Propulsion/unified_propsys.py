@@ -144,11 +144,18 @@ def unified_propsys(vehicle, weight_factor=1.0):
             except ZeroDivisionError:
                 mdote = 0.0
 
-            # These remain unchanged since there is only one of each
-            Pbat    = Pbat
-            Pgenmot = Pgenmot
-            Pconv   = Pconv
-            Plink   = Plink
+            try:
+                Pgenmot = Pgenmot / propsys.nr_engines_mech
+            except ZeroDivisionError:
+                Pgenmot = 0.0
+
+            try:
+                Pconv = Pconv / propsys.nr_engines_mech
+            except ZeroDivisionError:
+                Pconv = 0.0
+
+            # Remain unchanged since there is assumed  to be only one battery
+            Pbat = Pbat
 
             m_core = (1.67 * (Pturb / Units.hp)**0.803) * Units.lbs  # Raymer - p.323 (5th Ed.)
 

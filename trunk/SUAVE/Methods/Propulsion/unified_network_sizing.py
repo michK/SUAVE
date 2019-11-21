@@ -32,7 +32,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     nr_fans_elec = vehicle.nr_engines_elec
     nr_turbines = vehicle.nr_turbines
 
-    # FIXME Need to decide whether to use cruise/tot
+    # Size propulsors based on cruise
     fL = vehicle.fL_cruise  # Size propulsors for cruise
     fS = vehicle.fS_cruise  # Size propulsors for cruise
 
