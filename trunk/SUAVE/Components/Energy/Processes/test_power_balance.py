@@ -12,7 +12,7 @@ class TestPowerBalance(unittest.TestCase):
         numerics = Data()
 
         # Inputs from higher level
-        thrust.inputs.vertical_velocity = np.array([2000]) * Units['ft/min']
+        thrust.inputs.vertical_velocity = np.array([0]) * Units['ft/min']
         thrust.inputs.Vinf           = np.array([243.2236 * Units['m/s']])
         thrust.inputs.rho_inf        = np.array([0.38046])
         thrust.inputs.Dp             = np.array([30535])
@@ -20,7 +20,7 @@ class TestPowerBalance(unittest.TestCase):
         thrust.inputs.Dpp_DP         = thrust.inputs.Dpar / thrust.inputs.Dp
         thrust.inputs.nr_elements    = 1
         thrust.inputs.fS             = 0.001
-        thrust.inputs.fL             = 0.001
+        thrust.inputs.fL             = 0.999
         thrust.inputs.eta_propm      = 0.9
         thrust.inputs.eta_prope      = 0.9
         thrust.inputs.eta_th         = 0.5
@@ -36,7 +36,16 @@ class TestPowerBalance(unittest.TestCase):
         thrust.inputs.max_bat_power  = 1.350 * Units.MW
         thrust.inputs.Cp             = 0.256 * Units['kg/hr/kW']
         thrust.inputs.Cp_factor      = 1
-        thrust.inputs.power_bal_init = [10e6, 1000, 250, 250]
+        thrust.inputs.power_bal_init = [500e3, 500, 250, 0.8, 100e3]
+        Apropm = 2
+        Aprope = 2
+        thrust.inputs.nr_prop_m = 2
+        thrust.inputs.nr_prop_e = 4
+        Aperpropm = Apropm / thrust.inputs.nr_prop_m
+        Aperprope = Aprope / thrust.inputs.nr_prop_e
+        thrust.inputs.Dfan_m = np.sqrt(4 * Aperpropm / np.pi)
+        thrust.inputs.Dfan_e = np.sqrt(4 * Aperprope / np.pi)
+
 
         # Create custom conditions
         conditions = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
