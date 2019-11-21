@@ -71,12 +71,23 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
     obj       = np.zeros([number_of_points])
     PSEC      = np.zeros([number_of_points])
     mto       = np.zeros([number_of_points])
+    mdottot   = np.zeros([number_of_points])
+    PKtot     = np.zeros([number_of_points])
 
     # Create inputs matrix
     inputs[0,:] = np.linspace(bnd[idx0][0], bnd[idx0][1], number_of_points)
 
     # Initialize results dictionary
     res = dict()
+
+    # Check if file exists - For now this only works with serial runs
+    # filepath = os.path.join(os.path.expanduser('.'), 'Data',datafile)
+    # if os.path.exists(filepath):
+    #     q = input("This data file already exists, do you want to overwrite it? :")
+    #     if q in ['YES', 'yes', 'y', 'Y']:
+    #         pass
+    #     else:
+    #         raise FileExistsError("This file already exists and you chose not to overwrite it")
 
     # Create file to write results into
     data_path = os.path.join(os.path.expanduser('.'), 'Data',datafile)
@@ -87,7 +98,7 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
         opt_prob.inputs[idx0][2] = (inputs[0,i], inputs[0,i])
         problem.optimization_problem = opt_prob
         sol = pyoptsparse_setup.Pyoptsparse_Solve(
-            problem, solver='SNOPT', FD='parallel', sense_step=1e-06)
+            problem, solver='SNOPT', FD='parallel', sense_step=1e-06, is_Sweep=True)
         obj[i] = problem.objective() * obj_scaling
         PSEC[i] = problem.summary.PSEC
 
@@ -98,6 +109,12 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
 
         # Extract parameters from problem
         mto[i] = problem.vehicle_configurations.base.mass_properties.max_takeoff
+        mdottot[i] = problem.vehicle_configurations.base.mdottot
+        PKtot[i] = problem.vehicle_configurations.base.PKtot
+
+        # Delete history file
+        # if os.path.exists(os.path.join(os.path.expanduser('.'), 'snopt.hist')):
+            # os.remove('snopt.hist')
 
     # Populate results dictionary
     res["Input"] = inputs[0,:]
@@ -105,6 +122,9 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
     res["PSEC"] = PSEC
     res["Converged"] = converged
     res["Mto"] = mto
+    res["mdottot"] = mdottot
+    res["PKtot"] = PKtot
+
     # Write results dictionary to file
     pickle.dump(res, open(data_path, "wb"))
 
