@@ -44,7 +44,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     Pturb = unified_propsys_outputs[2]
     PMfan = unified_propsys_outputs[4]
 
-    mdottot = vehicle.mdottot  # FIXME Need to decide which one to use
+    mdottot = vehicle.mdottot
 
     mdotm_tot = (1 - fL) * mdottot
     mdote_tot = fL * mdottot
