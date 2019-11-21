@@ -10,7 +10,7 @@ import numpy as np
 
 from SUAVE.Methods.Power_Balance.calculate_powers import calculate_powers
 
-def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
+def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     """
     This function takes the total mass flow through all propulsors
     and sizes the fans appropriately, based on the number of propulsors
@@ -21,6 +21,11 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.5):
         propsys - Propulsion system model
         vehicle - Vehicle model
         f_KED_wing - Fraction of wing kinetic energy defect relative to full aircraft
+                     For top surface only: 80% of total wing defect
+                     For bottom surface only: 20% of total wing defect
+                     Default value assumes 50% of airframe defect from
+                     wing, and propulsors mounted on top surface only,
+                     thus f_KED_wing = 0.8 * 0.5  = 0.4
     """
 
     nr_fans_mech = vehicle.nr_engines_mech
