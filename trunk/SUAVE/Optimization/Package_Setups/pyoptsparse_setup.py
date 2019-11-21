@@ -17,7 +17,7 @@ from SUAVE.Optimization import helper_functions as help_fun
 # ----------------------------------------------------------------------
 
 ## @ingroup Optimization-Package_Setups
-def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  nonderivative_line_search=False):
+def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  nonderivative_line_search=False, is_Sweep=False):
     """ This converts your SUAVE Nexus problem into a PyOptsparse optimization problem and solves it.
         Pyoptsparse has many algorithms, they can be switched out by using the solver input.
 
@@ -106,7 +106,8 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
         opt = pyOpt.SNOPT()
         CD_step = (sense_step**2.)**(1./3.)  # based on SNOPT Manual Recommendations
         func_prec = 1e-6
-        opt.setOption('Problem Type', 'Minimize')  # 'Minimize' or 'Maximize', or 'Feasible point'
+        opt.setOption('Problem Type', 'Minimize')  # 'Minimize'/'Maximize'/'Feasible point'
+        opt.setOption('Major iterations limit', 20)
         opt.setOption('Major optimality tolerance', 1e-3)
         opt.setOption('Major feasibility tolerance', func_prec)
         opt.setOption('Minor feasibility tolerance', func_prec)
@@ -156,7 +157,10 @@ def Pyoptsparse_Solve(problem, solver='SNOPT', FD='single', sense_step=1.0E-6,  
         opt.setOption('Nonderivative linesearch')
 
     # Set output
-    if (solver == 'SNOPT') and (FD == 'parallel'):
+    if (solver == 'SNOPT') and (FD == 'parallel') and (is_Sweep == True):
+        outputs = opt(opt_prob, sens='FD', sensMode='pgc', sensStep = sense_step, storeHistory='snopt.hist')
+
+    elif (solver == 'SNOPT') and (FD == 'parallel'):
         outputs = opt(opt_prob, sens='FD', sensMode='pgc', sensStep = sense_step, storeHistory='snopt.hist')
 
     elif FD == 'parallel':
