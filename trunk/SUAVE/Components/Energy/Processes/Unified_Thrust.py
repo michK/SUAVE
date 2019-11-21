@@ -82,6 +82,8 @@ class Unified_Thrust(Energy_Component):
         nr_prop_e      = self.inputs.nr_prop_e
         Dfan_m         = self.inputs.Dfan_m
         Dfan_e         = self.inputs.Dfan_e
+        Acapm          = self.inputs.Acapm
+        Acape          = self.inputs.Acape
         hdot           = self.inputs.vertical_velocity
         nr_elements    = self.inputs.nr_elements
         fS             = self.inputs.fS
@@ -128,11 +130,7 @@ class Unified_Thrust(Energy_Component):
         # Compute overall fBLI
         fBLI = fBLIm + fBLIe
         # Compute total jet area
-        Ajet_m = 0.6 * nr_prop_m * (np.pi / 4 * Dfan_m**2)
-        Ajet_e = 0.6 * nr_prop_e * (np.pi / 4 * Dfan_e**2)
-        # Ajet_m = 0.6 * nr_prop_m * Afanm
-        # Ajet_e = 0.6 * nr_prop_e * Afane
-        Ajet = Ajet_m + Ajet_e
+        Ajet = 0.6 * (Acapm + Acape)
 
         for i in range(nr_elements):
             def power_balance(params):

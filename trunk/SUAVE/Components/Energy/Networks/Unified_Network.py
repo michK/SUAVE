@@ -93,8 +93,10 @@ class Unified_Network(Propulsor):
         # Unpack inputs
         nr_fans_mech   = self.nr_engines_mech
         nr_fans_elec   = self.nr_engines_elec
-        Dfan_m         = self.mech_fan_dia 
+        Dfan_m         = self.mech_fan_dia
         Dfan_e         = self.elec_fan_dia
+        Acapm          = self.Acapm
+        Acape          = self.Acape
         fL             = self.fL
         fS             = self.fS
         fBLIe          = self.fBLIe
@@ -132,6 +134,8 @@ class Unified_Network(Propulsor):
         thrust.inputs.nr_prop_e         = nr_fans_elec
         thrust.inputs.Dfan_m            = Dfan_m
         thrust.inputs.Dfan_e            = Dfan_e
+        thrust.inputs.Acapm             = Acapm
+        thrust.inputs.Acape             = Acape
         thrust.inputs.vertical_velocity = - conditions.frames.inertial.velocity_vector[:,2]
         thrust.inputs.fS                = fS
         thrust.inputs.fL                = fL

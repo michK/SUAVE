@@ -44,13 +44,19 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     Pturb = unified_propsys_outputs[2]
     PMfan = unified_propsys_outputs[4]
 
-    # propsys.mdot_cruise = vehicle.mdottot_cruise
-    propsys.mdot_cruise = vehicle.mdottot  # FIXME Need to decide which one to use
+    mdottot = vehicle.mdottot  # FIXME Need to decide which one to use
 
-    mdotm_tot = (1 - fL) * propsys.mdot_cruise
-    mdote_tot = fL * propsys.mdot_cruise
+    mdotm_tot = (1 - fL) * mdottot
+    mdote_tot = fL * mdottot
 
-    # These have to be separate since they are not mutually dependent
+    # Calculate total required capture area
+    Acap = 0.00515 * mdottot
+
+    # Divide between mechanical and electrical streams based on fL
+    propsys.Acapm = Acapm = (1 - fL) * Acap
+    propsys.Acape = Acape = fL * Acap
+
+    # Catch zero division errors in case propulsors don't exist
     try:
         mdotm = mdotm_tot / nr_fans_mech
     except ZeroDivisionError:
@@ -71,20 +77,31 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     except ZeroDivisionError:
         Pturb = 0
 
-    Acapm = 0.00515 * mdotm  # Raymer Chapter 10.3.4 for M <= 0.8
-    Acape = 0.00515 * mdote
-
     if vehicle.cruise_mach <= 0.4:
-        Afanm = Acapm
-        Afane = 1.5 * Acape
+        # Divide between individual propulsors
+        try:
+            Afanm =  Acapm / nr_fans_mech
+        except ZeroDivisionError:
+            Afanm = 0
+        try:
+            Afane =  Acape / nr_fans_elec
+        except ZeroDivisionError:
+            Afane = 0
     else:
         mach_inlet = 0.4 + (vehicle.cruise_mach - 0.4) / 2
 
         A_Astar_inlet = 1 / mach_inlet * ((1 + 0.2 * mach_inlet**2) / 1.2)**3
         A_Astar_face = 1 / 0.4 * ((1 + 0.2 * 0.4**2) / 1.2)**3
+        A_A = A_Astar_inlet / A_Astar_face
 
-        Afanm = Acapm / (A_Astar_inlet / A_Astar_face)
-        Afane = Acape / (A_Astar_inlet / A_Astar_face)
+        try:
+            Afanm = Acapm / A_A / nr_fans_mech
+        except ZeroDivisionError:
+            Afanm = 0
+        try:
+            Afane = Acape / A_A / nr_fans_elec
+        except ZeroDivisionError:
+            Afane = 0
 
     #########################
     # Mechanical propulsors #
@@ -117,7 +134,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
         propsys.nacelle_length_mech = 1.5 * propsys.mech_nac_dia
         if vehicle.external_turb:
             propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
-        else:
+        else: # If the mech system is turbine only housed inside the aircraft
             propsys.areas_wetted_mech = 0
 
     #########################
@@ -131,7 +148,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     propsys.nacelle_length_elec = 1.5 * propsys.elec_nac_dia
 
     # Wetted areas
-    propsys.areas_wetted_elec = 1.1 * 0.5 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
+    propsys.areas_wetted_elec = 0.5 * 1.1 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
 
     # Update BLI amounts
     wingspan_projected = vehicle.wings.main_wing.spans.projected
