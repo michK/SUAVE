@@ -66,6 +66,8 @@ def print_weight_breakdown(config,filename = 'weight_breakdown.dat'):
         fid.write( ' Maximum Fuel Weight ............ : ' + str( '%8.0F' % mass_properties.max_fuel)       + ' kg\n')
     if mass_properties.max_payload:
         fid.write( ' Maximum Payload Weight ......... : ' + str( '%8.0F' % mass_properties.max_payload)    + ' kg\n')
+    if mass_properties.mass_fuel:
+        fid.write( ' Fuel Weight .................... : ' + str( '%8.0F' % mass_properties.mass_fuel)      + ' kg\n')
     if mass_properties.mass_bat:
         fid.write( ' Battery Weight ................. : ' + str( '%8.0F' % mass_properties.mass_bat)       + ' kg\n')
     fid.write('\n')
