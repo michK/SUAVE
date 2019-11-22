@@ -47,4 +47,4 @@ def plot_2d_s(ax, filename, plot_vars_left, plot_vars_right=None):
 
             ax2.plot(x_data, y_data)
 
-    return ax, ax2
+        return ax, ax2
