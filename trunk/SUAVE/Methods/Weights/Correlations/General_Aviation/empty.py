@@ -178,9 +178,10 @@ def empty(vehicle):
     m_zf        = mto - fuel.mass_properties.mass
     q_c         = vehicle.design_dynamic_pressure
     mach_number = vehicle.design_mach_number
+    wt_empty_factor = vehicle.wt_empty_factor
 
     propulsor_name = list(vehicle.propulsors.keys())[0] # Obtain the key for the propulsor for assignment purposes
-    propulsors     = vehicle.propulsors[propulsor_name]   
+    propulsors     = vehicle.propulsors[propulsor_name]
 
     if propulsor_name == 'turbofan':
         num_eng                          = propulsors.number_of_engines
@@ -326,7 +327,7 @@ def empty(vehicle):
 
     # Calculate the equipment empty weight of the aircraft
 
-    wt_empty           = (m_wing + wt_fuselage + wt_landing_gear.main + wt_landing_gear.nose + wt_propulsion + output_2.wt_systems + \
+    wt_empty           = wt_empty_factor * (m_wing + wt_fuselage + wt_landing_gear.main + wt_landing_gear.nose + wt_propulsion + output_2.wt_systems + \
                           wt_tail_horizontal + output_3.wt_tail_vertical)
     vehicle.fuselages['fuselage'].mass_properties.mass = wt_fuselage
 
