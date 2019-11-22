@@ -50,7 +50,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     mdote_tot = fL * mdottot
 
     # Calculate total required capture area
-    Acap = 0.00515 / 0.6 * mdottot
+    Acap = 1.66666667 * (0.00515 * mdottot)
 
     # Divide between mechanical and electrical streams based on fL
     propsys.Acapm = Acapm = (1 - fL) * Acap
