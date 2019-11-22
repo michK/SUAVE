@@ -88,9 +88,9 @@ def unified_propsys(vehicle, weight_factor=1.0):
             Kcore  = 45.605
             Kfan = 1.3
             c_core = 400.0 * Units['kJ/kg']
-            pm_mot = propsys.pm_mot * Units['kW/kg']
-            pm_pe  = propsys.pm_pe * Units['kW/kg']
-            pm_tms = propsys.pm_tms * Units['kW/kg']
+            pm_mot = propsys.pm_mot # * Units['kW/kg']
+            pm_pe  = propsys.pm_pe  # * Units['kW/kg']
+            pm_tms = propsys.pm_tms # * Units['kW/kg']
 
             # Constants
             # Assumed efficiencies
@@ -114,45 +114,33 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Pgenmot = abs(Plink) / eta_mot / eta_pe
                 Pconv = abs(Plink) / eta_mot
 
-            # Split power between different components for proper sizing, catching missing propulsors
-            try:
-                PfanM  = PfanM / propsys.nr_engines_mech
-            except ZeroDivisionError:
-                PfanM  = 0.0
+            # Split power between different components for proper sizing
+            if propsys.nr_engines_mech >= 1:
+                PfanM   = PfanM   / propsys.nr_engines_mech
+                mdotm   = mdotm   / propsys.nr_engines_mech
+                Pgenmot = Pgenmot / propsys.nr_engines_mech
+                Pconv   = Pconv   / propsys.nr_engines_mech
+            else:
+                PfanM   = 0
+                mdotm   = 0
+                Pgenmot = 0
+                Pconv   = 0
 
-            try:
-                Pturb  = Pturb / propsys.nr_turbines
-            except ZeroDivisionError:
-                Pturb  = 0.0
+            if propsys.nr_turbines >= 1:
+                Pturb = Pturb / propsys.nr_turbines
+            else:
+                Pturb = 0
 
-            try:
+            if propsys.nr_engines_elec >= 1:
                 PfanE  = PfanE / propsys.nr_engines_elec
                 Pmot   = Pmot  / propsys.nr_engines_elec
                 Pinv   = Pinv  / propsys.nr_engines_elec
-            except ZeroDivisionError:
-                PfanE  = 0.0
-                Pmot   = 0.0
-                Pinv   = 0.0
-
-            try:
-                mdotm = mdotm / propsys.nr_engines_mech
-            except ZeroDivisionError:
-                mdotm = 0.0
-
-            try:
-                mdote = mdote / propsys.nr_engines_elec
-            except ZeroDivisionError:
-                mdote = 0.0
-
-            try:
-                Pgenmot = Pgenmot / propsys.nr_engines_mech
-            except ZeroDivisionError:
-                Pgenmot = 0.0
-
-            try:
-                Pconv = Pconv / propsys.nr_engines_mech
-            except ZeroDivisionError:
-                Pconv = 0.0
+                mdote  = mdote / propsys.nr_engines_elec
+            else:
+                PfanE = 0
+                Pmot  = 0
+                Pinv  = 0
+                mdote = 0
 
             # Remain unchanged since there is assumed  to be only one battery
             Pbat = Pbat

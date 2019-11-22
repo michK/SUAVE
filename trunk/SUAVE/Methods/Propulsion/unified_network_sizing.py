@@ -57,36 +57,35 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     propsys.Acape = Acape = fL * Acap
 
     # Catch zero division errors in case propulsors don't exist
-    try:
+    if nr_fans_mech >= 1:
         mdotm = mdotm_tot / nr_fans_mech
-    except ZeroDivisionError:
+        PMfan = PMfan     / nr_fans_mech
+    else:
         mdotm = 0
-
-    try:
-        mdote = mdote_tot / nr_fans_elec
-    except ZeroDivisionError:
-        mdote = 0
-
-    try:
-        PMfan = PMfan / nr_fans_mech
-    except ZeroDivisionError:
         PMfan = 0
 
-    try:
+    if nr_fans_elec >= 1:
+        mdote = mdote_tot / nr_fans_elec
+    else:
+        mdote = 0
+
+    if nr_turbines >= 1:
         Pturb = Pturb / nr_turbines
-    except ZeroDivisionError:
+    else:
         Pturb = 0
 
     if vehicle.cruise_mach <= 0.4:
         # Divide between individual propulsors
-        try:
+        if nr_fans_mech >= 1:
             Afanm =  Acapm / nr_fans_mech
-        except ZeroDivisionError:
+        else:
             Afanm = 0
-        try:
-            Afane =  Acape / nr_fans_elec
-        except ZeroDivisionError:
+
+        if nr_fans_elec >= 1:
+            Afane = Acape / nr_fans_elec
+        else:
             Afane = 0
+
     else:
         mach_inlet = 0.4 + (vehicle.cruise_mach - 0.4) / 2
 
@@ -94,13 +93,14 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
         A_Astar_face = 1 / 0.4 * ((1 + 0.2 * 0.4**2) / 1.2)**3
         A_A = A_Astar_inlet / A_Astar_face
 
-        try:
+        if nr_fans_mech >= 1:
             Afanm = Acapm / A_A / nr_fans_mech
-        except ZeroDivisionError:
+        else:
             Afanm = 0
-        try:
+
+        if nr_fans_elec >= 1:
             Afane = Acape / A_A / nr_fans_elec
-        except ZeroDivisionError:
+        else:
             Afane = 0
 
     #########################
