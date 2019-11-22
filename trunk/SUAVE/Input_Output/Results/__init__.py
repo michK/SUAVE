@@ -9,4 +9,5 @@ from .print_weights import print_weight_breakdown
 from .print_unified_system_info import print_unified_system_info
 from .print_SNOPT_summary import print_SNOPT_summary
 from .identify_architecture import identify_arch
-from .plot_2d import plot_2d
+from .plot_2d_s import plot_2d_s
+from .plot_2d_m import plot_2d_m
