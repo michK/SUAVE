@@ -88,7 +88,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
         propsys.mech_nac_dia = Dfanm / 0.8  # Raymer Chapter 10.3.4 for M <= 0.8
         propsys.nacelle_length_mech = 1.5 * propsys.mech_nac_dia
         if vehicle.external_turb:
-            propsys.areas_wetted_mech = 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
+            propsys.areas_wetted_mech = (1 - fL) * 1.1 * propsys.nacelle_length_mech * np.pi * propsys.mech_nac_dia
         else: # If the mech system is turbine only housed inside the aircraft
             propsys.areas_wetted_mech = 0
 
@@ -103,7 +103,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     propsys.nacelle_length_elec = 1.5 * propsys.elec_nac_dia
 
     # Wetted areas
-    propsys.areas_wetted_elec = 0.5 * 1.1 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
+    propsys.areas_wetted_elec = fL * 0.5 * 1.1 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
 
     # Divide between mechanical and electrical streams based on fL
     Acap = (nr_fans_mech * np.pi/4 * Dfanm**2) + (nr_fans_elec * np.pi/4 * Dfane**2)
