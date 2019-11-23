@@ -173,8 +173,12 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Wec  = 2.331 * Weng**0.901 * Kp * Ktr
                 Nen  = 1
                 Sn   = propsys.areas_wetted_mech / Units['ft^2']
-                m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
-                    Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+                try:
+                    m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                        Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+                except AttributeError:
+                    m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                        Wec**0.611 * Nen**0.984 * Sn**0.224) * Units.lbs  # Raymer - p.589 (5th Ed.)
             else: # Turbofan mechanical propulsors
                 # Fan weights
                 m_fanm = 0.1902 * (mdotm / Units['lbs/s'])**1.143 * (1351/1000)**2 * (1 - 0.406**2) * Units.lbs  # From Waters, 1997
