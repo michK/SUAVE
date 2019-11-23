@@ -102,7 +102,8 @@ def pareto_sweep(problem, print_PSEC, number_of_points, sweep_index, datafile='d
         obj[i] = problem.objective() * obj_scaling
         PSEC[i] = problem.summary.PSEC
 
-        if print_SNOPT_summary('/home/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):
+        if print_SNOPT_summary('/home/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):  # Work machine
+        # if print_SNOPT_summary('/Users/michael/Dropbox/PhD/Research/Codes/CADA/CADA/Commuter/SNOPT_summary.out'):  # Mac book
             converged[i] = 1
         else:
             converged[i] = 0
