@@ -196,8 +196,12 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Wec  = 2.331 * Weng**0.901 * Kp * Ktr
                 Nen  = 1  # Weight per engine
                 Sn   = propsys.areas_wetted_mech / Units['ft^2']
-                m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
-                    Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+                try:
+                    m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                        Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+                except AttributeError:
+                    m_nacm = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                        Wec**0.611 * Nen**0.984 * Sn**0.224) * Units.lbs  # Raymer - p.589 (5th Ed.)
 
             #######################################
             # Electrical propulsors - Podded fans #
@@ -215,8 +219,12 @@ def unified_propsys(vehicle, weight_factor=1.0):
             Wec  = 2.331 * Weng**0.901 * Kp * Ktr
             Nen  = 1  # Weight per engine
             Sn   = propsys.areas_wetted_elec / Units['ft^2']
-            m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
-                Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+            try:
+                m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                    Wec**0.611 * Nen**0.984 * Sn**0.224).sum() * Units.lbs  # Raymer - p.589 (5th Ed.)
+            except AttributeError:
+                m_nace = (0.6724 * Kng * NLt**0.1 * Nw**0.294 * Nz**0.119 *
+                    Wec**0.611 * Nen**0.984 * Sn**0.224) * Units.lbs  # Raymer - p.589 (5th Ed.)
 
             # Thermal management system
             q_bat  = (1.0 - eta_bat) * Pbat
