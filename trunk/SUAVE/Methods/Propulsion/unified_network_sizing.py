@@ -49,13 +49,6 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     mdotm_tot = (1 - fL) * mdottot
     mdote_tot = fL * mdottot
 
-    # Calculate total required capture area
-    Acap = 1.66666667 * (0.00515 * mdottot)
-
-    # Divide between mechanical and electrical streams based on fL
-    propsys.Acapm = Acapm = (1 - fL) * Acap
-    propsys.Acape = Acape = fL * Acap
-
     # Catch zero division errors in case propulsors don't exist
     if nr_fans_mech >= 1:
         mdotm = mdotm_tot / nr_fans_mech
@@ -74,50 +67,12 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     else:
         Pturb = 0
 
-    if vehicle.cruise_mach <= 0.4:
-        # Divide between individual propulsors
-        if nr_fans_mech >= 1:
-            Afanm =  Acapm / nr_fans_mech
-        else:
-            Afanm = 0
-
-        if nr_fans_elec >= 1:
-            Afane = Acape / nr_fans_elec
-        else:
-            Afane = 0
-
-    else:
-        mach_inlet = 0.4 + (vehicle.cruise_mach - 0.4) / 2
-
-        A_Astar_inlet = 1 / mach_inlet * ((1 + 0.2 * mach_inlet**2) / 1.2)**3
-        A_Astar_face = 1 / 0.4 * ((1 + 0.2 * 0.4**2) / 1.2)**3
-        A_A = A_Astar_inlet / A_Astar_face
-
-        if nr_fans_mech >= 1:
-            Afanm = Acapm / A_A / nr_fans_mech
-        else:
-            Afanm = 0
-
-        if nr_fans_elec >= 1:
-            Afane = Acape / A_A / nr_fans_elec
-        else:
-            Afane = 0
-
     #########################
     # Mechanical propulsors #
     #########################
     # Mechanical fan
-    if vehicle.is_turboprop:
-        if vehicle.prop_nr_blades == 2:
-            Kp_prop = 0.56
-        elif vehicle.prop_nr_blades == 3:
-            Kp_prop = 0.52
-        elif vehicle.prop_nr_blades >= 4:
-            Kp_prop = 0.49
-        vehicle.prop_diameter = Kp_prop * (PMfan / 1000)**(1/4)  # Raymer - p.315 (5th Ed.)
-        propsys.prop_diameter = propsys.mech_fan_dia = Dfanm = vehicle.prop_diameter
-    else:
-        propsys.mech_fan_dia = Dfanm = np.sqrt(4 * Afanm / np.pi)
+    vehicle.prop_diameter = vehicle.Dfanm
+    propsys.prop_diameter = propsys.mech_fan_dia = Dfanm = vehicle.prop_diameter
 
     # Mechanical nacelle
     if vehicle.is_turboprop:
@@ -141,7 +96,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     # Electrical propulsors #
     #########################
     # Electrical fan
-    propsys.elec_fan_dia = Dfane = np.sqrt(4 * Afane / np.pi)
+    propsys.elec_fan_dia = Dfane = vehicle.Dfanm
 
     # Electrical nacelle
     propsys.elec_nac_dia = Dfane / 0.8
@@ -149,6 +104,11 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
 
     # Wetted areas
     propsys.areas_wetted_elec = 0.5 * 1.1 * propsys.nacelle_length_elec * np.pi * propsys.elec_nac_dia
+
+    # Divide between mechanical and electrical streams based on fL
+    Acap = (nr_fans_mech * np.pi/4 * Dfanm**2) + (nr_fans_elec * np.pi/4 * Dfane**2)
+    propsys.Acapm = (1 - fL) * Acap
+    propsys.Acape = fL * Acap
 
     # Update BLI amounts
     wingspan_projected = vehicle.wings.main_wing.spans.projected
