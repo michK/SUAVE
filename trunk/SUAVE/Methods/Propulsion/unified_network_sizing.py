@@ -49,6 +49,11 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     mdotm_tot = (1 - fL) * mdottot
     mdote_tot = fL * mdottot
 
+    # Determine size of propulsors to cover 80% of upper wing surface
+    wingspan_projected = vehicle.wings.main_wing.spans.projected
+    fuselage_effective_diameter = vehicle.fuselages.fuselage.effective_diameter
+    span_coverable = 0.8 * (wingspan_projected - fuselage_effective_diameter)
+
     # Catch zero division errors in case propulsors don't exist
     if nr_fans_mech >= 1:
         mdotm = mdotm_tot / nr_fans_mech
@@ -96,8 +101,11 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     # Electrical propulsors #
     #########################
     # Electrical fan
-    propsys.elec_fan_dia = Dfane = vehicle.Dfanm
-
+    if vehicle.specify_Dfane is True:
+        propsys.elec_fan_dia = Dfane = vehicle.Dfane
+    else:
+        propsys.elec_fan_dia = Dfane = 0.8 * span_coverable / nr_fans_elec  # 0.8 factor to account for nacelle
+                                                                            # that is wider than fan
     # Electrical nacelle
     propsys.elec_nac_dia = Dfane / 0.8
     propsys.nacelle_length_elec = 1.5 * propsys.elec_nac_dia
@@ -111,8 +119,6 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     propsys.Acape = fL * Acap
 
     # Update BLI amounts
-    wingspan_projected = vehicle.wings.main_wing.spans.projected
-    fuselage_effective_diameter = vehicle.fuselages.fuselage.effective_diameter
     propsys.fBLIe = f_KED_wing * (nr_fans_elec * propsys.elec_nac_dia) / (wingspan_projected - fuselage_effective_diameter)
     # Print warning if propulsors cannot fit on wings
     if (nr_fans_elec * propsys.elec_nac_dia) > (wingspan_projected - fuselage_effective_diameter):
