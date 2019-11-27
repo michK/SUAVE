@@ -11,7 +11,7 @@ import pickle
 from cycler import cycler
 
 
-def plot_2d_m(ax, files, plot_vars, normalize_by=None, scale_by=1):
+def plot_2d_m(ax, files, plot_vars, is_relative=None):
     """
     Create 2D plot of data stored in specified data files
 
@@ -35,11 +35,10 @@ def plot_2d_m(ax, files, plot_vars, normalize_by=None, scale_by=1):
             if 0 in conv:
                 print("Warning: {} out of {} points in sweep did not converge".format(conv.tolist().count(0), len(conv.tolist())))
 
-            if normalize_by is None:
-                ax.plot(x_data, y_data*scale_by)
+            if is_relative is None:
+                ax.plot(x_data, y_data)
             else:
-                norm_data = pickle.load(open(normalize_by[0], "rb"))
-                norm_var = norm_data[normalize_by[1]]
-                ax.plot(x_data, y_data/norm_var*scale_by)
+                norm_rel = is_relative
+                ax.plot(x_data, (y_data - norm_rel)/y_data*100)
 
     return ax

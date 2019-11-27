@@ -119,7 +119,7 @@ def unified_network_sizing(propsys, vehicle, f_KED_wing=0.4):
     propsys.Acape = fL * Acap
 
     # Update BLI amounts
-    propsys.fBLIe = f_KED_wing * (nr_fans_elec * propsys.elec_nac_dia) / (wingspan_projected - fuselage_effective_diameter)
+    propsys.fBLIe = fL * f_KED_wing * (nr_fans_elec * propsys.elec_nac_dia) / (wingspan_projected - fuselage_effective_diameter)
     # Print warning if propulsors cannot fit on wings
     if (nr_fans_elec * propsys.elec_nac_dia) > (wingspan_projected - fuselage_effective_diameter):
         raise ValueError("Number of electric propulsors cannot fit on wing")
