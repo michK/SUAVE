@@ -11,3 +11,4 @@ from .print_SNOPT_summary import print_SNOPT_summary
 from .identify_architecture import identify_arch
 from .plot_2d_s import plot_2d_s
 from .plot_2d_m import plot_2d_m
+from .plot_3d import plot_3d
