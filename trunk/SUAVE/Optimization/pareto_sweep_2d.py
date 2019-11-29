@@ -16,13 +16,14 @@ from SUAVE.Input_Output.Results import print_SNOPT_summary
 import numpy as np
 import pickle
 import os
+import sys
 
 # ----------------------------------------------------------------------
 #  pareto_sweep_2d
 # ----------------------------------------------------------------------
 
 
-def pareto_sweep_2d(problem, print_PSEC, number_of_points, sweep_index_0, sweep_index_1, datafile='data.out'):
+def pareto_sweep_2d(problem, number_of_points, sweep_index_0, sweep_index_1, datafile='data.resdat'):
     """
     Takes in an optimization problem and runs a Pareto sweep of the sweep indexes sweep_index_0 and sweep_index_1.
     i.e. sweep_index_0=0,weep_index_2=1 means you want to sweep the first 2 indexes to draw a carpet plot of the cost function
@@ -120,6 +121,8 @@ def pareto_sweep_2d(problem, print_PSEC, number_of_points, sweep_index_0, sweep_
             mto[i,j] = problem.vehicle_configurations.base.mass_properties.max_takeoff
             mdottot[i,j] = problem.vehicle_configurations.base.mdottot
             PKtot[i,j] = problem.vehicle_configurations.base.PKtot
+            # print(problem)
+            # sys.exit()
 
         # Delete history file
         # if os.path.exists(os.path.join(os.path.expanduser('.'), 'snopt.hist')):

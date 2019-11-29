@@ -32,9 +32,10 @@ def plot_3d(ax, filename, sweepvar_0, sweepvar_1, plotvar, is_relative=None):
         print("Warning: some points in sweep did not converge")
 
     if is_relative == None:
-        CS = ax.contourf(XX, YY, res["PSEC"], cmap=plt.cm.bwr)
+        CS = ax.contourf(XX, YY, np.rot90(res[plotvar],axes=(1,0)), cmap=plt.cm.bwr)
     else:
         norm_rel = is_relative
-        CS = ax.contourf(XX, YY, res["PSEC"] / norm_rel * 100, cmap=plt.cm.bwr)
+        val = np.rot90((res[plotvar] - norm_rel) / res[plotvar] * 100, axes=(1,0))
+        CS = ax.contourf(XX, YY, val, cmap=plt.cm.bwr)
 
     return ax, CS
