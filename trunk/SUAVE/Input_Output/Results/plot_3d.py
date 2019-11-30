@@ -36,6 +36,7 @@ def plot_3d(ax, filename, sweepvar_0, sweepvar_1, plotvar, is_relative=None):
     else:
         norm_rel = is_relative
         val = np.rot90((res[plotvar] - norm_rel) / res[plotvar] * 100, axes=(1,0))
+        # val = np.transpose((res[plotvar] - norm_rel) / res[plotvar] * 100)
         CS = ax.contourf(XX, YY, val, cmap=plt.cm.bwr)
 
     return ax, CS
