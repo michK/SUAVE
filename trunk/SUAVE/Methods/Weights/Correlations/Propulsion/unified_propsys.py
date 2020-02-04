@@ -134,6 +134,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
             if propsys.nr_engines_elec >= 1:
                 PfanE  = PfanE / propsys.nr_engines_elec
                 Pmot   = Pmot  / propsys.nr_engines_elec
+                print("Pmot : {}".format(Pmot))
                 Pinv   = Pinv  / propsys.nr_engines_elec
                 mdote  = mdote / propsys.nr_engines_elec
             else:
@@ -142,7 +143,7 @@ def unified_propsys(vehicle, weight_factor=1.0):
                 Pinv  = 0
                 mdote = 0
 
-            # Remain unchanged since there is assumed  to be only one battery
+            # Remain unchanged since there is assumed to be only one battery
             Pbat = Pbat
 
             m_core = (1.67 * (Pturb / Units.hp)**0.803) * Units.lbs  # Raymer - p.323 (5th Ed.)

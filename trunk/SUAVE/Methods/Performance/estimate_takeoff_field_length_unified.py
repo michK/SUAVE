@@ -2,7 +2,7 @@
 # estimate_balanced_field_length.py
 #
 # Created: June 2019, M. Kruger
-# Modified: 
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -42,7 +42,7 @@ def estimate_takeoff_field_length_unified(vehicle, analyses, results, airport, o
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -62,10 +62,10 @@ def estimate_takeoff_field_length_unified(vehicle, analyses, results, airport, o
     # ==============================================
     atmo_values       = atmo.compute_values(altitude,delta_isa)
     conditions        = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
-    
+
     rho = atmo_values.density
     sea_level_gravity = atmo.planet.sea_level_gravity
-    
+
     # ==============================================
     # Determining vehicle maximum lift coefficient
     # ==============================================

@@ -35,7 +35,7 @@ def thrust_weight_climb(vehicle, results, analyses, rate_of_climb):
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -52,7 +52,7 @@ def thrust_weight_climb(vehicle, results, analyses, rate_of_climb):
     # ==============================================
     atmo_values       = atmo.compute_values(0, 0)
     conditions        = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
-    
+
     rho = atmo_values.density
 
     # ==============================================
