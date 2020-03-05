@@ -134,7 +134,6 @@ def unified_propsys(vehicle, weight_factor=1.0):
             if propsys.nr_engines_elec >= 1:
                 PfanE  = PfanE / propsys.nr_engines_elec
                 Pmot   = Pmot  / propsys.nr_engines_elec
-                print("Pmot : {}".format(Pmot))
                 Pinv   = Pinv  / propsys.nr_engines_elec
                 mdote  = mdote / propsys.nr_engines_elec
             else:

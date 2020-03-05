@@ -1,5 +1,5 @@
 ## @ingroup Input_Output-Results
-# print_unified_system_weights.py 
+# print_unified_system_weights.py
 
 # Created: M. Kruger
 # Updated:
@@ -91,4 +91,4 @@ def print_unified_system_info(vehicle, filename = 'unified_sys_info.dat'):
 #   Module Test
 # ----------------------------------------------------------------------
 if __name__ == '__main__':
-    print(' Error: No test defined ! ')    
+    print(' Error: No test defined ! ')
