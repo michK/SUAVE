@@ -2,7 +2,7 @@
 # estimate_wing_fuel_vol.py
 #
 # Created: June 2019, M. Kruger
-# Modified: 
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -39,7 +39,7 @@ def wing_loading_approach(vehicle, analyses, airport, m_fuel):
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -60,7 +60,7 @@ def wing_loading_approach(vehicle, analyses, airport, m_fuel):
     # ==============================================
     atmo_values       = atmo.compute_values(altitude,delta_isa)
     conditions        = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
-    
+
     p   = atmo_values.pressure
     T   = atmo_values.temperature
     rho = atmo_values.density
@@ -68,7 +68,7 @@ def wing_loading_approach(vehicle, analyses, airport, m_fuel):
     mu  = atmo_values.dynamic_viscosity
     sea_level_gravity = atmo.planet.sea_level_gravity
 
-    
+
 
     # ==============================================
     # Determining vehicle maximum lift coefficient
@@ -94,9 +94,9 @@ def wing_loading_approach(vehicle, analyses, airport, m_fuel):
     # ==============================================
     # Computing speeds (Vs, Vapp)
     # ==============================================
-    Vstall = (2.0 * (mass_to - m_fuel) * sea_level_gravity / (rho * Sw * maximum_lift_coefficient)) ** 0.5
+    Vstall = (2.0 * (mass_to - m_fuel) * sea_level_gravity * rho / (rho * Sw * maximum_lift_coefficient)) ** 0.5
     Vapp = 1.22 * Vstall
 
     wing_loading_approach = 0.335 * rho * Vapp**2 * maximum_lift_coefficient
-    
+
     return wing_loading_approach

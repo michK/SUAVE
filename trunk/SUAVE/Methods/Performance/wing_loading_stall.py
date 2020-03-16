@@ -2,7 +2,7 @@
 # wing_loading_stall.py
 #
 # Created: Oct 2019, M. Kruger
-# Modified: 
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -35,7 +35,7 @@ def wing_loading_stall(vehicle, analyses, airport):
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -56,7 +56,7 @@ def wing_loading_stall(vehicle, analyses, airport):
     # ==============================================
     atmo_values       = atmo.compute_values(altitude,delta_isa)
     conditions        = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
-    
+
     p   = atmo_values.pressure
     T   = atmo_values.temperature
     rho = atmo_values.density
@@ -64,7 +64,7 @@ def wing_loading_stall(vehicle, analyses, airport):
     mu  = atmo_values.dynamic_viscosity
     sea_level_gravity = atmo.planet.sea_level_gravity
 
-    
+
 
     # ==============================================
     # Determining vehicle maximum lift coefficient
@@ -90,8 +90,8 @@ def wing_loading_stall(vehicle, analyses, airport):
     # ==============================================
     # Computing speeds (Vs, Vapp)
     # ==============================================
-    Vstall = (2.0 * mass_to * sea_level_gravity / (rho * Sw * maximum_lift_coefficient)) ** 0.5
+    Vstall = (2.0 * mass_to * sea_level_gravity * rho / (rho * Sw * maximum_lift_coefficient)) ** 0.5
 
     wing_loading_stall = 0.5 * rho * Vstall**2 * maximum_lift_coefficient
-    
+
     return wing_loading_stall

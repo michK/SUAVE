@@ -2,7 +2,7 @@
 # estimate_balanced_field_length.py
 #
 # Created: June 2019, M. Kruger
-# Modified: 
+# Modified:
 
 # ----------------------------------------------------------------------
 #  Imports
@@ -45,7 +45,7 @@ def estimate_landing_field_length_unified(vehicle, analyses, results, airport, m
 
     Properties Used:
     N/A
-    """        
+    """
 
     # ==============================================
     # Unpack
@@ -65,10 +65,10 @@ def estimate_landing_field_length_unified(vehicle, analyses, results, airport, m
     # ==============================================
     atmo_values       = atmo.compute_values(altitude,delta_isa)
     conditions        = SUAVE.Analyses.Mission.Segments.Conditions.Aerodynamics()
-    
+
     rho = atmo_values.density
     sea_level_gravity = atmo.planet.sea_level_gravity
-    
+
     # ==============================================
     # Determining vehicle maximum lift coefficient
     # ==============================================
@@ -80,8 +80,7 @@ def estimate_landing_field_length_unified(vehicle, analyses, results, airport, m
     # ==============================================
     # Computing stall speed
     # ==============================================
-    Vstall = (2.0 * mass_to * sea_level_gravity / (rho * reference_area * maximum_lift_coefficient)) ** 0.5
-
+    Vstall = (2.0 * mass_to * sea_level_gravity * rho / (rho * reference_area * maximum_lift_coefficient)) ** 0.5
     mass_land = mass_to - mass_fuel
 
     # Approach
@@ -91,7 +90,7 @@ def estimate_landing_field_length_unified(vehicle, analyses, results, airport, m
     hf = R * (1 - np.cos(gamma_app))
     sa = (obst_height - hf) / np.tan(gamma_app)
 
-    # Flare    
+    # Flare
     Tf = 0.1 * PKtot / Vf
     L_D = 0.8 * results.mission.segments['descent'].conditions.aerodynamics.lift_coefficient[0] /\
         results.mission.segments['descent'].conditions.aerodynamics.drag_coefficient[0]
@@ -120,5 +119,5 @@ def estimate_landing_field_length_unified(vehicle, analyses, results, airport, m
     KA = rho / (2 * vehicle.wing_loading) * (mu_brake * CLr - CD0r - Kr * CLr**2)
     KT = (T_g / (mass_land * sea_level_gravity)) - mu_brake
     sg = (1 / (2 * sea_level_gravity * KA)) * np.log((KT + KA * Vf**2) / (KT + KA * Vi**2))
-   
+
     return sa + sf + sg
