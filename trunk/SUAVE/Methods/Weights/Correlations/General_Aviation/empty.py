@@ -165,7 +165,7 @@ def empty(vehicle):
     """
 
     # Unpack inputs
-    S_gross_w   = vehicle.reference_area
+    S_gross_w   = vehicle.mass_properties.max_takeoff / vehicle.wing_loading
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     mto         = vehicle.mass_properties.max_takeoff
