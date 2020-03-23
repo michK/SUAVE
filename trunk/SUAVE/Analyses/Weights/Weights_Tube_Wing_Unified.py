@@ -20,7 +20,7 @@ from .Weights import Weights
 ## @ingroup Analyses-Weights
 class Weights_Tube_Wing_Unified(Weights):
     """ This a class that evaluates the weight of Tube and Wing GA aircraft
-    
+
     Assumptions:
         None
 
@@ -29,15 +29,15 @@ class Weights_Tube_Wing_Unified(Weights):
 
     Inputs:
         None
-      
+
     Outputs:
         None
-        
+
     Properties Used:
          N/A
     """
     def __defaults__(self):
-        """This sets the default values and methods for the tube and wing 
+        """This sets the default values and methods for the tube and wing
         aircraft weight analysis.
 
         Assumptions:
@@ -54,9 +54,9 @@ class Weights_Tube_Wing_Unified(Weights):
 
         Properties Used:
         N/A
-        """           
+        """
         self.tag = 'weights_tube_wing'
-        
+
         self.vehicle  = Data()
         self.settings = Data()
         self.settings.weight_reduction_factors = Data()
@@ -64,10 +64,10 @@ class Weights_Tube_Wing_Unified(Weights):
         self.settings.weight_reduction_factors.main_wing = 0.
         self.settings.weight_reduction_factors.fuselage  = 0.
         self.settings.weight_reduction_factors.empennage = 0. # applied to horizontal and vertical stabilizers
-        
+
     def evaluate(self, conditions=None):
         """Evaluate the weight analysis.
-    
+
         Assumptions:
         None
 
@@ -82,7 +82,7 @@ class Weights_Tube_Wing_Unified(Weights):
 
         Properties Used:
         N/A
-        """         
+        """
         # unpack
         vehicle  = self.vehicle
         settings = self.settings
@@ -93,20 +93,20 @@ class Weights_Tube_Wing_Unified(Weights):
 
         # evaluate
         results = empty(vehicle)
-        
+
         # storing weight breakdown into vehicle
-        vehicle.weight_breakdown = results 
+        vehicle.weight_breakdown = results
 
         # updating empty weight
         vehicle.mass_properties.operating_empty = results.empty
-              
+
         # done!
         return results
-    
-    
+
+
     def finalize(self):
         """Finalize the weight analysis.
-    
+
         Assumptions:
         None
 
@@ -121,8 +121,8 @@ class Weights_Tube_Wing_Unified(Weights):
 
         Properties Used:
         N/A
-        """           
+        """
         self.mass_properties = self.vehicle.mass_properties
-        
+
         return
-        
+
