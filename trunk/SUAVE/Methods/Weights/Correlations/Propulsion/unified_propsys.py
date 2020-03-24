@@ -97,7 +97,8 @@ def unified_propsys(vehicle, weight_factor=1.0):
             eta_fan = propsys.eta_fan
             eta_mot = propsys.eta_mot
             eta_pe  = propsys.eta_pe
-            eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5  FIXME This isn't always true
+            eta_bat = 0.5  # For sizing condition battery is at max power, thus eta = 0.5
+                           # FIXME What about when batter is sized based on energy, which is usually the case?
 
             # Find mass flows
             mdotm = (1 - fL) * mdottot
